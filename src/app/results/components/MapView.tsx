@@ -15,7 +15,6 @@ export default function MapView({ sortMode }: MapViewProps) {
   const mapRef = useRef<HTMLDivElement | null>(null)
   const { stores, selectedStore, setSelectedStore } = useResultState()
 
-  // ✅ マップ初期化（storesが変わったら再生成）
   useEffect(() => {
     if (!mapRef.current || stores.length === 0) return
 
@@ -23,7 +22,6 @@ export default function MapView({ sortMode }: MapViewProps) {
       await loadGoogleMapsApi()
       if (!window.google?.maps) return
 
-      // 最初の店舗を中心に
       const first = stores[0]
       const map = new window.google.maps.Map(mapRef.current!, {
         center: { lat: first.latitude, lng: first.longitude },
@@ -36,7 +34,7 @@ export default function MapView({ sortMode }: MapViewProps) {
       const bounds = new window.google.maps.LatLngBounds()
       const markers: google.maps.Marker[] = []
 
-      // ピンを生成
+      // ✅ ピンを生成
       stores.forEach((store) => {
         const marker = new window.google.maps.Marker({
           position: { lat: store.latitude, lng: store.longitude },
@@ -48,47 +46,53 @@ export default function MapView({ sortMode }: MapViewProps) {
           },
         })
 
-        // クリックしたら選択状態にする
+        // ✅ クリックで選択
         marker.addListener('click', () => {
           setSelectedStore(store)
+          // 🔵 ピン更新即時反映
+          updateMarkerIcons(markers, store)
         })
 
         markers.push(marker)
         bounds.extend(marker.getPosition()!)
       })
 
-      // 地図を全ピンにフィット
       map.fitBounds(bounds)
 
-        // ✅ map と markers を DOM に保存（再利用用）
+        // ✅ 生成結果を保存
         ; (mapRef.current as any)._mapInstance = map
         ; (mapRef.current as any)._markers = markers
 
-      // ✅ 初期状態で一件目を選択（青ピン反映）
-      if (stores[0]) setSelectedStore(stores[0])
+      // ✅ 初期時点で1件目を選択 + 即座にピン更新
+      const initial = stores[0]
+      setSelectedStore(initial)
+      updateMarkerIcons(markers, initial)
     }
 
     initMap()
   }, [stores])
 
-  // ✅ selectedStore の変更を反映（青ピン切替）
+  // ✅ selectedStore の変更時にも反映
   useEffect(() => {
-    const map = (mapRef.current as any)?._mapInstance
     const markers: google.maps.Marker[] = (mapRef.current as any)?._markers
-    if (!map || !markers) return
-
-    markers.forEach((marker) => {
-      const isActive = marker.getTitle() === selectedStore?.name
-      marker.setIcon({
-        url: isActive
-          ? 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'
-          : 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
-        scaledSize: new google.maps.Size(isActive ? 40 : 30, isActive ? 40 : 30),
-      })
-    })
+    if (!markers) return
+    updateMarkerIcons(markers, selectedStore)
   }, [selectedStore])
 
   return <div ref={mapRef} className="absolute inset-0" />
+}
+
+/** ✅ ピンの色変更関数 */
+function updateMarkerIcons(markers: google.maps.Marker[], activeStore?: Store | null) {
+  markers.forEach((marker) => {
+    const isActive = marker.getTitle() === activeStore?.name
+    marker.setIcon({
+      url: isActive
+        ? 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+        : 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+      scaledSize: new google.maps.Size(isActive ? 40 : 30, isActive ? 40 : 30),
+    })
+  })
 }
 
 /** ✅ Google Maps API ロード関数 */

@@ -1,7 +1,6 @@
 'use client'
-
-import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion'
+import { useEffect, useState } from 'react'
 import { useResultState } from './store/useResultState'
 import MapView from './components/MapView'
 import StoreCardSwiper from './components/StoreCardSwiper'
@@ -77,9 +76,36 @@ export default function ResultPage() {
     setSelectedStore(sorted[0])
   }, [setStores, setSelectedStore])
 
-  /** ✅ 現在のインデックス */
   const currentIndex = stores.findIndex((s) => s.id === selectedStore?.id)
   const total = stores.length
+
+  // 🎯 モーダルのY位置をMotionValueで制御
+  const y = useMotionValue(0)
+  const [windowHeight, setWindowHeight] = useState(0)
+
+  useEffect(() => {
+    setWindowHeight(window.innerHeight)
+  }, [])
+
+  const fullyOpenY = 0
+  const closedY = windowHeight * 0.75 // 画面の55%くらいまで下げる
+  const currentY = useTransform(y, [fullyOpenY, closedY], [fullyOpenY, closedY])
+
+  const handleDragEnd = (_: any, info: any) => {
+    const velocity = info.velocity.y
+    const offset = info.offset.y
+    if (offset > 100 || velocity > 400) {
+      setIsListVisible(false)
+      y.set(closedY)
+    } else if (offset < -100 || velocity < -400) {
+      setIsListVisible(true)
+      y.set(fullyOpenY)
+    }
+  }
+
+  useEffect(() => {
+    y.set(isListVisible ? fullyOpenY : closedY)
+  }, [isListVisible, closedY, fullyOpenY, y])
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-gray-50">
@@ -109,25 +135,18 @@ export default function ResultPage() {
         </div>
       )}
 
-      {/* 📜 下部スライドリスト（画面最下部に固定） */}
+      {/* 📜 下部スライドリスト（指追従でスムーズに動く） */}
       <motion.div
-        className="fixed left-0 right-0 bottom-0 z-10 bg-white rounded-t-3xl shadow-[0_-2px_10px_rgba(0,0,0,0.1)] pointer-events-auto overflow-hidden"
-        initial={false}
-        animate={{
-          // ✅ リスト閉じ時：下に完全固定
-          height: isListVisible ? 'calc(100vh - 100px)' : '110px',
-          bottom: isListVisible ? 0 : 0,
-        }}
-        transition={{ duration: 0.35, ease: 'easeInOut' }}
         drag="y"
-        dragConstraints={{ top: 0, bottom: 0 }}
-        onDragEnd={(_, info) => {
-          if (info.offset.y < -40 || info.velocity.y < -400) setIsListVisible(true)
-          if (info.offset.y > 40 || info.velocity.y > 400) setIsListVisible(false)
+        dragConstraints={{ top: fullyOpenY, bottom: closedY }}
+        style={{
+          y: currentY,
+          zIndex: 50,
+          height: 'calc(100vh - 100px)',
         }}
+        onDragEnd={handleDragEnd}
+        className="fixed left-0 right-0 bottom-0 bg-white rounded-t-3xl shadow-[0_-2px_10px_rgba(0,0,0,0.1)] pointer-events-auto"
       >
-        {/* グリップバー */}
-        <div className="mx-auto mt-2 h-1.5 w-10 rounded-full bg-gray-300 cursor-grab active:cursor-grabbing" />
 
         {/* 件数表示 */}
         <div className="flex items-center justify-center py-2">
@@ -137,22 +156,9 @@ export default function ResultPage() {
         </div>
 
         {/* 📜 リスト本体 */}
-        <AnimatePresence>
-          {isListVisible && (
-            <motion.div
-              key="list"
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', stiffness: 220, damping: 26 }}
-              className="absolute top-12 left-0 right-0 bottom-0 bg-white rounded-t-3xl shadow-inner overflow-y-auto"
-            >
-              <div className="pt-2 pb-20">
-                <StoreGridList />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <div className="overflow-y-auto h-[calc(100%-60px)] pt-2 pb-20">
+          <StoreGridList />
+        </div>
       </motion.div>
     </div>
   )
