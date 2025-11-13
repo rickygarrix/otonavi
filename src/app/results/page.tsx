@@ -147,9 +147,14 @@ export default function ResultPage() {
       {/* ---------- LIST PANEL ---------- */}
       <motion.div
         style={{ y, zIndex: 40, height: '100vh' }}
-        className="fixed left-0 right-0 bottom-0 bg-white flex flex-col transition-all duration-150"
+        className={`fixed left-0 right-0 bottom-0 bg-white flex flex-col transition-all duration-150
+    ${isListVisible
+            ? 'rounded-t-none'
+            : 'rounded-t-[36px] shadow-[0_-6px_18px_rgba(0,0,0,0.12)]'
+          }
+  `}
       >
-        <div className="flex items-center justify-center py-3 border-b border-gray-100 sticky top-0 bg-white z-10">
+        <div className="flex items-center justify-center py-3 border-b border-gray-100 sticky top-0 bg-white z-10 rounded-t-[36px]">
           <p className="text-[15px] font-semibold text-gray-900">{total}件見つかりました</p>
           <button
             onClick={toggleList}
