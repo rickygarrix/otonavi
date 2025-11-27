@@ -7,25 +7,26 @@ import type { HomeStore } from '@/types/store'
 export default function HomeSlider({ stores }: { stores: HomeStore[] }) {
   if (stores.length === 0) return null
 
-  // ループ用に3倍に増やす
+  // ループ用に 3セット分にする
   const loopStores = [...stores, ...stores, ...stores]
-  const middleIndex = stores.length
+  const middleIndex = stores.length // 真ん中のセット開始 index
 
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [currentIndex, setCurrentIndex] = useState(middleIndex)
 
-  // -----------------------
-  // 中央カードを検出
-  // -----------------------
-  const handleScroll = () => {
+  // ================================
+  // 🎯 中央カード検出
+  // ================================
+  const detectCenterCard = () => {
     if (!containerRef.current) return
     const el = containerRef.current
-    const containerCenter = el.clientWidth / 2
 
+    const containerCenter = el.clientWidth / 2
     let closestIndex = 0
     let minDistance = Infinity
 
     const cards = Array.from(el.children)
+
     cards.forEach((card, i) => {
       const rect = (card as HTMLElement).getBoundingClientRect()
       const cardCenter = rect.left + rect.width / 2
@@ -40,48 +41,54 @@ export default function HomeSlider({ stores }: { stores: HomeStore[] }) {
     setCurrentIndex(closestIndex)
   }
 
-  // -----------------------
-  // 初期位置：中央に合わせる
-  // -----------------------
+  // ================================
+  // 🎯 初期位置を真ん中へ
+  // ================================
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
 
-    const cardWidth = el.children[0]?.clientWidth ?? 300
-    const gap = 24 // gap-6 = 24px
+    const first = el.children[0] as HTMLElement
+    const cardWidth = first?.clientWidth ?? 300
+    const gap = 24
+    const unit = cardWidth + gap
 
-    // カードの中心を画面中央に持ってくる scrollLeft を計算
     const containerCenter = el.clientWidth / 2
+
+    // 真ん中セットの先頭カードの中央を画面中央に合わせる
     const targetOffset =
-      middleIndex * (cardWidth + gap) + cardWidth / 2 - containerCenter
+      middleIndex * unit + cardWidth / 2 - containerCenter
 
     el.scrollLeft = targetOffset
 
-    handleScroll()
-    el.addEventListener('scroll', handleScroll)
-    return () => el.removeEventListener('scroll', handleScroll)
+    detectCenterCard()
+
+    el.addEventListener('scroll', detectCenterCard)
+    return () => el.removeEventListener('scroll', detectCenterCard)
   }, [])
 
-  // -----------------------
-  // 無限ループ化
-  // -----------------------
+  // ================================
+  // 🔁 無限ループ（右/左にどこまでも）
+  // ================================
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
 
-    const cardWidth = el.children[0]?.clientWidth ?? 300
+    const first = el.children[0] as HTMLElement
+    const cardWidth = first?.clientWidth ?? 300
     const gap = 24
+    const unit = cardWidth + gap
 
-    const totalWidth =
-      (cardWidth + gap) * loopStores.length
-
-    const middleOffset =
-      (cardWidth + gap) * middleIndex
+    const totalWidth = unit * loopStores.length
+    const middleOffset = middleIndex * unit
 
     const handleLoop = () => {
-      if (el.scrollLeft < cardWidth) {
+      // 左端を超えた → 中央へジャンプ
+      if (el.scrollLeft <= unit) {
         el.scrollLeft += middleOffset
-      } else if (el.scrollLeft > totalWidth - cardWidth) {
+      }
+      // 右端を超えた → 中央へジャンプ
+      else if (el.scrollLeft >= totalWidth - unit * 2) {
         el.scrollLeft -= middleOffset
       }
     }
@@ -92,6 +99,7 @@ export default function HomeSlider({ stores }: { stores: HomeStore[] }) {
 
   return (
     <>
+      {/* スライダー */}
       <div
         ref={containerRef}
         className="w-full overflow-x-auto flex gap-6 px-6 mt-6 scrollbar-none snap-x snap-mandatory"
