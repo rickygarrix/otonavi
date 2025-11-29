@@ -9,6 +9,7 @@ import { useHomeStores } from "@/hooks/useHomeStores"
 import SearchFilter from "@/components/home/SearchFilter"
 import AreaSelector from "@/components/home/AreaSelector"
 import StoreTypeSelector from "@/components/home/StoreTypeSelector"
+import EventTrendSelector from "@/components/home/EventTrendSelector"
 import FixedSearchBar from "@/components/home/FixedSearchBar"
 
 import SearchResultPanel from "@/components/SearchResultPanel"
@@ -26,6 +27,13 @@ export default function HomePage() {
   const [selectedStore, setSelectedStore] = useState<HomeStore | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
 
+  // 🔹 ホームまで戻る（2階層閉じる）
+  const handleCloseAll = useCallback(() => {
+    setIsDetailOpen(false)
+    setIsResultOpen(false)
+    setSelectedStore(null)
+  }, [])
+
   const handleAreaChange = useCallback((pref: string | null, area: string | null) => {
     setPrefecture(pref)
     setArea(area)
@@ -33,6 +41,9 @@ export default function HomePage() {
 
   const handleStoreTypeChange = useCallback((type: string | null) => {
     setStoreType(type)
+  }, [])
+  const handleEventTrendSelector = useCallback((selectedKeys: string[]) => {
+    // 保存したければ state に入れる
   }, [])
 
   const handleClear = useCallback(() => {
@@ -66,12 +77,9 @@ export default function HomePage() {
 
   return (
     <>
-      {/* ========================== */}
-      {/* 🎨 背景カーブ部分 */}
-      {/* ========================== */}
+      {/* ========================== 背景部分 */}
       <div className="relative w-full text-white overflow-hidden">
         <CurvedBackground />
-
         <div className="mt-[80px]">
           <LogoHero />
         </div>
@@ -86,27 +94,21 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* ⭐ コメントスライダー（背景内に absolute で配置） */}
-        <div
-          className="absolute left-0 bottom-[30px] w-full flex justify-center pointer-events-none"
-        >
-          <div className="text-center whitespace-nowrap">
-            <CommentSlider />
-          </div>
+        {/* コメント */}
+        <div className="absolute left-0 bottom-[30px] w-full flex justify-center pointer-events-none">
+          <CommentSlider />
         </div>
 
-        {/* 下余白（白背景との境界を確保） */}
         <div className="h-[160px]" />
       </div>
 
-      {/* ========================== */}
-      {/* 🔍 フィルター UI（白背景） */}
-      {/* ========================== */}
+      {/* ========================== フィルタ UI */}
       <div className="bg-white w-full py-8">
         <SearchFilter />
         <div className="h-6" />
         <AreaSelector onChange={handleAreaChange} />
         <StoreTypeSelector onChange={handleStoreTypeChange} />
+        <EventTrendSelector onChange={handleEventTrendSelector} />
       </div>
 
       {/* 固定検索バー */}
@@ -121,6 +123,7 @@ export default function HomePage() {
       <SearchResultPanel
         isOpen={isResultOpen}
         onClose={() => setIsResultOpen(false)}
+        onCloseAll={handleCloseAll}     // ← これ追加！
         stores={filteredStores}
         selectedFilters={selectedFilters}
         onSelectStore={handleSelectStore}
@@ -131,8 +134,9 @@ export default function HomePage() {
         store={selectedStore}
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
+        onCloseAll={handleCloseAll}      // ← 追加・ここが重要
       />
-      {/* 👇 固定検索バーに隠れないように余白を追加 */}
+
       <div className="h-[50px]" />
     </>
   )

@@ -1,4 +1,3 @@
-// src/hooks/useHomeStores.ts
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -16,25 +15,39 @@ export function useHomeStores() {
         .select(`
           id,
           name,
+          name_kana,
           description,
+          access,
+          google_map_url,
+          address,
+          instagram_url,
+          x_url,
+          facebook_url,
+          tiktok_url,
+          official_site_url,
 
-          prefecture:prefecture_id (
-            name_ja
+          open_hours:store_open_hours (
+            day_of_week,
+            open_time,
+            close_time,
+            last_order_time,
+            is_closed
           ),
 
-          area:area_id (
-            name
+          special_hours:store_special_open_hours (
+            date,
+            open_time,
+            close_time,
+            last_order_time,
+            is_closed,
+            reason
           ),
 
-          store_type:store_type_id (
-            label
-          ),
+          prefecture:prefecture_id ( name_ja ),
+          area:area_id ( name ),
+          store_type:store_type_id ( label ),
 
-          store_images (
-            image_url,
-            is_main,
-            order_num
-          )
+          store_images ( image_url, is_main, order_num )
         `)
 
       if (error) {
@@ -44,30 +57,10 @@ export function useHomeStores() {
       }
 
       const formatted: HomeStore[] = (data ?? []).map((s: any) => {
-        //===== 都道府県 =====
-        const prefectureName =
-          Array.isArray(s.prefecture)
-            ? s.prefecture[0]?.name_ja ?? null
-            : s.prefecture?.name_ja ?? null
-
-        //===== エリア =====
-        const areaName =
-          Array.isArray(s.area)
-            ? s.area[0]?.name ?? null
-            : s.area?.name ?? null
-
-        //===== タイプ =====
-        const typeName =
-          Array.isArray(s.store_type)
-            ? s.store_type[0]?.label ?? null
-            : s.store_type?.label ?? null
-
-        //===== メイン画像 or 最初の画像 or default =====
+        // === 画像処理 ===
         let imageUrl: string | null = null
-
         if (Array.isArray(s.store_images) && s.store_images.length > 0) {
           const main = s.store_images.find((img: any) => img.is_main)
-
           if (main) {
             imageUrl = main.image_url
           } else {
@@ -77,20 +70,43 @@ export function useHomeStores() {
             imageUrl = sorted[0]?.image_url ?? null
           }
         }
-
-        // デフォルト画像
-        if (!imageUrl) {
-          imageUrl = '/default_shop.svg'
-        }
+        if (!imageUrl) imageUrl = '/default_shop.svg'
 
         return {
           id: s.id,
           name: s.name,
-          prefecture: prefectureName,
-          area: areaName,
-          type: typeName,
+          name_kana: s.name_kana ?? null,
+
+          prefecture:
+            Array.isArray(s.prefecture)
+              ? s.prefecture[0]?.name_ja ?? null
+              : s.prefecture?.name_ja ?? null,
+
+          area:
+            Array.isArray(s.area)
+              ? s.area[0]?.name ?? null
+              : s.area?.name ?? null,
+
+          type:
+            Array.isArray(s.store_type)
+              ? s.store_type[0]?.label ?? null
+              : s.store_type?.label ?? null,
+
           image_url: imageUrl,
           description: s.description ?? null,
+
+          instagram_url: s.instagram_url ?? null,
+          x_url: s.x_url ?? null,
+          facebook_url: s.facebook_url ?? null,
+          tiktok_url: s.tiktok_url ?? null,
+          official_site_url: s.official_site_url ?? null,
+
+          access: s.access ?? null,
+          google_map_url: s.google_map_url ?? null,
+          address: s.address ?? null,
+
+          open_hours: s.open_hours ?? [],
+          special_hours: s.special_hours ?? [],
         }
       })
 

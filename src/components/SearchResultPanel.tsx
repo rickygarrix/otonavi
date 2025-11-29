@@ -6,6 +6,7 @@ import Image from "next/image"
 type Props = {
   isOpen: boolean
   onClose: () => void
+  onCloseAll: () => void         // ← 追加！
   stores: HomeStore[]
   selectedFilters: string[]
   onSelectStore: (store: HomeStore) => void
@@ -14,6 +15,7 @@ type Props = {
 export default function SearchResultPanel({
   isOpen,
   onClose,
+  onCloseAll,          // ← 受け取る
   stores,
   selectedFilters,
   onSelectStore,
@@ -30,48 +32,27 @@ export default function SearchResultPanel({
     >
 
       {/* ==================================================== */}
-      {/* 🎨 Figma再現 ヘッダー */}
+      {/* 🎨 ヘッダー */}
       {/* ==================================================== */}
       <div className="px-4 py-4 flex items-center gap-4 border-b">
-
-        {/* 左丸アイコン */}
         <button onClick={onClose} className="active:scale-95">
           <div className="w-14 h-14 rounded-full flex justify-center items-center">
-
-            {/* 内側の半透明円 */}
-            <div
-              className="
-                w-14 h-14 bg-white/10 rounded-full
-                shadow-[0px_2px_4px_rgba(0,0,0,0.1)]
-                outline outline-1 outline-white/10 outline-offset-[-1px]
-                backdrop-blur-sm flex justify-center items-center
-              "
-            >
-              {/* ロゴ（mix-blend-differenceで白黒反転） */}
+            <div className="w-14 h-14 bg-white/10 rounded-full shadow outline outline-1 outline-white/10 backdrop-blur-sm flex justify-center items-center">
               <div className="w-8 h-8 relative mix-blend-difference">
-                <Image
-                  src="/logo4.svg"
-                  alt="back"
-                  fill
-                  className="object-contain"
-                />
+                <Image src="/logo4.svg" alt="back" fill className="object-contain" />
               </div>
             </div>
           </div>
         </button>
 
-        {/* 件数 */}
-        <div className="flex flex-col justify-center items-start">
+        <div className="flex flex-col">
           <div className="text-slate-900 font-bold text-lg tracking-widest leading-none">
             {stores.length}
-            <span className="text-[10px] font-bold tracking-wide ml-1">
-              件
-            </span>
+            <span className="text-[10px] font-bold tracking-wide ml-1">件</span>
           </div>
         </div>
 
-        {/* 選択中フィルタ */}
-        <div className="flex-1 text-blue-800 text-xs leading-4 line-clamp-2">
+        <div className="flex-1 text-blue-800 text-xs line-clamp-2">
           {selectedFilters.join(", ")}
         </div>
       </div>
@@ -80,8 +61,8 @@ export default function SearchResultPanel({
       {/* ==================================================== */}
       {/* 🏠 店舗一覧 */}
       {/* ==================================================== */}
-      <div className="overflow-y-auto px-4 py-4">
-        <div className="grid grid-cols-2 gap-4">
+      <div className="overflow-y-auto px-4 py-4 flex-1">
+        <div className="grid grid-cols-2 gap-4 pb-20">
           {stores.map((s) => (
             <button
               key={s.id}
@@ -114,6 +95,22 @@ export default function SearchResultPanel({
           ))}
         </div>
       </div>
+
+      {/* ==================================================== */}
+      {/* 🔍 別の条件で探す（← ホームへ戻る） */}
+      {/* ==================================================== */}
+      <div className="px-6 pb-8">
+        <button
+          onClick={onCloseAll}   // ← これが超重要
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl
+            border border-slate-300 text-slate-700 text-lg font-medium
+            hover:bg-slate-50 transition"
+        >
+          <span className="text-xl">🔍</span>
+          別の条件で探す
+        </button>
+      </div>
+
     </div>
   )
 }

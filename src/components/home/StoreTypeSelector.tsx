@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import Chip from '@/components/ui/Chip'
 
 type StoreType = {
   id: string
@@ -15,19 +16,22 @@ type Props = {
 
 export default function StoreTypeSelector({ onChange }: Props) {
   const [types, setTypes] = useState<StoreType[]>([])
-  const [selected, setSelected] = useState<StoreType | null>(null)
+  const [selected, setSelected] = useState<string | null>(null)
 
   useEffect(() => {
     const load = async () => {
       const { data, error } = await supabase
         .from('store_types')
-        .select('*')
+        .select('id, label, is_active')
         .eq('is_active', true)
         .order('label')
 
-      if (error) return console.error(error)
-      setTypes(data ?? [])
+      if (error) {
+        console.error(error)
+        return
+      }
 
+      setTypes(data ?? [])
       setSelected(null)
       onChange(null)
     }
@@ -43,23 +47,15 @@ export default function StoreTypeSelector({ onChange }: Props) {
 
       <div className="grid grid-cols-2 gap-4">
         {types.map((t) => (
-          <button
+          <Chip
             key={t.id}
+            label={t.label}
+            selected={selected === t.id}
             onClick={() => {
-              setSelected(t)
+              setSelected(t.id)
               onChange(t.label)
             }}
-            className={`
-              h-14 rounded-[40px] border text-lg font-medium transition
-              flex items-center justify-center
-              ${selected?.id === t.id
-                ? 'border-blue-600 text-blue-700 bg-blue-50 shadow-sm'
-                : 'border-slate-200 text-slate-400 bg-white'
-              }
-            `}
-          >
-            {t.label}
-          </button>
+          />
         ))}
       </div>
     </div>
