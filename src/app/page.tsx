@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo } from "react"
 import CurvedBackground from "@/components/home/CurvedBackground"
 import LogoHero from "@/components/home/LogoHero"
 import HomeSlider from "@/components/home/HomeSlider"
+import CommentSlider from "@/components/home/CommentSlider"
 import { useHomeStores } from "@/hooks/useHomeStores"
 import SearchFilter from "@/components/home/SearchFilter"
 import AreaSelector from "@/components/home/AreaSelector"
@@ -17,23 +18,14 @@ import type { HomeStore } from "@/types/store"
 export default function HomePage() {
   const { stores, loading } = useHomeStores()
 
-  // -----------------------------
-  // 🏷 選択状態
-  // -----------------------------
   const [prefecture, setPrefecture] = useState<string | null>(null)
   const [area, setArea] = useState<string | null>(null)
   const [storeType, setStoreType] = useState<string | null>(null)
 
-  // 🔍 検索結果パネル
   const [isResultOpen, setIsResultOpen] = useState(false)
-
-  // 🏬 店舗詳細パネル
   const [selectedStore, setSelectedStore] = useState<HomeStore | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
 
-  // -----------------------------
-  // 📝 ハンドラー
-  // -----------------------------
   const handleAreaChange = useCallback((pref: string | null, area: string | null) => {
     setPrefecture(pref)
     setArea(area)
@@ -49,9 +41,6 @@ export default function HomePage() {
     setStoreType(null)
   }, [])
 
-  // -----------------------------
-  // 🔍 フィルタリングロジック
-  // -----------------------------
   const filteredStores = useMemo(() => {
     return stores.filter((s) => {
       if (prefecture && s.prefecture !== prefecture) return false
@@ -63,16 +52,13 @@ export default function HomePage() {
 
   const count = filteredStores.length
 
-  // 検索実行 → パネル表示
   const handleSearch = useCallback(() => {
     if (count === 0) return
     setIsResultOpen(true)
   }, [count])
 
-  // 選択中フィルタ
   const selectedFilters = [prefecture, area, storeType].filter(Boolean) as string[]
 
-  // 店舗クリック → 詳細パネルへ
   const handleSelectStore = useCallback((store: HomeStore) => {
     setSelectedStore(store)
     setIsDetailOpen(true)
@@ -81,7 +67,7 @@ export default function HomePage() {
   return (
     <>
       {/* ========================== */}
-      {/* 🎨 背景カーブ + スライダー */}
+      {/* 🎨 背景カーブ部分 */}
       {/* ========================== */}
       <div className="relative w-full text-white overflow-hidden">
         <CurvedBackground />
@@ -90,15 +76,31 @@ export default function HomePage() {
           <LogoHero />
         </div>
 
+        {/* 店舗カードスライダー */}
         <div className="mt-[40px]">
-          {!loading && <HomeSlider stores={stores} />}
+          {!loading && (
+            <HomeSlider
+              stores={stores}
+              onSelectStore={handleSelectStore}
+            />
+          )}
         </div>
 
-        <div className="h-[140px]" />
+        {/* ⭐ コメントスライダー（背景内に absolute で配置） */}
+        <div
+          className="absolute left-0 bottom-[30px] w-full flex justify-center pointer-events-none"
+        >
+          <div className="text-center whitespace-nowrap">
+            <CommentSlider />
+          </div>
+        </div>
+
+        {/* 下余白（白背景との境界を確保） */}
+        <div className="h-[160px]" />
       </div>
 
       {/* ========================== */}
-      {/* 🔍 フィルター UI */}
+      {/* 🔍 フィルター UI（白背景） */}
       {/* ========================== */}
       <div className="bg-white w-full py-8">
         <SearchFilter />
@@ -107,9 +109,7 @@ export default function HomePage() {
         <StoreTypeSelector onChange={handleStoreTypeChange} />
       </div>
 
-      {/* ========================== */}
-      {/* 🔍 固定検索バー */}
-      {/* ========================== */}
+      {/* 固定検索バー */}
       <FixedSearchBar
         selectedFilters={selectedFilters}
         onClear={handleClear}
@@ -117,25 +117,23 @@ export default function HomePage() {
         count={count}
       />
 
-      {/* ========================== */}
-      {/* 📋 検索結果スライドインパネル */}
-      {/* ========================== */}
+      {/* 検索結果パネル */}
       <SearchResultPanel
         isOpen={isResultOpen}
         onClose={() => setIsResultOpen(false)}
         stores={filteredStores}
         selectedFilters={selectedFilters}
-        onSelectStore={handleSelectStore}   // ★追加
+        onSelectStore={handleSelectStore}
       />
 
-      {/* ========================== */}
-      {/* 🏬 店舗詳細スライドインパネル */}
-      {/* ========================== */}
+      {/* 店舗詳細パネル */}
       <StoreDetailPanel
         store={selectedStore}
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
       />
+      {/* 👇 固定検索バーに隠れないように余白を追加 */}
+      <div className="h-[50px]" />
     </>
   )
 }

@@ -1,39 +1,73 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import HomeStoreCard from './HomeStoreCard'
 import type { HomeStore } from '@/types/store'
 
-export default function HomeSlider({ stores }: { stores: HomeStore[] }) {
+type Props = {
+  stores: HomeStore[]
+  onSelectStore: (store: HomeStore) => void
+}
+
+export default function HomeSlider({ stores, onSelectStore }: Props) {
   if (stores.length === 0) return null
 
-  // ループ用に 3セット分にする
+  // 無限ループ用：3セットつなげる
   const loopStores = [...stores, ...stores, ...stores]
-  const middleIndex = stores.length // 真ん中のセット開始 index
+  const middleIndex = stores.length // 真ん中のセットの開始点
 
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const trackRef = useRef<HTMLDivElement | null>(null)
+
   const [currentIndex, setCurrentIndex] = useState(middleIndex)
+  const scrollSpeed = 0.35
+  const isDragging = useRef(false)
 
-  // ================================
-  // 🎯 中央カード検出
-  // ================================
-  const detectCenterCard = () => {
-    if (!containerRef.current) return
-    const el = containerRef.current
+  // =======================================
+  // ⭐ カードの縮小カーブ（中心 → 端）
+  // =======================================
+  const calcScaleOpacity = (diff: number) => {
+    const maxRange = 240   // 距離240pxで最小値
+    const t = Math.min(diff / maxRange, 1)
 
-    const containerCenter = el.clientWidth / 2
+    // 中央1.0 → 端0.50（自然なカーブ）
+    const scale = 1 - t * 0.50
+    const opacity = 1 - t * 0.55
+
+    return { scale, opacity }
+  }
+
+  // =======================================
+  // 🎯 画面上の「中心」を検出してスケール反映
+  // =======================================
+  const detectCenter = () => {
+    const container = containerRef.current
+    const track = trackRef.current
+    if (!container || !track) return
+
+    // container 中央（ロゴのトとナの間）
+    const rect = container.getBoundingClientRect()
+    const centerX = rect.left + rect.width / 2
+
+    const cards = Array.from(track.children)
+
     let closestIndex = 0
-    let minDistance = Infinity
-
-    const cards = Array.from(el.children)
+    let minDiff = Infinity
 
     cards.forEach((card, i) => {
-      const rect = (card as HTMLElement).getBoundingClientRect()
-      const cardCenter = rect.left + rect.width / 2
-      const diff = Math.abs(cardCenter - containerCenter)
+      const cardRect = (card as HTMLElement).getBoundingClientRect()
+      const cardCenter = cardRect.left + cardRect.width / 2
 
-      if (diff < minDistance) {
-        minDistance = diff
+      const diff = Math.abs(cardCenter - centerX)
+
+      // スケール適用
+      const { scale, opacity } = calcScaleOpacity(diff)
+        ; (card as HTMLElement).style.transform = `scale(${scale})`
+        ; (card as HTMLElement).style.opacity = `${opacity}`
+
+      // 中央に最も近いカードを保存
+      if (diff < minDiff) {
+        minDiff = diff
         closestIndex = i
       }
     })
@@ -41,40 +75,35 @@ export default function HomeSlider({ stores }: { stores: HomeStore[] }) {
     setCurrentIndex(closestIndex)
   }
 
-  // ================================
-  // 🎯 初期位置を真ん中へ
-  // ================================
+  // =======================================
+  // 初期位置（中央セットの先頭カードを中央へ）
+  // =======================================
   useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
+    const container = containerRef.current
+    const track = trackRef.current
+    if (!container || !track) return
 
-    const first = el.children[0] as HTMLElement
+    const first = track.children[0] as HTMLElement
     const cardWidth = first?.clientWidth ?? 300
     const gap = 24
     const unit = cardWidth + gap
 
-    const containerCenter = el.clientWidth / 2
+    // container の中央に middleIndex のカードが来るように設定
+    container.scrollLeft =
+      middleIndex * unit - container.clientWidth / 2 + cardWidth / 2
 
-    // 真ん中セットの先頭カードの中央を画面中央に合わせる
-    const targetOffset =
-      middleIndex * unit + cardWidth / 2 - containerCenter
-
-    el.scrollLeft = targetOffset
-
-    detectCenterCard()
-
-    el.addEventListener('scroll', detectCenterCard)
-    return () => el.removeEventListener('scroll', detectCenterCard)
+    detectCenter()
   }, [])
 
-  // ================================
-  // 🔁 無限ループ（右/左にどこまでも）
-  // ================================
+  // =======================================
+  // 🌀 自動スクロール / 無限ループ
+  // =======================================
   useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
+    const container = containerRef.current
+    const track = trackRef.current
+    if (!container || !track) return
 
-    const first = el.children[0] as HTMLElement
+    const first = track.children[0] as HTMLElement
     const cardWidth = first?.clientWidth ?? 300
     const gap = 24
     const unit = cardWidth + gap
@@ -82,46 +111,73 @@ export default function HomeSlider({ stores }: { stores: HomeStore[] }) {
     const totalWidth = unit * loopStores.length
     const middleOffset = middleIndex * unit
 
-    const handleLoop = () => {
-      // 左端を超えた → 中央へジャンプ
-      if (el.scrollLeft <= unit) {
-        el.scrollLeft += middleOffset
+    let frameId: number
+
+    const loop = () => {
+      if (!isDragging.current) container.scrollLeft += scrollSpeed
+
+      // 右端 → 真ん中セットへ巻き戻し
+      if (container.scrollLeft >= totalWidth - unit * 2) {
+        container.scrollLeft -= middleOffset
       }
-      // 右端を超えた → 中央へジャンプ
-      else if (el.scrollLeft >= totalWidth - unit * 2) {
-        el.scrollLeft -= middleOffset
+
+      // 左端 → 真ん中セットへ巻き戻し
+      if (container.scrollLeft <= unit) {
+        container.scrollLeft += middleOffset
       }
+
+      detectCenter()
+      frameId = requestAnimationFrame(loop)
     }
 
-    el.addEventListener('scroll', handleLoop)
-    return () => el.removeEventListener('scroll', handleLoop)
+    frameId = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(frameId)
   }, [loopStores])
 
+  // =======================================
+  // ✋ ユーザーが触ったら自動スクロール停止
+  // =======================================
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+
+    const stop = () => (isDragging.current = true)
+    const resume = () => (isDragging.current = false)
+
+    el.addEventListener('mousedown', stop)
+    el.addEventListener('touchstart', stop)
+    el.addEventListener('mouseup', resume)
+    el.addEventListener('touchend', resume)
+
+    return () => {
+      el.removeEventListener('mousedown', stop)
+      el.removeEventListener('touchstart', stop)
+      el.removeEventListener('mouseup', resume)
+      el.removeEventListener('touchend', resume)
+    }
+  }, [])
+
+  // =======================================
+  // JSX
+  // =======================================
   return (
     <>
-      {/* スライダー */}
-      <div
-        ref={containerRef}
-        className="w-full overflow-x-auto flex gap-6 px-6 mt-6 scrollbar-none snap-x snap-mandatory"
-      >
-        {loopStores.map((s, i) => (
-          <div
-            key={`${s.id}-${i}`}
-            className="snap-center shrink-0 transition-transform duration-300"
-            style={{
-              transform: `scale(${i === currentIndex ? 1 : 0.8})`,
-              opacity: i === currentIndex ? 1 : 0.3,
-            }}
-          >
-            <HomeStoreCard store={s} />
-          </div>
-        ))}
+      {/* スライダーコンテナ */}
+      <div ref={containerRef} className="w-full overflow-x-hidden px-6 mt-6">
+        <div ref={trackRef} className="flex gap-6">
+          {loopStores.map((store, i) => (
+            <div
+              key={`${store.id}-${i}`}
+              className="shrink-0 transition-transform duration-300 cursor-pointer"
+              onClick={() => onSelectStore(store)}
+            >
+              <HomeStoreCard store={store} />
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* カード下の説明 */}
-      <div className="text-center mt-6 px-8 text-white text-sm opacity-90 min-h-[40px]">
-        {loopStores[currentIndex]?.description}
-      </div>
+
     </>
   )
 }

@@ -18,7 +18,7 @@ export default function FixedSearchBar({
   const isDisabled = count === 0
 
   const searchLabel = isDisabled
-    ? "該当する店舗はありません"
+    ? "音箱が見つかりません😢"
     : `${count}件を検索`
 
   return (
