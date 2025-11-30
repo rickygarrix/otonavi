@@ -44,7 +44,7 @@ export default function AreaSelector({ onChange }: Props) {
     }
 
     load()
-  }, [onChange])
+  }, [])   // ← ★ onChange を消す!!
 
   // 選択された都道府県のエリアをロード
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function AreaSelector({ onChange }: Props) {
     }
 
     load()
-  }, [selectedPrefecture, onChange])
+  }, [selectedPrefecture])
 
   // 地方ごとに分類
   const grouped = prefectures.reduce((acc: Record<string, Prefecture[]>, p) => {
