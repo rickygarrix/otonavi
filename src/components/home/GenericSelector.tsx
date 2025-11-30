@@ -4,27 +4,30 @@ import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import Chip from "@/components/ui/Chip"
 
-// マスタ行の型
+// ===================================================
+// マスタ行
+// ===================================================
 type Item = {
   id: string
-  key?: string        // store_types の場合は key が無い可能性があるので optional
+  key?: string | null            // store_types など key が無いテーブル対応
   label: string
+  description?: string | null    // 🔥 price_range_definitions に対応
   is_active: boolean
 }
 
-// Base
+// ===================================================
+// Props
+// ===================================================
 type BaseProps = {
   title: string
   table: string
 }
 
-// Single
 type SingleProps = BaseProps & {
   selection: "single"
   onChange: (value: string | null) => void
 }
 
-// Multi
 type MultiProps = BaseProps & {
   selection: "multi"
   onChange: (value: string[]) => void
@@ -32,6 +35,9 @@ type MultiProps = BaseProps & {
 
 type Props = SingleProps | MultiProps
 
+// ===================================================
+// Component
+// ===================================================
 export default function GenericSelector(props: Props) {
   const { title, table, selection, onChange } = props
 
@@ -40,7 +46,9 @@ export default function GenericSelector(props: Props) {
     selection === "single" ? null : []
   )
 
-  // 🔹 Supabase マスタ読み込み
+  // ---------------------------------------------------
+  // 🔹 Supabase からマスタ読み込み
+  // ---------------------------------------------------
   useEffect(() => {
     const load = async () => {
       const { data, error } = await supabase
@@ -60,7 +68,9 @@ export default function GenericSelector(props: Props) {
     load()
   }, [table])
 
+  // ---------------------------------------------------
   // 🔹 選択トグル
+  // ---------------------------------------------------
   const toggle = (id: string) => {
     if (selection === "single") {
       const next = selected === id ? null : id
@@ -70,10 +80,10 @@ export default function GenericSelector(props: Props) {
     }
 
     // multi
-    const prevArray = Array.isArray(selected) ? selected : []
-    const next = prevArray.includes(id)
-      ? prevArray.filter((x) => x !== id)
-      : [...prevArray, id]
+    const prevArr = Array.isArray(selected) ? selected : []
+    const next = prevArr.includes(id)
+      ? prevArr.filter((x) => x !== id)
+      : [...prevArr, id]
 
     setSelected(next)
     onChange(next as string[])
@@ -84,6 +94,9 @@ export default function GenericSelector(props: Props) {
     return Array.isArray(selected) && selected.includes(id)
   }
 
+  // ---------------------------------------------------
+  // 🔹 UI
+  // ---------------------------------------------------
   return (
     <div className="w-full px-6 py-6">
       <h2 className="text-lg font-bold text-slate-900 mb-6">{title}</h2>
@@ -98,6 +111,14 @@ export default function GenericSelector(props: Props) {
           />
         ))}
       </div>
+
+      {/* 🔥 description があるマスタは説明文を表示 */}
+      {items.some((i) => i.description) && (
+        <p className="text-xs text-gray-500 mt-4 leading-relaxed">
+          {items.find((i) => isSelected(i.id))?.description ??
+            "※補足説明はありません"}
+        </p>
+      )}
     </div>
   )
 }

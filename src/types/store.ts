@@ -22,7 +22,7 @@ export type SpecialOpenHour = {
 }
 
 // ===============================
-// HomeStore
+// HomeStore（🔥 全フィルタ完全対応）
 // ===============================
 export type HomeStore = {
   id: string
@@ -31,7 +31,14 @@ export type HomeStore = {
 
   prefecture: string | null
   area: string | null
-  type: string | null
+
+  // 店舗タイプ（単一）
+  store_type_id: string | null
+  type: string | null // ラベル
+
+  // 価格帯（単一）
+  price_range_id: string | null
+  price_range_label: string | null
 
   image_url: string | null
   description: string | null
@@ -55,8 +62,7 @@ export type HomeStore = {
   hasAward: boolean
   hasMedia: boolean
 
-  // ---------- 🔥 新規 ----------
-  store_type_id: string | null
+  // ---------- 多対多（既存） ----------
   seat_type_keys: string[]
   smoking_keys: string[]
   environment_keys: string[]
@@ -66,5 +72,12 @@ export type HomeStore = {
   toilet_keys: string[]
   floor_keys: string[]
 
+  // ---------- 🔥 多対多（新規追加） ----------
+  pricing_system_keys: string[]        // 料金システム
+  discount_keys: string[]             // ディスカウント
+  vip_keys: string[]                  // VIP 要素
+  payment_method_keys: string[]       // 支払い方法
+
+  // ---------- 単一 ----------
   size_key: string | null
 }

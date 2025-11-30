@@ -10,7 +10,6 @@ import SearchFilter from "@/components/home/SearchFilter"
 
 import AreaSelector from "@/components/home/AreaSelector"
 import AchievementSelector from "@/components/home/AchievementSelector"
-
 import GenericSelector from "@/components/home/GenericSelector"
 
 import FixedSearchBar from "@/components/home/FixedSearchBar"
@@ -22,12 +21,16 @@ import type { HomeStore } from "@/types/store"
 export default function HomePage() {
   const { stores, loading } = useHomeStores()
 
-  // ▼ 基本フィルタ
+  // --------------------------------------------------
+  // 基本フィルタ
+  // --------------------------------------------------
   const [prefecture, setPrefecture] = useState<string | null>(null)
   const [area, setArea] = useState<string | null>(null)
   const [storeType, setStoreType] = useState<string | null>(null)
 
-  // ▼ 既存フィルタ
+  // --------------------------------------------------
+  // 既存フィルタ
+  // --------------------------------------------------
   const [eventTrendKeys, setEventTrendKeys] = useState<string[]>([])
   const [ruleKeys, setRuleKeys] = useState<string[]>([])
   const [achievementFilter, setAchievementFilter] = useState({
@@ -35,7 +38,9 @@ export default function HomePage() {
     hasMedia: false,
   })
 
-  // ▼ GenericSelector フィルタ
+  // --------------------------------------------------
+  // GenericSelector（既存）
+  // --------------------------------------------------
   const [seatTypeKeys, setSeatTypeKeys] = useState<string[]>([])
   const [smokingKeys, setSmokingKeys] = useState<string[]>([])
   const [environmentKeys, setEnvironmentKeys] = useState<string[]>([])
@@ -46,7 +51,18 @@ export default function HomePage() {
   const [floorKeys, setFloorKeys] = useState<string[]>([])
   const [sizeKey, setSizeKey] = useState<string | null>(null)
 
-  // ▼ パネル系
+  // --------------------------------------------------
+  // GenericSelector（新規追加）
+  // --------------------------------------------------
+  const [priceRange, setPriceRange] = useState<string | null>(null)
+  const [pricingSystemKeys, setPricingSystemKeys] = useState<string[]>([])
+  const [discountKeys, setDiscountKeys] = useState<string[]>([])
+  const [vipKeys, setVipKeys] = useState<string[]>([])
+  const [paymentMethodKeys, setPaymentMethodKeys] = useState<string[]>([])
+
+  // --------------------------------------------------
+  // パネル制御
+  // --------------------------------------------------
   const [isResultOpen, setIsResultOpen] = useState(false)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [selectedStore, setSelectedStore] = useState<HomeStore | null>(null)
@@ -57,7 +73,9 @@ export default function HomePage() {
     setSelectedStore(null)
   }, [])
 
-  // ▼ 全クリア
+  // --------------------------------------------------
+  // 全クリア
+  // --------------------------------------------------
   const handleClear = useCallback(() => {
     setPrefecture(null)
     setArea(null)
@@ -76,10 +94,19 @@ export default function HomePage() {
     setFloorKeys([])
     setSizeKey(null)
 
+    // 🔥 新規フィルタもクリア
+    setPriceRange(null)
+    setPricingSystemKeys([])
+    setDiscountKeys([])
+    setVipKeys([])
+    setPaymentMethodKeys([])
+
     setAchievementFilter({ hasAward: false, hasMedia: false })
   }, [])
 
-  // ▼ フィルタ実行
+  // --------------------------------------------------
+  // フィルタ実行
+  // --------------------------------------------------
   const filteredStores = useMemo(() => {
     return stores.filter((s) => {
       if (prefecture && s.prefecture !== prefecture) return false
@@ -99,6 +126,12 @@ export default function HomePage() {
         [securityKeys, s.security_keys],
         [toiletKeys, s.toilet_keys],
         [floorKeys, s.floor_keys],
+
+        // 🔥 新規 multi フィルタ
+        [pricingSystemKeys, s.pricing_system_keys],
+        [discountKeys, s.discount_keys],
+        [vipKeys, s.vip_keys],
+        [paymentMethodKeys, s.payment_method_keys],
       ]
 
       for (const [selected, storeKeys] of checks) {
@@ -108,6 +141,9 @@ export default function HomePage() {
       }
 
       if (sizeKey && s.size_key !== sizeKey) return false
+
+      // 🔥 price_range_id
+      if (priceRange && s.price_range_id !== priceRange) return false
 
       return true
     })
@@ -127,17 +163,23 @@ export default function HomePage() {
     toiletKeys,
     floorKeys,
     sizeKey,
+    priceRange,
+    pricingSystemKeys,
+    discountKeys,
+    vipKeys,
+    paymentMethodKeys,
     achievementFilter,
   ])
 
   const count = filteredStores.length
 
-  // ▼ 検索ボタン
   const handleSearch = useCallback(() => {
     if (count > 0) setIsResultOpen(true)
   }, [count])
 
-  // ▼ 選択中フィルタ表示用
+  // --------------------------------------------------
+  // 選択中フィルタ表示用
+  // --------------------------------------------------
   const selectedFilters = [
     prefecture,
     area,
@@ -153,6 +195,14 @@ export default function HomePage() {
     ...toiletKeys,
     ...floorKeys,
     sizeKey,
+
+    // 🔥 新規追加
+    priceRange,
+    ...pricingSystemKeys,
+    ...discountKeys,
+    ...vipKeys,
+    ...paymentMethodKeys,
+
     achievementFilter.hasAward ? "受賞歴あり" : null,
     achievementFilter.hasMedia ? "メディア掲載あり" : null,
   ].filter(Boolean) as string[]
@@ -162,6 +212,9 @@ export default function HomePage() {
     setIsDetailOpen(true)
   }, [])
 
+  // ==================================================
+  // UI
+  // ==================================================
   return (
     <>
       {/* 背景 */}
@@ -169,7 +222,9 @@ export default function HomePage() {
         <CurvedBackground />
         <div className="mt-[80px]"><LogoHero /></div>
         <div className="mt-[40px]">
-          {!loading && <HomeSlider stores={stores} onSelectStore={handleSelectStore} />}
+          {!loading && (
+            <HomeSlider stores={stores} onSelectStore={handleSelectStore} />
+          )}
         </div>
         <div className="absolute left-0 bottom-[30px] w-full flex justify-center pointer-events-none">
           <CommentSlider />
@@ -185,7 +240,7 @@ export default function HomePage() {
         {/* 地域 */}
         <AreaSelector onChange={(pref, a) => { setPrefecture(pref); setArea(a); }} />
 
-        {/* 店舗タイプ → GenericSelector に統一 */}
+        {/* 店舗タイプ */}
         <GenericSelector
           title="店舗タイプ"
           table="store_types"
@@ -196,7 +251,47 @@ export default function HomePage() {
         {/* Achievement */}
         <AchievementSelector onChange={setAchievementFilter} />
 
-        {/* 汎用フィルタ */}
+        {/* 🔥 新規：価格帯 */}
+        <GenericSelector
+          title="価格帯"
+          table="price_range_definitions"
+          selection="single"
+          onChange={setPriceRange}
+        />
+
+        {/* 🔥 新規：料金システム */}
+        <GenericSelector
+          title="料金システム"
+          table="pricing_system_definitions"
+          selection="multi"
+          onChange={setPricingSystemKeys}
+        />
+
+        {/* 🔥 ディスカウント */}
+        <GenericSelector
+          title="ディスカウント"
+          table="discount_definitions"
+          selection="multi"
+          onChange={setDiscountKeys}
+        />
+
+        {/* 🔥 VIP */}
+        <GenericSelector
+          title="VIP"
+          table="vip_definitions"
+          selection="multi"
+          onChange={setVipKeys}
+        />
+
+        {/* 🔥 支払い方法 */}
+        <GenericSelector
+          title="支払い方法"
+          table="payment_method_definitions"
+          selection="multi"
+          onChange={setPaymentMethodKeys}
+        />
+
+        {/* 既存の汎用フィルタ */}
         <GenericSelector title="座席タイプ" table="seat_type_definitions" selection="multi" onChange={setSeatTypeKeys} />
         <GenericSelector title="喫煙" table="smoking_definitions" selection="multi" onChange={setSmokingKeys} />
         <GenericSelector title="周辺環境" table="environment_definitions" selection="multi" onChange={setEnvironmentKeys} />
