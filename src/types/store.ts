@@ -32,11 +32,11 @@ export type HomeStore = {
   prefecture: string | null
   area: string | null
 
-  // 店舗タイプ（単一）
+  // ---------- 店舗タイプ（単一） ----------
   store_type_id: string | null
   type: string | null // ラベル
 
-  // 価格帯（単一）
+  // ---------- 価格帯（単一） ----------
   price_range_id: string | null
   price_range_label: string | null
 
@@ -56,13 +56,11 @@ export type HomeStore = {
   open_hours: OpenHour[]
   special_hours: SpecialOpenHour[]
 
-  // ---------- 既存 ----------
+  // ======================================================
+  // 既存 M2M
+  // ======================================================
   event_trend_keys: string[]
   rule_keys: string[]
-  hasAward: boolean
-  hasMedia: boolean
-
-  // ---------- 多対多（既存） ----------
   seat_type_keys: string[]
   smoking_keys: string[]
   environment_keys: string[]
@@ -72,12 +70,37 @@ export type HomeStore = {
   toilet_keys: string[]
   floor_keys: string[]
 
-  // ---------- 🔥 多対多（新規追加） ----------
-  pricing_system_keys: string[]        // 料金システム
-  discount_keys: string[]             // ディスカウント
-  vip_keys: string[]                  // VIP 要素
-  payment_method_keys: string[]       // 支払い方法
+  // ======================================================
+  // 🔥 新規 M2M
+  // ======================================================
+  pricing_system_keys: string[]     // 料金システム
+  discount_keys: string[]           // ディスカウント
+  vip_keys: string[]                // VIP 要素
+  payment_method_keys: string[]     // 支払い方法
+
+  // ======================================================
+  // 🔥 音響・照明チーム
+  // ======================================================
+  sound_keys: string[]              // 音響
+  lighting_keys: string[]           // 照明
+  production_keys: string[]         // 演出
+
+  // ======================================================
+  // 🔥 客層・雰囲気チーム
+  // ======================================================
+  customer_keys: string[]           // 客層
+  atmosphere_keys: string[]         // 雰囲気
+
+  // ======================================================
+  // 🔥 接客（stores.hospitality）単一
+  // ======================================================
+  hospitality_key: string | null    // friendly / cool / professional など
+  hospitality_label: string | null
 
   // ---------- 単一 ----------
   size_key: string | null
+
+  // ---------- 既存 ----------
+  hasAward: boolean
+  hasMedia: boolean
 }

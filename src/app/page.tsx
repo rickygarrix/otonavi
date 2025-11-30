@@ -52,13 +52,27 @@ export default function HomePage() {
   const [sizeKey, setSizeKey] = useState<string | null>(null)
 
   // --------------------------------------------------
-  // GenericSelector（新規追加）
+  // GenericSelector（料金系 新規）
   // --------------------------------------------------
   const [priceRange, setPriceRange] = useState<string | null>(null)
   const [pricingSystemKeys, setPricingSystemKeys] = useState<string[]>([])
   const [discountKeys, setDiscountKeys] = useState<string[]>([])
   const [vipKeys, setVipKeys] = useState<string[]>([])
   const [paymentMethodKeys, setPaymentMethodKeys] = useState<string[]>([])
+
+  // --------------------------------------------------
+  // GenericSelector（音響・照明チーム）
+  // --------------------------------------------------
+  const [soundKeys, setSoundKeys] = useState<string[]>([])
+  const [lightingKeys, setLightingKeys] = useState<string[]>([])
+  const [productionKeys, setProductionKeys] = useState<string[]>([])
+
+  // --------------------------------------------------
+  // GenericSelector（客層・雰囲気チーム）
+  // --------------------------------------------------
+  const [customerKeys, setCustomerKeys] = useState<string[]>([])
+  const [atmosphereKeys, setAtmosphereKeys] = useState<string[]>([])
+  const [hospitalityKey, setHospitalityKey] = useState<string | null>(null)
 
   // --------------------------------------------------
   // パネル制御
@@ -94,12 +108,22 @@ export default function HomePage() {
     setFloorKeys([])
     setSizeKey(null)
 
-    // 🔥 新規フィルタもクリア
+    // 料金系
     setPriceRange(null)
     setPricingSystemKeys([])
     setDiscountKeys([])
     setVipKeys([])
     setPaymentMethodKeys([])
+
+    // 音響・照明チーム
+    setSoundKeys([])
+    setLightingKeys([])
+    setProductionKeys([])
+
+    // 客層・雰囲気チーム
+    setCustomerKeys([])
+    setAtmosphereKeys([])
+    setHospitalityKey(null)
 
     setAchievementFilter({ hasAward: false, hasMedia: false })
   }, [])
@@ -109,12 +133,16 @@ export default function HomePage() {
   // --------------------------------------------------
   const filteredStores = useMemo(() => {
     return stores.filter((s) => {
+      // 基本
       if (prefecture && s.prefecture !== prefecture) return false
       if (area && s.area !== area) return false
       if (storeType && s.store_type_id !== storeType) return false
+
+      // 実績
       if (achievementFilter.hasAward && !s.hasAward) return false
       if (achievementFilter.hasMedia && !s.hasMedia) return false
 
+      // multi の AND 条件
       const checks: [string[], string[]][] = [
         [eventTrendKeys, s.event_trend_keys],
         [ruleKeys, s.rule_keys],
@@ -127,11 +155,20 @@ export default function HomePage() {
         [toiletKeys, s.toilet_keys],
         [floorKeys, s.floor_keys],
 
-        // 🔥 新規 multi フィルタ
+        // 料金系
         [pricingSystemKeys, s.pricing_system_keys],
         [discountKeys, s.discount_keys],
         [vipKeys, s.vip_keys],
         [paymentMethodKeys, s.payment_method_keys],
+
+        // 音響・照明チーム
+        [soundKeys, s.sound_keys],
+        [lightingKeys, s.lighting_keys],
+        [productionKeys, s.production_keys],
+
+        // 客層・雰囲気チーム
+        [customerKeys, s.customer_keys],
+        [atmosphereKeys, s.atmosphere_keys],
       ]
 
       for (const [selected, storeKeys] of checks) {
@@ -140,10 +177,14 @@ export default function HomePage() {
         }
       }
 
+      // 単一サイズ
       if (sizeKey && s.size_key !== sizeKey) return false
 
-      // 🔥 price_range_id
+      // 単一価格帯
       if (priceRange && s.price_range_id !== priceRange) return false
+
+      // 単一定接客
+      if (hospitalityKey && s.hospitality_key !== hospitalityKey) return false
 
       return true
     })
@@ -168,6 +209,12 @@ export default function HomePage() {
     discountKeys,
     vipKeys,
     paymentMethodKeys,
+    soundKeys,
+    lightingKeys,
+    productionKeys,
+    customerKeys,
+    atmosphereKeys,
+    hospitalityKey,
     achievementFilter,
   ])
 
@@ -196,12 +243,22 @@ export default function HomePage() {
     ...floorKeys,
     sizeKey,
 
-    // 🔥 新規追加
+    // 料金系
     priceRange,
     ...pricingSystemKeys,
     ...discountKeys,
     ...vipKeys,
     ...paymentMethodKeys,
+
+    // 音響・照明チーム
+    ...soundKeys,
+    ...lightingKeys,
+    ...productionKeys,
+
+    // 客層・雰囲気チーム
+    ...customerKeys,
+    ...atmosphereKeys,
+    hospitalityKey,
 
     achievementFilter.hasAward ? "受賞歴あり" : null,
     achievementFilter.hasMedia ? "メディア掲載あり" : null,
@@ -220,10 +277,15 @@ export default function HomePage() {
       {/* 背景 */}
       <div className="relative w-full text-white overflow-hidden">
         <CurvedBackground />
-        <div className="mt-[80px]"><LogoHero /></div>
+        <div className="mt-[80px]">
+          <LogoHero />
+        </div>
         <div className="mt-[40px]">
           {!loading && (
-            <HomeSlider stores={stores} onSelectStore={handleSelectStore} />
+            <HomeSlider
+              stores={stores}
+              onSelectStore={handleSelectStore}
+            />
           )}
         </div>
         <div className="absolute left-0 bottom-[30px] w-full flex justify-center pointer-events-none">
@@ -238,7 +300,12 @@ export default function HomePage() {
         <div className="h-6" />
 
         {/* 地域 */}
-        <AreaSelector onChange={(pref, a) => { setPrefecture(pref); setArea(a); }} />
+        <AreaSelector
+          onChange={(pref, a) => {
+            setPrefecture(pref)
+            setArea(a)
+          }}
+        />
 
         {/* 店舗タイプ */}
         <GenericSelector
@@ -248,10 +315,10 @@ export default function HomePage() {
           onChange={setStoreType}
         />
 
-        {/* Achievement */}
+        {/* 実績 */}
         <AchievementSelector onChange={setAchievementFilter} />
 
-        {/* 🔥 新規：価格帯 */}
+        {/* 価格帯 */}
         <GenericSelector
           title="価格帯"
           table="price_range_definitions"
@@ -259,7 +326,7 @@ export default function HomePage() {
           onChange={setPriceRange}
         />
 
-        {/* 🔥 新規：料金システム */}
+        {/* 料金システム */}
         <GenericSelector
           title="料金システム"
           table="pricing_system_definitions"
@@ -267,7 +334,7 @@ export default function HomePage() {
           onChange={setPricingSystemKeys}
         />
 
-        {/* 🔥 ディスカウント */}
+        {/* ディスカウント */}
         <GenericSelector
           title="ディスカウント"
           table="discount_definitions"
@@ -275,7 +342,7 @@ export default function HomePage() {
           onChange={setDiscountKeys}
         />
 
-        {/* 🔥 VIP */}
+        {/* VIP */}
         <GenericSelector
           title="VIP"
           table="vip_definitions"
@@ -283,7 +350,7 @@ export default function HomePage() {
           onChange={setVipKeys}
         />
 
-        {/* 🔥 支払い方法 */}
+        {/* 支払い方法 */}
         <GenericSelector
           title="支払い方法"
           table="payment_method_definitions"
@@ -291,16 +358,101 @@ export default function HomePage() {
           onChange={setPaymentMethodKeys}
         />
 
-        {/* 既存の汎用フィルタ */}
-        <GenericSelector title="座席タイプ" table="seat_type_definitions" selection="multi" onChange={setSeatTypeKeys} />
-        <GenericSelector title="喫煙" table="smoking_definitions" selection="multi" onChange={setSmokingKeys} />
-        <GenericSelector title="周辺環境" table="environment_definitions" selection="multi" onChange={setEnvironmentKeys} />
-        <GenericSelector title="その他" table="other_definitions" selection="multi" onChange={setOtherKeys} />
-        <GenericSelector title="荷物預かり" table="baggage_definitions" selection="multi" onChange={setBaggageKeys} />
-        <GenericSelector title="セキュリティ" table="security_definitions" selection="multi" onChange={setSecurityKeys} />
-        <GenericSelector title="トイレ" table="toilet_definitions" selection="multi" onChange={setToiletKeys} />
-        <GenericSelector title="フロア位置" table="floor_definitions" selection="multi" onChange={setFloorKeys} />
-        <GenericSelector title="広さ" table="size_definitions" selection="single" onChange={setSizeKey} />
+        {/* ▼ 既存 汎用フィルタ */}
+        <GenericSelector
+          title="座席タイプ"
+          table="seat_type_definitions"
+          selection="multi"
+          onChange={setSeatTypeKeys}
+        />
+        <GenericSelector
+          title="喫煙"
+          table="smoking_definitions"
+          selection="multi"
+          onChange={setSmokingKeys}
+        />
+        <GenericSelector
+          title="周辺環境"
+          table="environment_definitions"
+          selection="multi"
+          onChange={setEnvironmentKeys}
+        />
+        <GenericSelector
+          title="その他"
+          table="other_definitions"
+          selection="multi"
+          onChange={setOtherKeys}
+        />
+        <GenericSelector
+          title="荷物預かり"
+          table="baggage_definitions"
+          selection="multi"
+          onChange={setBaggageKeys}
+        />
+        <GenericSelector
+          title="セキュリティ"
+          table="security_definitions"
+          selection="multi"
+          onChange={setSecurityKeys}
+        />
+        <GenericSelector
+          title="トイレ"
+          table="toilet_definitions"
+          selection="multi"
+          onChange={setToiletKeys}
+        />
+        <GenericSelector
+          title="フロア位置"
+          table="floor_definitions"
+          selection="multi"
+          onChange={setFloorKeys}
+        />
+        <GenericSelector
+          title="広さ"
+          table="size_definitions"
+          selection="single"
+          onChange={setSizeKey}
+        />
+
+        {/* ▼ 音響・照明チーム */}
+        <GenericSelector
+          title="音響"
+          table="sound_definitions"
+          selection="multi"
+          onChange={setSoundKeys}
+        />
+        <GenericSelector
+          title="照明"
+          table="lighting_definitions"
+          selection="multi"
+          onChange={setLightingKeys}
+        />
+        <GenericSelector
+          title="演出"
+          table="production_definitions"
+          selection="multi"
+          onChange={setProductionKeys}
+        />
+
+        {/* ▼ 客層・雰囲気チーム */}
+        <GenericSelector
+          title="客層"
+          table="customer_definitions"
+          selection="multi"
+          onChange={setCustomerKeys}
+        />
+        <GenericSelector
+          title="雰囲気"
+          table="atmosphere_definitions"
+          selection="multi"
+          onChange={setAtmosphereKeys}
+        />
+        <GenericSelector
+          title="接客"
+          table="hospitality_definitions"
+          selection="single"
+          onChange={setHospitalityKey}
+        />
       </div>
 
       {/* 固定検索バー */}
@@ -311,7 +463,7 @@ export default function HomePage() {
         count={count}
       />
 
-      {/* 結果 */}
+      {/* 結果パネル */}
       <SearchResultPanel
         isOpen={isResultOpen}
         onClose={() => setIsResultOpen(false)}
@@ -321,7 +473,7 @@ export default function HomePage() {
         onSelectStore={handleSelectStore}
       />
 
-      {/* 詳細 */}
+      {/* 詳細パネル */}
       <StoreDetailPanel
         store={selectedStore}
         isOpen={isDetailOpen}

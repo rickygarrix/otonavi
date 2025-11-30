@@ -5,18 +5,18 @@ import { supabase } from "@/lib/supabase"
 import Chip from "@/components/ui/Chip"
 
 // ===================================================
-// マスタ行
+// マスタ行の型
 // ===================================================
 type Item = {
   id: string
-  key?: string | null            // store_types など key が無いテーブル対応
+  key?: string | null
   label: string
-  description?: string | null    // 🔥 price_range_definitions に対応
+  description?: string | null
   is_active: boolean
 }
 
 // ===================================================
-// Props
+// Props 型
 // ===================================================
 type BaseProps = {
   title: string
@@ -46,9 +46,9 @@ export default function GenericSelector(props: Props) {
     selection === "single" ? null : []
   )
 
-  // ---------------------------------------------------
-  // 🔹 Supabase からマスタ読み込み
-  // ---------------------------------------------------
+  // ===================================================
+  // 🔹 Supabase マスタ読み込み
+  // ===================================================
   useEffect(() => {
     const load = async () => {
       const { data, error } = await supabase
@@ -62,41 +62,62 @@ export default function GenericSelector(props: Props) {
         return
       }
 
-      setItems(data ?? [])
+      setItems((data ?? []) as Item[])
     }
 
     load()
   }, [table])
 
-  // ---------------------------------------------------
+  // ===================================================
   // 🔹 選択トグル
-  // ---------------------------------------------------
+  // ===================================================
   const toggle = (id: string) => {
     if (selection === "single") {
       const next = selected === id ? null : id
       setSelected(next)
-      onChange(next as string | null)
+      onChange(next)
       return
     }
 
-    // multi
-    const prevArr = Array.isArray(selected) ? selected : []
-    const next = prevArr.includes(id)
-      ? prevArr.filter((x) => x !== id)
-      : [...prevArr, id]
+    // multi 選択
+    const prev = Array.isArray(selected) ? selected : []
+    const next = prev.includes(id)
+      ? prev.filter((x) => x !== id)
+      : [...prev, id]
 
     setSelected(next)
-    onChange(next as string[])
+    onChange(next)
   }
 
-  const isSelected = (id: string) => {
-    if (selection === "single") return selected === id
-    return Array.isArray(selected) && selected.includes(id)
-  }
+  const isSelected = (id: string) =>
+    selection === "single"
+      ? selected === id
+      : Array.isArray(selected) && selected.includes(id)
 
-  // ---------------------------------------------------
+  // ===================================================
+  // 🔹 選択中項目の説明文を生成（single & multi 対応）
+  // ===================================================
+  const selectedDescriptions = (() => {
+    if (!items.some((i) => i.description)) return null
+
+    if (selection === "single") {
+      const found = items.find((i) => i.id === selected)
+      return found?.description ?? null
+    }
+
+    // multi: 選択した複数 description を結合
+    const selectedIds = Array.isArray(selected) ? selected : []
+    const descs = selectedIds
+      .map((id) => items.find((i) => i.id === id)?.description)
+      .filter(Boolean)
+
+    if (descs.length === 0) return null
+    return descs.join(" / ")
+  })()
+
+  // ===================================================
   // 🔹 UI
-  // ---------------------------------------------------
+  // ===================================================
   return (
     <div className="w-full px-6 py-6">
       <h2 className="text-lg font-bold text-slate-900 mb-6">{title}</h2>
@@ -112,11 +133,10 @@ export default function GenericSelector(props: Props) {
         ))}
       </div>
 
-      {/* 🔥 description があるマスタは説明文を表示 */}
-      {items.some((i) => i.description) && (
+      {/* 🔥 description がある項目のみ説明文表示 */}
+      {selectedDescriptions && (
         <p className="text-xs text-gray-500 mt-4 leading-relaxed">
-          {items.find((i) => isSelected(i.id))?.description ??
-            "※補足説明はありません"}
+          {selectedDescriptions}
         </p>
       )}
     </div>
