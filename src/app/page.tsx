@@ -12,13 +12,15 @@ import AreaSelector from "@/components/home/AreaSelector"
 import AchievementSelector from "@/components/home/AchievementSelector"
 import GenericSelector from "@/components/home/GenericSelector"
 
-import DrinkSelector from "@/components/home/DrinkSelector"   // 🍺 追加
+import DrinkSelector from "@/components/home/DrinkSelector"
 
 import FixedSearchBar from "@/components/home/FixedSearchBar"
 import SearchResultPanel from "@/components/SearchResultPanel"
 import StoreDetailPanel from "@/components/StoreDetailPanel"
 
 import type { HomeStore } from "@/types/store"
+
+import Footer from "@/components/Footer"
 
 export default function HomePage() {
   const { stores, loading } = useHomeStores()
@@ -85,7 +87,7 @@ export default function HomePage() {
   // --------------------------------------------------
   // 🍺 ドリンク（カテゴリ別）
   // --------------------------------------------------
-  const [drinkKeys, setDrinkKeys] = useState<string[]>([])      // 追加
+  const [drinkKeys, setDrinkKeys] = useState<string[]>([])
 
   // --------------------------------------------------
   // パネル
@@ -93,10 +95,6 @@ export default function HomePage() {
   const [isResultOpen, setIsResultOpen] = useState(false)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [selectedStore, setSelectedStore] = useState<HomeStore | null>(null)
-
-
-
-
 
   const handleCloseAll = useCallback(() => {
     setIsDetailOpen(false)
@@ -142,11 +140,14 @@ export default function HomePage() {
     setFoodKeys([])
     setServiceKeys([])
 
-    setDrinkKeys([])       // 🍺 CLEAR 追加
+    setDrinkKeys([])
 
     setAchievementFilter({ hasAward: false, hasMedia: false })
   }, [])
 
+  // --------------------------------------------------
+  // セクションのスクロール制御
+  // --------------------------------------------------
   const storeRef = useRef<HTMLHeadingElement | null>(null)
   const equipmentRef = useRef<HTMLHeadingElement | null>(null)
   const priceRef = useRef<HTMLHeadingElement | null>(null)
@@ -155,9 +156,7 @@ export default function HomePage() {
   const customerRef = useRef<HTMLHeadingElement | null>(null)
 
   const scrollTo = (ref: React.RefObject<HTMLElement | null>) => {
-    if (ref.current) {
-      ref.current.scrollIntoView({ behavior: "smooth", block: "start" })
-    }
+    ref.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
   // --------------------------------------------------
@@ -165,17 +164,14 @@ export default function HomePage() {
   // --------------------------------------------------
   const filteredStores = useMemo(() => {
     return stores.filter((s) => {
-      // 基本
       if (prefecture && s.prefecture !== prefecture) return false
       if (area && s.area !== area) return false
       if (storeType && s.store_type_id !== storeType) return false
 
-      // 実績
       if (achievementFilter.hasAward && !s.hasAward) return false
       if (achievementFilter.hasMedia && !s.hasMedia) return false
 
-      // 全 M2M 判定
-      const checks: [string[], string[]][] = [
+      const m2mChecks: [string[], string[]][] = [
         [eventTrendKeys, s.event_trend_keys],
         [ruleKeys, s.rule_keys],
         [seatTypeKeys, s.seat_type_keys],
@@ -202,10 +198,10 @@ export default function HomePage() {
         [foodKeys, s.food_keys],
         [serviceKeys, s.service_keys],
 
-        [drinkKeys, s.drink_keys],          // 🍺 DRINK 判定
+        [drinkKeys, s.drink_keys],
       ]
 
-      for (const [selected, storeKeys] of checks) {
+      for (const [selected, storeKeys] of m2mChecks) {
         if (selected.length > 0 && !selected.every((k) => storeKeys.includes(k)))
           return false
       }
@@ -245,7 +241,7 @@ export default function HomePage() {
     hospitalityKey,
     foodKeys,
     serviceKeys,
-    drinkKeys,         // 🍺 追加
+    drinkKeys,
     achievementFilter,
   ])
 
@@ -291,7 +287,7 @@ export default function HomePage() {
     ...foodKeys,
     ...serviceKeys,
 
-    ...drinkKeys,         // 🍺 追加
+    ...drinkKeys,
 
     achievementFilter.hasAward ? "受賞歴あり" : null,
     achievementFilter.hasMedia ? "メディア掲載あり" : null,
@@ -343,8 +339,13 @@ export default function HomePage() {
 
         <AreaSelector onChange={(pref, a) => { setPrefecture(pref); setArea(a) }} />
         <GenericSelector title="店舗タイプ" table="store_types" selection="single" onChange={setStoreType} />
-        <GenericSelector title="イベントの傾向" table="event_trend_definitions" selection="multi" onChange={setEventTrendKeys} />
-        <GenericSelector title="ルール / マナー" table="rule_definitions" selection="multi" onChange={setRuleKeys} />
+
+        {/* ★ 3列指定 */}
+        <GenericSelector title="イベントの傾向" table="event_trend_definitions" selection="multi" onChange={setEventTrendKeys} columns={3} />
+
+        {/* ★ 3列指定 */}
+        <GenericSelector title="ルール / マナー" table="rule_definitions" selection="multi" onChange={setRuleKeys} columns={3} />
+
         <AchievementSelector onChange={setAchievementFilter} />
 
         <div className="h-8" />
@@ -356,15 +357,17 @@ export default function HomePage() {
           設備
         </h2>
 
-        <GenericSelector title="荷物預かり" table="baggage_definitions" selection="multi" onChange={setBaggageKeys} />
-        <GenericSelector title="セキュリティ" table="security_definitions" selection="multi" onChange={setSecurityKeys} />
-        <GenericSelector title="トイレ" table="toilet_definitions" selection="multi" onChange={setToiletKeys} />
+        <GenericSelector title="荷物預かり" table="baggage_definitions" selection="multi" onChange={setBaggageKeys} columns={3} />
+        <GenericSelector title="セキュリティ" table="security_definitions" selection="multi" onChange={setSecurityKeys} columns={3} />
+        <GenericSelector title="トイレ" table="toilet_definitions" selection="multi" onChange={setToiletKeys} columns={3} />
+
         <GenericSelector title="広さ" table="size_definitions" selection="single" onChange={setSizeKey} />
-        <GenericSelector title="フロアの位置" table="floor_definitions" selection="multi" onChange={setFloorKeys} />
-        <GenericSelector title="座席タイプ" table="seat_type_definitions" selection="multi" onChange={setSeatTypeKeys} />
-        <GenericSelector title="喫煙" table="smoking_definitions" selection="multi" onChange={setSmokingKeys} />
-        <GenericSelector title="周辺環境" table="environment_definitions" selection="multi" onChange={setEnvironmentKeys} />
-        <GenericSelector title="その他" table="other_definitions" selection="multi" onChange={setOtherKeys} />
+
+        <GenericSelector title="フロアの位置" table="floor_definitions" selection="multi" onChange={setFloorKeys} columns={3} />
+        <GenericSelector title="座席タイプ" table="seat_type_definitions" selection="multi" onChange={setSeatTypeKeys} columns={3} />
+        <GenericSelector title="喫煙" table="smoking_definitions" selection="multi" onChange={setSmokingKeys} columns={3} />
+        <GenericSelector title="周辺環境" table="environment_definitions" selection="multi" onChange={setEnvironmentKeys} columns={3} />
+        <GenericSelector title="その他" table="other_definitions" selection="multi" onChange={setOtherKeys} columns={3} />
 
         <div className="h-8" />
 
@@ -376,10 +379,11 @@ export default function HomePage() {
         </h2>
 
         <GenericSelector title="価格帯" table="price_range_definitions" selection="single" onChange={setPriceRange} />
-        <GenericSelector title="料金システム" table="pricing_system_definitions" selection="multi" onChange={setPricingSystemKeys} />
-        <GenericSelector title="ディスカウント" table="discount_definitions" selection="multi" onChange={setDiscountKeys} />
-        <GenericSelector title="VIP" table="vip_definitions" selection="multi" onChange={setVipKeys} />
-        <GenericSelector title="支払い方法" table="payment_method_definitions" selection="multi" onChange={setPaymentMethodKeys} />
+
+        <GenericSelector title="料金システム" table="pricing_system_definitions" selection="multi" onChange={setPricingSystemKeys} columns={3} />
+        <GenericSelector title="ディスカウント" table="discount_definitions" selection="multi" onChange={setDiscountKeys} columns={3} />
+        <GenericSelector title="VIP" table="vip_definitions" selection="multi" onChange={setVipKeys} columns={3} />
+        <GenericSelector title="支払い方法" table="payment_method_definitions" selection="multi" onChange={setPaymentMethodKeys} columns={3} />
 
         <div className="h-8" />
 
@@ -390,9 +394,9 @@ export default function HomePage() {
           音響・照明
         </h2>
 
-        <GenericSelector title="音響" table="sound_definitions" selection="multi" onChange={setSoundKeys} />
-        <GenericSelector title="照明" table="lighting_definitions" selection="multi" onChange={setLightingKeys} />
-        <GenericSelector title="演出" table="production_definitions" selection="multi" onChange={setProductionKeys} />
+        <GenericSelector title="音響" table="sound_definitions" selection="multi" onChange={setSoundKeys} columns={3} />
+        <GenericSelector title="照明" table="lighting_definitions" selection="multi" onChange={setLightingKeys} columns={3} />
+        <GenericSelector title="演出" table="production_definitions" selection="multi" onChange={setProductionKeys} columns={3} />
 
         <div className="h-8" />
 
@@ -404,8 +408,8 @@ export default function HomePage() {
         </h2>
 
         <DrinkSelector title="ドリンク" onChange={setDrinkKeys} />
-        <GenericSelector title="フード" table="food_definitions" selection="multi" onChange={setFoodKeys} />
-        <GenericSelector title="サービス" table="service_definitions" selection="multi" onChange={setServiceKeys} />
+        <GenericSelector title="フード" table="food_definitions" selection="multi" onChange={setFoodKeys} columns={3} />
+        <GenericSelector title="サービス" table="service_definitions" selection="multi" onChange={setServiceKeys} columns={3} />
 
         <div className="h-8" />
 
@@ -416,11 +420,13 @@ export default function HomePage() {
           客層・雰囲気
         </h2>
 
-        <GenericSelector title="客層" table="customer_definitions" selection="multi" onChange={setCustomerKeys} />
-        <GenericSelector title="雰囲気" table="atmosphere_definitions" selection="multi" onChange={setAtmosphereKeys} />
+        <GenericSelector title="客層" table="customer_definitions" selection="multi" onChange={setCustomerKeys} columns={3} />
+        <GenericSelector title="雰囲気" table="atmosphere_definitions" selection="multi" onChange={setAtmosphereKeys} columns={3} />
         <GenericSelector title="接客" table="hospitality_definitions" selection="single" onChange={setHospitalityKey} />
 
       </div>
+
+
 
       <FixedSearchBar
         selectedFilters={selectedFilters}
@@ -428,6 +434,8 @@ export default function HomePage() {
         onSearch={handleSearch}
         count={count}
       />
+
+      <Footer />
 
       <SearchResultPanel
         isOpen={isResultOpen}

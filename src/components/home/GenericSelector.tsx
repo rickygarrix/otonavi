@@ -21,6 +21,7 @@ type Item = {
 type BaseProps = {
   title: string
   table: string
+  columns?: 2 | 3             // ★ ここで列数指定可能
 }
 
 type SingleProps = BaseProps & {
@@ -39,11 +40,11 @@ type Props = SingleProps | MultiProps
 // Component
 // -------------------------------
 export default function GenericSelector(props: Props) {
-  const { title, table, selection, onChange } = props
+  const { title, table, selection, onChange, columns = 2 } = props
+  // ★ columns のデフォルトは 2 列
 
   const [items, setItems] = useState<Item[]>([])
 
-  // selection により型を分岐
   const [selected, setSelected] = useState<string | string[] | null>(
     selection === "single" ? null : []
   )
@@ -136,7 +137,8 @@ export default function GenericSelector(props: Props) {
     <div className="w-full px-6 py-6">
       <h2 className="text-lg font-bold text-slate-900 mb-6">{title}</h2>
 
-      <div className="grid grid-cols-2 gap-3">
+      {/* ★ ここで 2列 / 3列 切り替え */}
+      <div className={`grid gap-3 ${columns === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
         {items.map((item) => (
           <Chip
             key={item.id}
