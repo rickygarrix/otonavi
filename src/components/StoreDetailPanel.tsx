@@ -1,12 +1,15 @@
 "use client"
 
-import { X } from "lucide-react"
 import { useState, useEffect } from "react"
 import type { HomeStore } from "@/types/store"
 import { supabase } from "@/lib/supabase"
 
+import Footer from "@/components/Footer"
+import HomeButton from "@/components/ui/HomeButton"
+import BackToHomeButton from "@/components/ui/BackToHomeButton"
+
 // ===============================
-// 画像型
+// 型
 // ===============================
 type StoreImage = {
   id: string
@@ -15,9 +18,6 @@ type StoreImage = {
   caption: string | null
 }
 
-// ===============================
-// 曜日ラベル
-// ===============================
 const DAY_LABEL: Record<number, string> = {
   1: "月",
   2: "火",
@@ -30,16 +30,7 @@ const DAY_LABEL: Record<number, string> = {
 
 const formatTime = (t: string | null) => (t ? t.slice(0, 5) : "")
 
-// ===============================
-// 行 UI（値が空ならグレーで —）
-// ===============================
-function DetailItem({
-  label,
-  value,
-}: {
-  label: string
-  value: string | null
-}) {
+function DetailItem({ label, value }: { label: string; value: string | null }) {
   const hasValue = value && value.trim() !== ""
 
   return (
@@ -54,26 +45,21 @@ function DetailItem({
   )
 }
 
-// ===============================
-// key[] → label[] を優先して結合する
-// ===============================
 const toJoined = (labels?: string[], keys?: string[]) => {
-  if (labels && labels.length > 0) return labels.join("、")
-  if (keys && keys.length > 0) return keys.join("、")
+  if (labels?.length) return labels.join("、")
+  if (keys?.length) return keys.join("、")
   return null
 }
 
 type Props = {
   store: HomeStore | null
   isOpen: boolean
-  onClose: () => void
   onCloseAll: () => void
 }
 
 export default function StoreDetailPanel({
   store,
   isOpen,
-  onClose,
   onCloseAll,
 }: Props) {
   const [images, setImages] = useState<StoreImage[]>([])
@@ -111,6 +97,26 @@ export default function StoreDetailPanel({
         },
       ]
 
+  // ===============================
+  // 特別営業時間を曜日にマッピング
+  // ===============================
+  const specialMap: Record<number, any[]> = {}
+
+  store?.special_hours?.forEach((sp) => {
+    const jsDay = new Date(sp.date).getDay() // 0(日)〜6(土)
+    const dow = jsDay === 0 ? 7 : jsDay      // → 1(月)〜7(日)
+
+    if (!specialMap[dow]) specialMap[dow] = []
+    specialMap[dow].push(sp)
+  })
+
+  // 各曜日ごとに最新の日付を優先（重複があれば最新にする）
+  Object.keys(specialMap).forEach((dow) => {
+    specialMap[Number(dow)].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    )
+  })
+
   return (
     <div
       className={`
@@ -122,19 +128,23 @@ export default function StoreDetailPanel({
     >
       {store && (
         <div className="overflow-y-auto">
+
           {/* =============================== */}
-          {/* ヘッダー + 画像 */}
+          {/* 🏠 ホーム + 店名（画像上） */}
           {/* =============================== */}
-          <div className="relative w-full overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 z-20 flex items-center gap-3 px-4 py-4 bg-gradient-to-b from-black/70 to-transparent">
-              <button onClick={onClose}>
-                <X className="w-6 h-6 text-white" />
-              </button>
-              <div className="text-white font-semibold text-lg truncate">
-                {store.name}
-              </div>
+          <div className="relative w-full">
+            <div
+              className="
+                absolute top-0 left-0 right-0 z-30
+                flex items-center gap-3
+                px-4 py-4
+                bg-gradient-to-b from-black/70 to-transparent
+              ">
+              <HomeButton onHome={onCloseAll} size={48} iconSize={24} />
+              <div className="text-white font-semibold text-lg truncate">{store.name}</div>
             </div>
 
+            {/* 画像 */}
             <div
               className="flex overflow-x-scroll snap-x snap-mandatory scrollbar-none"
               onScroll={(e) => {
@@ -154,13 +164,12 @@ export default function StoreDetailPanel({
               ))}
             </div>
 
-            {/* スライダーのドット */}
+            {/* ドット */}
             <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2 z-20">
               {mainImages.map((_, idx) => (
                 <div
                   key={idx}
-                  className={`w-2 h-2 rounded-full ${idx === current ? "bg-white" : "bg-white/40"
-                    }`}
+                  className={`w-2 h-2 rounded-full ${idx === current ? "bg-white" : "bg-white/40"}`}
                 />
               ))}
             </div>
@@ -174,18 +183,14 @@ export default function StoreDetailPanel({
               {store.prefecture} {store.area} ・ {store.type}
             </p>
 
-            <h2 className="text-2xl font-extrabold text-slate-900 mt-1">
-              {store.name}
-            </h2>
+            <h2 className="text-2xl font-extrabold text-slate-900 mt-1">{store.name}</h2>
 
             {store.name_kana && (
               <p className="text-slate-500 text-sm mt-1">{store.name_kana}</p>
             )}
 
             {store.description && (
-              <p className="mt-4 text-slate-700 whitespace-pre-line">
-                {store.description}
-              </p>
+              <p className="mt-4 text-slate-700 whitespace-pre-line">{store.description}</p>
             )}
 
             {/* SNS */}
@@ -216,214 +221,126 @@ export default function StoreDetailPanel({
                 </a>
               )}
             </div>
+          </div>
 
-            {/* =============================== */}
-            {/* アクセス */}
-            {/* =============================== */}
-            <div className="px-4 py-6">
-              <h3 className="text-xl font-bold text-slate-900 mb-3">
-                アクセス
-              </h3>
+          {/* =============================== */}
+          {/* アクセス */}
+          {/* =============================== */}
+          <div className="px-4 py-6">
+            <h3 className="text-xl font-bold text-slate-900 mb-3">アクセス</h3>
 
-              {store.access && (
-                <p className="text-slate-700 whitespace-pre-line mb-4">
-                  {store.access}
-                </p>
-              )}
+            {store.access && (
+              <p className="text-slate-700 whitespace-pre-line mb-4">{store.access}</p>
+            )}
 
-              {store.google_map_url && (
-                <a href={store.google_map_url} target="_blank">
-                  <img
-                    src={store.google_map_url}
-                    className="w-full rounded-xl mb-4"
-                  />
-                </a>
-              )}
+            {store.google_map_url && (
+              <a href={store.google_map_url} target="_blank">
+                <img src={store.google_map_url} className="w-full rounded-xl mb-4" />
+              </a>
+            )}
 
-              {store.address && (
-                <p className="text-slate-700 whitespace-pre-line">
-                  {store.address}
-                </p>
-              )}
-            </div>
+            {store.address && (
+              <p className="text-slate-700 whitespace-pre-line">{store.address}</p>
+            )}
+          </div>
 
-            {/* =============================== */}
-            {/* 営業時間 */}
-            {/* =============================== */}
-            <div className="px-4 mt-8">
-              <h2 className="text-xl font-bold text-slate-900 mb-4">
-                営業時間
-              </h2>
+          {/* =============================== */}
+          {/* 営業時間（特別営業時間を上書き） */}
+          {/* =============================== */}
+          <div className="px-4 mt-8">
+            <h2 className="text-xl font-bold text-slate-900 mb-4">営業時間</h2>
 
-              {store.open_hours?.map((h) => (
-                <div key={h.day_of_week} className="flex gap-4 text-slate-700">
-                  <div className="w-10 font-medium">
-                    {DAY_LABEL[h.day_of_week]}
-                  </div>
-                  {h.is_closed ? (
-                    <div className="text-slate-500">定休日</div>
+            {store.open_hours?.map((h) => {
+              const special = specialMap[h.day_of_week]?.[0] ?? null
+
+              const isClosed = special ? special.is_closed : h.is_closed
+              const open = special ? special.open_time : h.open_time
+              const close = special ? special.close_time : h.close_time
+              const lo = special ? special.last_order_time : h.last_order_time
+              const reason = special ? special.reason : null
+
+              return (
+                <div key={h.day_of_week} className="flex gap-4 text-slate-700 py-1">
+                  <div className="w-10 font-medium">{DAY_LABEL[h.day_of_week]}</div>
+
+                  {isClosed ? (
+                    <div className="text-slate-500">
+                      定休日
+                      {reason && <span className="text-xs text-slate-400 ml-2">（{reason}）</span>}
+                    </div>
                   ) : (
                     <div>
-                      {formatTime(h.open_time)}〜{formatTime(h.close_time)}
-                      {h.last_order_time && (
+                      {formatTime(open)}〜{formatTime(close)}
+                      {lo && (
                         <span className="text-slate-500 ml-2">
-                          (LO {formatTime(h.last_order_time)})
+                          (LO {formatTime(lo)})
                         </span>
+                      )}
+                      {reason && (
+                        <div className="text-xs text-blue-600 mt-1">
+                          ※ {reason}
+                        </div>
                       )}
                     </div>
                   )}
                 </div>
-              ))}
-            </div>
-
-            {/* =============================== */}
-            {/* 特徴一覧（label優先） */}
-            {/* =============================== */}
-            <div className="px-4 mt-10">
-              <h2 className="text-xl font-bold text-slate-900 mb-4">
-                この店舗の特徴
-              </h2>
-
-              <DetailItem label="店舗タイプ" value={store.type} />
-
-              <DetailItem
-                label="イベントの傾向"
-                value={toJoined(store.event_trend_labels, store.event_trend_keys)}
-              />
-
-              <DetailItem
-                label="ルール／マナー"
-                value={toJoined(store.rule_labels, store.rule_keys)}
-              />
-
-              <DetailItem
-                label="荷物預かり"
-                value={toJoined(store.baggage_labels, store.baggage_keys)}
-              />
-
-              <DetailItem
-                label="セキュリティ"
-                value={toJoined(store.security_labels, store.security_keys)}
-              />
-
-              <DetailItem
-                label="トイレ"
-                value={toJoined(store.toilet_labels, store.toilet_keys)}
-              />
-
-              <DetailItem label="広さ" value={store.size_label ?? store.size_key} />
-
-              <DetailItem
-                label="フロアの位置"
-                value={toJoined(store.floor_labels, store.floor_keys)}
-              />
-
-              <DetailItem
-                label="座席タイプ"
-                value={toJoined(store.seat_type_labels, store.seat_type_keys)}
-              />
-
-              <DetailItem
-                label="喫煙"
-                value={toJoined(store.smoking_labels, store.smoking_keys)}
-              />
-
-              <DetailItem
-                label="周辺環境"
-                value={toJoined(store.environment_labels, store.environment_keys)}
-              />
-
-              {/* 料金 */}
-              <DetailItem label="価格帯" value={store.price_range_label} />
-
-              <DetailItem
-                label="料金システム"
-                value={toJoined(store.pricing_system_labels, store.pricing_system_keys)}
-              />
-
-              <DetailItem
-                label="ディスカウント"
-                value={toJoined(store.discount_labels, store.discount_keys)}
-              />
-
-              <DetailItem
-                label="VIP"
-                value={toJoined(store.vip_labels, store.vip_keys)}
-              />
-
-              <DetailItem
-                label="支払い方法"
-                value={toJoined(store.payment_method_labels, store.payment_method_keys)}
-              />
-
-              {/* 音響・照明 */}
-              <DetailItem
-                label="音響"
-                value={toJoined(store.sound_labels, store.sound_keys)}
-              />
-
-              <DetailItem
-                label="照明"
-                value={toJoined(store.lighting_labels, store.lighting_keys)}
-              />
-
-              <DetailItem
-                label="演出"
-                value={toJoined(store.production_labels, store.production_keys)}
-              />
-
-              {/* 飲食 */}
-              <DetailItem
-                label="フード"
-                value={toJoined(store.food_labels, store.food_keys)}
-              />
-
-              <DetailItem
-                label="サービス"
-                value={toJoined(store.service_labels, store.service_keys)}
-              />
-
-              {/* ドリンク（カテゴリ別） */}
-              <div className="py-2">
-                <span className="font-semibold text-slate-900">ドリンク</span>
-                <div className="text-sm text-slate-800 mt-2">
-                  {Object.entries(store.drink_categories).map(([cat, obj]) => (
-                    <div key={cat} className="flex justify-between py-1">
-                      <span className="text-slate-600">{cat}</span>
-                      <span>{obj.labels.join("、")}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 客層・雰囲気 */}
-              <DetailItem
-                label="客層"
-                value={toJoined(store.customer_labels, store.customer_keys)}
-              />
-
-              <DetailItem
-                label="雰囲気"
-                value={toJoined(store.atmosphere_labels, store.atmosphere_keys)}
-              />
-
-              <DetailItem label="接客" value={store.hospitality_label} />
-            </div>
-
-            {/* =============================== */}
-            {/* 閉じる（別条件で探す） */}
-            {/* =============================== */}
-            <div className="px-6 py-10">
-              <button
-                onClick={onCloseAll}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl
-                border border-slate-300 text-slate-700 text-lg font-medium hover:bg-slate-50 transition"
-              >
-                <span className="text-xl">🔍</span>
-                別の条件で探す
-              </button>
-            </div>
+              )
+            })}
           </div>
+
+          {/* =============================== */}
+          {/* 特徴 */}
+          {/* =============================== */}
+          <div className="px-4 mt-10">
+            <h2 className="text-xl font-bold text-slate-900 mb-4">この店舗の特徴</h2>
+
+            {/* 以下は元のまま */}
+            <DetailItem label="店舗タイプ" value={store.type} />
+            <DetailItem label="イベントの傾向" value={toJoined(store.event_trend_labels, store.event_trend_keys)} />
+            <DetailItem label="ルール／マナー" value={toJoined(store.rule_labels, store.rule_keys)} />
+            <DetailItem label="荷物預かり" value={toJoined(store.baggage_labels, store.baggage_keys)} />
+            <DetailItem label="セキュリティ" value={toJoined(store.security_labels, store.security_keys)} />
+            <DetailItem label="トイレ" value={toJoined(store.toilet_labels, store.toilet_keys)} />
+            <DetailItem label="広さ" value={store.size_label ?? store.size_key} />
+            <DetailItem label="フロア" value={toJoined(store.floor_labels, store.floor_keys)} />
+            <DetailItem label="座席タイプ" value={toJoined(store.seat_type_labels, store.seat_type_keys)} />
+            <DetailItem label="喫煙" value={toJoined(store.smoking_labels, store.smoking_keys)} />
+            <DetailItem label="周辺環境" value={toJoined(store.environment_labels, store.environment_keys)} />
+            <DetailItem label="価格帯" value={store.price_range_label} />
+            <DetailItem label="料金システム" value={toJoined(store.pricing_system_labels, store.pricing_system_keys)} />
+            <DetailItem label="ディスカウント" value={toJoined(store.discount_labels, store.discount_keys)} />
+            <DetailItem label="VIP" value={toJoined(store.vip_labels, store.vip_keys)} />
+            <DetailItem label="支払い方法" value={toJoined(store.payment_method_labels, store.payment_method_keys)} />
+            <DetailItem label="音響" value={toJoined(store.sound_labels, store.sound_keys)} />
+            <DetailItem label="照明" value={toJoined(store.lighting_labels, store.lighting_keys)} />
+            <DetailItem label="演出" value={toJoined(store.production_labels, store.production_keys)} />
+            <DetailItem label="フード" value={toJoined(store.food_labels, store.food_keys)} />
+            <DetailItem label="サービス" value={toJoined(store.service_labels, store.service_keys)} />
+
+            {/* ドリンクカテゴリ別 */}
+            <div className="py-2">
+              <span className="font-semibold text-slate-900">ドリンク</span>
+              <div className="text-sm text-slate-800 mt-2">
+                {Object.entries(store.drink_categories).map(([cat, obj]) => (
+                  <div key={cat} className="flex justify-between py-1">
+                    <span className="text-slate-600">{cat}</span>
+                    <span>{obj.labels.join("、")}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <DetailItem label="客層" value={toJoined(store.customer_labels, store.customer_keys)} />
+            <DetailItem label="雰囲気" value={toJoined(store.atmosphere_labels, store.atmosphere_keys)} />
+            <DetailItem label="接客" value={store.hospitality_label} />
+          </div>
+
+          {/* =============================== */}
+          {/* 🔍 ホームへ戻る（共通ボタン） */}
+          {/* =============================== */}
+          <BackToHomeButton onClick={onCloseAll} className="px-6 py-10" />
+
+          <Footer />
         </div>
       )}
     </div>

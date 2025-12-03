@@ -44,7 +44,6 @@ export function useHomeStores() {
     ),
 
     special_hours:store_special_open_hours (
-      date,
       open_time,
       close_time,
       last_order_time,

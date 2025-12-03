@@ -2,11 +2,13 @@
 
 import type { HomeStore } from "@/types/store"
 import Image from "next/image"
+import Footer from "@/components/Footer"
+import HomeButton from "@/components/ui/HomeButton"
+import BackToHomeButton from "@/components/ui/BackToHomeButton"
 
 type Props = {
   isOpen: boolean
-  onClose: () => void
-  onCloseAll: () => void         // ← 追加！
+  onCloseAll: () => void
   stores: HomeStore[]
   selectedFilters: string[]
   onSelectStore: (store: HomeStore) => void
@@ -14,8 +16,7 @@ type Props = {
 
 export default function SearchResultPanel({
   isOpen,
-  onClose,
-  onCloseAll,          // ← 受け取る
+  onCloseAll,
   stores,
   selectedFilters,
   onSelectStore,
@@ -31,20 +32,19 @@ export default function SearchResultPanel({
       `}
     >
 
-      {/* ==================================================== */}
-      {/* 🎨 ヘッダー */}
-      {/* ==================================================== */}
-      <div className="px-4 py-4 flex items-center gap-4 border-b">
-        <button onClick={onClose} className="active:scale-95">
-          <div className="w-14 h-14 rounded-full flex justify-center items-center">
-            <div className="w-14 h-14 bg-white/10 rounded-full shadow outline outline-1 outline-white/10 backdrop-blur-sm flex justify-center items-center">
-              <div className="w-8 h-8 relative mix-blend-difference">
-                <Image src="/logo4.svg" alt="back" fill className="object-contain" />
-              </div>
-            </div>
-          </div>
-        </button>
+      {/* ============================== */}
+      {/* 🎨 ヘッダー（ホーム + 件数 + フィルター） */}
+      {/* ============================== */}
+      <div className="px-4 py-4 flex items-center gap-4 border-b mt-1">
 
+        {/* 🏠 ホームへ戻る（戻るボタンの代わり） */}
+        <HomeButton
+          onHome={onCloseAll}
+          size={56}
+          iconSize={26}
+        />
+
+        {/* 件数 */}
         <div className="flex flex-col">
           <div className="text-slate-900 font-bold text-lg tracking-widest leading-none">
             {stores.length}
@@ -52,15 +52,15 @@ export default function SearchResultPanel({
           </div>
         </div>
 
+        {/* 選択中フィルター */}
         <div className="flex-1 text-blue-800 text-xs line-clamp-2">
           {selectedFilters.join(", ")}
         </div>
       </div>
 
-
-      {/* ==================================================== */}
+      {/* ============================== */}
       {/* 🏠 店舗一覧 */}
-      {/* ==================================================== */}
+      {/* ============================== */}
       <div className="overflow-y-auto px-4 py-4 flex-1">
         <div className="grid grid-cols-2 gap-4 pb-20">
           {stores.map((s) => (
@@ -96,21 +96,15 @@ export default function SearchResultPanel({
         </div>
       </div>
 
-      {/* ==================================================== */}
-      {/* 🔍 別の条件で探す（← ホームへ戻る） */}
-      {/* ==================================================== */}
-      <div className="px-6 pb-8">
-        <button
-          onClick={onCloseAll}   // ← これが超重要
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl
-            border border-slate-300 text-slate-700 text-lg font-medium
-            hover:bg-slate-50 transition"
-        >
-          <span className="text-xl">🔍</span>
-          別の条件で探す
-        </button>
-      </div>
+      {/* ============================== */}
+      {/* 🔍 別の条件で探す（ホームへ戻る） */}
+      {/* ============================== */}
+      <BackToHomeButton
+        onClick={onCloseAll}
+        className="px-6 pb-8"
+      />
 
+      <Footer />
     </div>
   )
 }

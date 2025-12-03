@@ -439,7 +439,6 @@ export default function HomePage() {
 
       <SearchResultPanel
         isOpen={isResultOpen}
-        onClose={() => setIsResultOpen(false)}
         onCloseAll={handleCloseAll}
         stores={filteredStores}
         selectedFilters={selectedFilters}
@@ -449,7 +448,6 @@ export default function HomePage() {
       <StoreDetailPanel
         store={selectedStore}
         isOpen={isDetailOpen}
-        onClose={() => setIsDetailOpen(false)}
         onCloseAll={handleCloseAll}
       />
 

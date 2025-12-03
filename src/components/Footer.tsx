@@ -27,6 +27,9 @@ export default function Footer() {
         <Link href="/privacy" className="hover:opacity-70">
           プライバシーポリシー
         </Link>
+        <Link href="/tokusho" className="hover:opacity-70">
+          特定商取引法に基づく表記
+        </Link>
       </nav>
 
       {/* コピーライト */}
