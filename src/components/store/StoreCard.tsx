@@ -9,6 +9,12 @@ type Props = {
 }
 
 export default function StoreCard({ store, onClick }: Props) {
+  // 画像URLのフォールバック処理
+  const imageUrl =
+    store.image_url && store.image_url.trim() !== ""
+      ? store.image_url
+      : "/noshop.svg"
+
   return (
     <button
       onClick={onClick}
@@ -22,7 +28,7 @@ export default function StoreCard({ store, onClick }: Props) {
       {/* 画像 */}
       <div className="w-full h-40 p-2 flex justify-center items-center">
         <img
-          src={store.image_url ?? "/default_shop.svg"}
+          src={imageUrl}
           alt={store.name}
           className="
             w-full h-36 object-cover rounded-2xl

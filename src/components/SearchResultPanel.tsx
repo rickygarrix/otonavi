@@ -1,7 +1,7 @@
 "use client"
 
 import type { HomeStore } from "@/types/store"
-import Image from "next/image"
+import StoreCard from "@/components/store/StoreCard"
 import Footer from "@/components/Footer"
 import HomeButton from "@/components/ui/HomeButton"
 import BackToHomeButton from "@/components/ui/BackToHomeButton"
@@ -33,11 +33,15 @@ export default function SearchResultPanel({
     >
 
       {/* ============================== */}
-      {/* 🎨 ヘッダー（ホーム + 件数 + フィルター） */}
+      {/* 🎨 固定ヘッダー */}
       {/* ============================== */}
-      <div className="px-4 py-4 flex items-center gap-4 border-b mt-1">
-
-        {/* 🏠 ホームへ戻る（戻るボタンの代わり） */}
+      <div
+        className="
+          px-4 py-4 flex items-center gap-4 border-b mt-1
+          sticky top-0 bg-white z-[70]
+        "
+      >
+        {/* 🏠 ホームボタン */}
         <HomeButton
           onHome={onCloseAll}
           size={56}
@@ -52,52 +56,29 @@ export default function SearchResultPanel({
           </div>
         </div>
 
-        {/* 選択中フィルター */}
+        {/* フィルター表示 */}
         <div className="flex-1 text-blue-800 text-xs line-clamp-2">
           {selectedFilters.join(", ")}
         </div>
       </div>
 
       {/* ============================== */}
-      {/* 🏠 店舗一覧 */}
+      {/* 🏠 店舗一覧（スクロール領域） */}
       {/* ============================== */}
       <div className="overflow-y-auto px-4 py-4 flex-1">
         <div className="grid grid-cols-2 gap-4 pb-20">
           {stores.map((s) => (
-            <button
+            <StoreCard
               key={s.id}
+              store={s}
               onClick={() => onSelectStore(s)}
-              className="text-left"
-            >
-              <div className="w-full bg-white rounded-xl shadow-sm border hover:shadow-md transition">
-
-                {/* 画像 */}
-                <div className="w-full h-32 bg-slate-100 rounded-t-xl overflow-hidden">
-                  <img
-                    src={s.image_url ?? "/default_shop.svg"}
-                    alt={s.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* テキスト */}
-                <div className="p-3">
-                  <div className="font-semibold text-sm text-slate-900 line-clamp-1">
-                    {s.name}
-                  </div>
-                  <div className="text-xs text-slate-500 mt-1 line-clamp-1">
-                    {s.prefecture} {s.area} ・ {s.type}
-                  </div>
-                </div>
-
-              </div>
-            </button>
+            />
           ))}
         </div>
       </div>
 
       {/* ============================== */}
-      {/* 🔍 別の条件で探す（ホームへ戻る） */}
+      {/* 🔍 別の条件で探す */}
       {/* ============================== */}
       <BackToHomeButton
         onClick={onCloseAll}

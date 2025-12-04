@@ -29,7 +29,20 @@ export default function FixedSearchBar({
         px-4 py-3
       "
     >
-      <div className="flex gap-3 mt-2">
+      {/* 🔵 選択中フィルター（選択が 0 のときは表示しない） */}
+      {selectedFilters.length > 0 && (
+        <div
+          className="
+            text-blue-800 text-sm mb-2
+            whitespace-nowrap overflow-x-auto scrollbar-none
+          "
+        >
+          <span>{selectedFilters.join(", ")}</span>
+        </div>
+      )}
+
+      {/* ボタン部分 */}
+      <div className="flex gap-3 mt-1">
         {/* 全クリア */}
         <button
           onClick={onClear}

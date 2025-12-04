@@ -20,7 +20,7 @@ export default function HomeSlider({ stores, onSelectStore }: Props) {
   const trackRef = useRef<HTMLDivElement | null>(null)
   const isDragging = useRef(false)
 
-  const scrollSpeed = 0.35
+  const scrollSpeed = 0.6
 
   // =======================================
   // スケール・透明度のカーブ

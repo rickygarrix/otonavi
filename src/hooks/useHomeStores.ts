@@ -43,13 +43,15 @@ export function useHomeStores() {
       is_closed
     ),
 
-    special_hours:store_special_open_hours (
-      open_time,
-      close_time,
-      last_order_time,
-      is_closed,
-      reason
-    ),
+  special_hours:store_special_open_hours (
+  start_date,
+  end_date,
+  open_time,
+  close_time,
+  last_order_time,
+  is_closed,
+  reason
+),
 
     prefecture:prefecture_id ( name_ja ),
     area:area_id ( name ),

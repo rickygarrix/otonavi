@@ -21,31 +21,27 @@ type Item = {
 type BaseProps = {
   title: string
   table: string
-  columns?: 2 | 3             // ★ ここで列数指定可能
+  columns?: 2 | 3
 }
 
 type SingleProps = BaseProps & {
   selection: "single"
-  onChange: (value: string | null) => void
+  onChange: (value: string | null) => void   // ★ label を返す
 }
 
 type MultiProps = BaseProps & {
   selection: "multi"
-  onChange: (value: string[]) => void
+  onChange: (value: string[]) => void        // ★ label の配列を返す
 }
 
 type Props = SingleProps | MultiProps
 
 // -------------------------------
-// Component
-// -------------------------------
 export default function GenericSelector(props: Props) {
   const { title, table, selection, onChange, columns = 2 } = props
-  // ★ columns のデフォルトは 2 列
 
   const [items, setItems] = useState<Item[]>([])
-
-  const [selected, setSelected] = useState<string | string[] | null>(
+  const [selectedIds, setSelectedIds] = useState<string[] | string | null>(
     selection === "single" ? null : []
   )
 
@@ -76,53 +72,73 @@ export default function GenericSelector(props: Props) {
   // -------------------------------
   useEffect(() => {
     if (selection === "single") {
-      setSelected(null)
+      setSelectedIds(null)
       onChange(null)
     } else {
-      setSelected([])
+      setSelectedIds([])
       onChange([])
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [table])
 
   // -------------------------------
-  // 選択トグル
+  // id → label に変換
+  // -------------------------------
+  const convertToLabels = (ids: string[] | string | null) => {
+    if (!ids) return null
+
+    if (typeof ids === "string") {
+      return items.find((i) => i.id === ids)?.label ?? null
+    }
+
+    return ids
+      .map((id) => items.find((i) => i.id === id)?.label)
+      .filter(Boolean) as string[]
+  }
+
+  // -------------------------------
+  // 選択トグル（ID を保持）＋ label を外に返す
   // -------------------------------
   const toggle = (id: string) => {
     if (selection === "single") {
-      const next = selected === id ? null : id
-      setSelected(next)
-      onChange(next)
+      const nextId = selectedIds === id ? null : id
+      setSelectedIds(nextId)
+
+      // ★ label を返す
+      onChange(convertToLabels(nextId) as string | null)
       return
     }
 
-    const prev = Array.isArray(selected) ? selected : []
-    const next = prev.includes(id)
+    const prev = Array.isArray(selectedIds) ? selectedIds : []
+    const nextIds = prev.includes(id)
       ? prev.filter((v) => v !== id)
       : [...prev, id]
 
-    setSelected(next)
-    onChange(next)
+    setSelectedIds(nextIds)
+
+    // ★ label 配列を返す
+    onChange(convertToLabels(nextIds) as string[])
   }
 
-  // 選択判定
   const isSelected = (id: string) =>
     selection === "single"
-      ? selected === id
-      : Array.isArray(selected) && selected.includes(id)
+      ? selectedIds === id
+      : Array.isArray(selectedIds) && selectedIds.includes(id)
 
   // -------------------------------
   // description 表示
   // -------------------------------
   const selectedDescriptions = (() => {
+    const labels = convertToLabels(selectedIds)
+
     if (!items.some((i) => i.description)) return null
 
     if (selection === "single") {
-      const found = items.find((i) => i.id === selected)
+      const id = selectedIds as string | null
+      const found = items.find((i) => i.id === id)
       return found?.description ?? null
     }
 
-    const ids = Array.isArray(selected) ? selected : []
+    const ids = Array.isArray(selectedIds) ? selectedIds : []
     const descs = ids
       .map((id) => items.find((i) => i.id === id)?.description)
       .filter(Boolean)
@@ -137,7 +153,6 @@ export default function GenericSelector(props: Props) {
     <div className="w-full px-6 py-6">
       <h2 className="text-lg font-bold text-slate-900 mb-6">{title}</h2>
 
-      {/* ★ ここで 2列 / 3列 切り替え */}
       <div className={`grid gap-3 ${columns === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
         {items.map((item) => (
           <Chip

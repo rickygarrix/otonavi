@@ -15,12 +15,12 @@ type DrinkItem = {
 
 type Props = {
   title: string
-  onChange: (keys: string[]) => void
+  onChange: (labels: string[]) => void   // ★ label を返すように変更
 }
 
 export default function DrinkSelector({ title, onChange }: Props) {
   const [items, setItems] = useState<DrinkItem[]>([])
-  const [selected, setSelected] = useState<string[]>([])
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]) // ★ keyで内部管理
 
   // ----------------------------------------
   // Supabase から取得
@@ -46,6 +46,15 @@ export default function DrinkSelector({ title, onChange }: Props) {
   }, [])
 
   // ----------------------------------------
+  // key[] → label[] に変換する関数
+  // ----------------------------------------
+  const convertToLabels = (keys: string[]) => {
+    return keys
+      .map((k) => items.find((i) => i.key === k)?.label)
+      .filter(Boolean) as string[]
+  }
+
+  // ----------------------------------------
   // カテゴリごとにグループ化
   // ----------------------------------------
   const groups = useMemo(() => {
@@ -63,26 +72,28 @@ export default function DrinkSelector({ title, onChange }: Props) {
   // 選択トグル
   // ----------------------------------------
   const toggle = (key: string) => {
-    const next = selected.includes(key)
-      ? selected.filter((k) => k !== key)
-      : [...selected, key]
+    const nextKeys = selectedKeys.includes(key)
+      ? selectedKeys.filter((k) => k !== key)
+      : [...selectedKeys, key]
 
-    setSelected(next)
-    onChange(next)
+    setSelectedKeys(nextKeys)
+
+    // ★ label 配列を親へ渡す
+    onChange(convertToLabels(nextKeys))
   }
 
-  const isSelected = (key: string) => selected.includes(key)
+  const isSelected = (key: string) => selectedKeys.includes(key)
 
   // ----------------------------------------
   // description 表示
   // ----------------------------------------
   const selectedDescriptions = useMemo(() => {
-    const descs = selected
+    const descs = selectedKeys
       .map((k) => items.find((i) => i.key === k)?.description)
       .filter(Boolean)
 
     return descs.length > 0 ? descs.join(" / ") : null
-  }, [selected, items])
+  }, [selectedKeys, items])
 
   // ----------------------------------------
   // UI
@@ -91,7 +102,6 @@ export default function DrinkSelector({ title, onChange }: Props) {
     <div className="w-full px-6 py-6">
       <h2 className="text-lg font-bold text-slate-900 mb-6">{title}</h2>
 
-      {/* 全カテゴリを順に描画 */}
       {Object.entries(groups).map(([category, list]) => (
         <div key={category} className="mb-8">
           <p className="font-semibold text-slate-800 mb-3 text-base">
@@ -111,7 +121,6 @@ export default function DrinkSelector({ title, onChange }: Props) {
         </div>
       ))}
 
-      {/* description */}
       {selectedDescriptions && (
         <p className="text-xs text-gray-500 mt-4 leading-relaxed">
           {selectedDescriptions}
