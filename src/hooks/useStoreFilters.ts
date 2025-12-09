@@ -5,7 +5,7 @@ import type { HomeStore } from "@/types/store"
 
 export function useStoreFilters(
   stores: HomeStore[],
-  externalLabelMap?: Map<string, string> // ✅ 追加
+  externalLabelMap?: Map<string, string>
 ) {
   // ============================
   // フィルタ state
@@ -51,7 +51,7 @@ export function useStoreFilters(
   const [drinkKeys, setDrinkKeys] = useState<string[]>([])
 
   // ============================
-  // ✅ 内部 + 外部 labelMap を合成
+  // ✅ labelMap（UUID → 日本語）
   // ============================
   const labelMap = useMemo(() => {
     const map = new Map<string, string>()
@@ -61,7 +61,6 @@ export function useStoreFilters(
       if (s.area_id && s.area_label) map.set(s.area_id, s.area_label)
     })
 
-    // ✅ 店舗が0件の県もここで補完
     externalLabelMap?.forEach((v, k) => {
       if (!map.has(k)) map.set(k, v)
     })
@@ -70,7 +69,7 @@ export function useStoreFilters(
   }, [stores, externalLabelMap])
 
   // ============================
-  // ✅ 全クリア（← これが今 undefined 扱いされてた）
+  // ✅ 全クリア
   // ============================
   const handleClear = useCallback(() => {
     setPrefecture(null)
@@ -112,47 +111,139 @@ export function useStoreFilters(
   }, [])
 
   // ============================
-  // 絞り込みロジック
+  // ✅ 検索ロジック【完全対応】
   // ============================
   const filteredStores = useMemo(() => {
-    return stores.filter((s) => {
-      // ✅ 都道府県
+    return stores.filter((s: any) => {
       if (prefecture && s.prefecture_id !== prefecture) return false
-
-      // ✅ エリア
       if (area && s.area_id !== area) return false
+      if (storeType && s.store_type_id !== storeType) return false
 
-      // ✅ ドリンク（ここが今回の本丸）
-      if (drinkKeys.length > 0) {
-        // stores 側が drink_keys: string[] を持っている前提
-        if (!s.drink_keys) return false
+      const m2mChecks: [string[], string[]][] = [
+        [eventTrendKeys, s.event_trend_keys ?? []],
+        [ruleKeys, s.rule_keys ?? []],
+        [seatTypeKeys, s.seat_type_keys ?? []],
+        [smokingKeys, s.smoking_keys ?? []],
+        [environmentKeys, s.environment_keys ?? []],
+        [otherKeys, s.other_keys ?? []],
+        [baggageKeys, s.baggage_keys ?? []],
+        [securityKeys, s.security_keys ?? []],
+        [toiletKeys, s.toilet_keys ?? []],
+        [floorKeys, s.floor_keys ?? []],
 
-        const hasMatch = drinkKeys.some((key) =>
-          s.drink_keys.includes(key)
-        )
+        [pricingSystemKeys, s.pricing_system_keys ?? []],
+        [discountKeys, s.discount_keys ?? []],
+        [vipKeys, s.vip_keys ?? []],
+        [paymentMethodKeys, s.payment_method_keys ?? []],
 
-        if (!hasMatch) return false
+        [soundKeys, s.sound_keys ?? []],
+        [lightingKeys, s.lighting_keys ?? []],
+        [productionKeys, s.production_keys ?? []],
+
+        [foodKeys, s.food_keys ?? []],
+        [serviceKeys, s.service_keys ?? []],
+        [drinkKeys, s.drink_keys ?? []],
+
+        [customerKeys, s.customer_keys ?? []],
+        [atmosphereKeys, s.atmosphere_keys ?? []],
+      ]
+
+      for (const [selected, storeKeys] of m2mChecks) {
+        if (selected.length > 0 && !selected.some((k) => storeKeys.includes(k))) {
+          return false
+        }
       }
+
+      if (sizeKey && s.size_key !== sizeKey) return false
+      if (priceRange && s.price_range_id !== priceRange) return false
+      if (hospitalityKey && s.hospitality_key !== hospitalityKey) return false
+
+      if (achievementFilter.hasAward && !s.hasAward) return false
+      if (achievementFilter.hasMedia && !s.hasMedia) return false
 
       return true
     })
-  }, [stores, prefecture, area, drinkKeys])
+  }, [
+    stores,
+    prefecture,
+    area,
+    storeType,
+    eventTrendKeys,
+    ruleKeys,
+    seatTypeKeys,
+    smokingKeys,
+    environmentKeys,
+    otherKeys,
+    baggageKeys,
+    securityKeys,
+    toiletKeys,
+    floorKeys,
+    sizeKey,
+    priceRange,
+    pricingSystemKeys,
+    discountKeys,
+    vipKeys,
+    paymentMethodKeys,
+    soundKeys,
+    lightingKeys,
+    productionKeys,
+    foodKeys,
+    serviceKeys,
+    drinkKeys,
+    customerKeys,
+    atmosphereKeys,
+    hospitalityKey,
+    achievementFilter,
+  ])
 
   const count = filteredStores.length
 
   // ============================
-  // ✅ 表示用フィルター（UUID → 日本語）
+  // ✅ 検索バー表示用フィルター【完全対応】
   // ============================
   const selectedFilters = [
     prefecture ? labelMap.get(prefecture) ?? prefecture : null,
     area ? labelMap.get(area) ?? area : null,
+    storeType ? labelMap.get(storeType) ?? storeType : null,
 
-    // ✅ ドリンクも表示対象に追加
+    ...eventTrendKeys.map((k) => labelMap.get(k) ?? k),
+    ...ruleKeys.map((k) => labelMap.get(k) ?? k),
+
+    ...seatTypeKeys.map((k) => labelMap.get(k) ?? k),
+    ...smokingKeys.map((k) => labelMap.get(k) ?? k),
+    ...environmentKeys.map((k) => labelMap.get(k) ?? k),
+    ...otherKeys.map((k) => labelMap.get(k) ?? k),
+    ...baggageKeys.map((k) => labelMap.get(k) ?? k),
+    ...securityKeys.map((k) => labelMap.get(k) ?? k),
+    ...toiletKeys.map((k) => labelMap.get(k) ?? k),
+    ...floorKeys.map((k) => labelMap.get(k) ?? k),
+
+    sizeKey ? labelMap.get(sizeKey) ?? sizeKey : null,
+
+    priceRange ? labelMap.get(priceRange) ?? priceRange : null,
+    ...pricingSystemKeys.map((k) => labelMap.get(k) ?? k),
+    ...discountKeys.map((k) => labelMap.get(k) ?? k),
+    ...vipKeys.map((k) => labelMap.get(k) ?? k),
+    ...paymentMethodKeys.map((k) => labelMap.get(k) ?? k),
+
+    ...soundKeys.map((k) => labelMap.get(k) ?? k),
+    ...lightingKeys.map((k) => labelMap.get(k) ?? k),
+    ...productionKeys.map((k) => labelMap.get(k) ?? k),
+
+    ...foodKeys.map((k) => labelMap.get(k) ?? k),
+    ...serviceKeys.map((k) => labelMap.get(k) ?? k),
     ...drinkKeys.map((k) => labelMap.get(k) ?? k),
+
+    ...customerKeys.map((k) => labelMap.get(k) ?? k),
+    ...atmosphereKeys.map((k) => labelMap.get(k) ?? k),
+    hospitalityKey ? labelMap.get(hospitalityKey) ?? hospitalityKey : null,
+
+    achievementFilter.hasAward ? "受賞あり" : null,
+    achievementFilter.hasMedia ? "メディア掲載あり" : null,
   ].filter(Boolean) as string[]
 
   // ============================
-  // パネル制御
+  // ✅ パネル制御
   // ============================
   const [isResultOpen, setIsResultOpen] = useState(false)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
@@ -174,7 +265,7 @@ export function useStoreFilters(
   }, [])
 
   // ============================
-  // ✅ ここが Home で展開している完全一致の return
+  // ✅ return（Home 側と完全一致）
   // ============================
   return {
     prefecture, setPrefecture,
@@ -224,6 +315,6 @@ export function useStoreFilters(
     handleSearch,
     handleSelectStore,
     handleCloseAll,
-    handleClear, // ✅ これでエラー消える
+    handleClear,
   }
 }
