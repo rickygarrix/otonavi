@@ -12,7 +12,6 @@ import SearchFilter from "@/components/filters/SearchFilter"
 import SearchFilterStickyWrapper from "@/components/filters/SearchFilterStickyWrapper"
 
 import FixedSearchBar from "@/components/home/FixedSearchBar"
-import StoreDetailPanel from "@/components/StoreDetailPanel"
 import Footer from "@/components/Footer"
 
 import { useHomeStores } from "@/hooks/useHomeStores"
@@ -202,13 +201,6 @@ export default function HomePage() {
       />
 
       <Footer />
-
-      {/* ================= 店舗詳細パネル ================= */}
-      <StoreDetailPanel
-        store={selectedStore}
-        isOpen={isDetailOpen}
-        onCloseAll={handleCloseAll}
-      />
 
       <div className="h-[50px]" />
     </>

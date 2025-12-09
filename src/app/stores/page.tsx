@@ -55,11 +55,7 @@ export default function StoresPage() {
         <div className="grid grid-cols-2 gap-4 pb-24">
           {filteredStores.map((s) => (
             <div key={s.id} className="min-h-[250px] flex">
-              <StoreCard
-                store={s}
-                // ここは好きな挙動に差し替え可
-                onClick={() => router.push(`/stores/${s.id}`)}
-              />
+              <StoreCard store={s} />
             </div>
           ))}
         </div>
