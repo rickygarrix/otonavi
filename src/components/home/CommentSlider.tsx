@@ -8,52 +8,68 @@ type Comment = {
   comment: string
 }
 
+type Phase = "enter" | "stay" | "leave"
+
 export default function CommentSlider() {
   const [comments, setComments] = useState<Comment[]>([])
   const [index, setIndex] = useState(0)
-  const [anim, setAnim] = useState<"enter" | "leave">("enter")
+  const [phase, setPhase] = useState<Phase>("enter")
 
+  // コメント取得
   useEffect(() => {
     const load = async () => {
-      const res = await supabase.from("comments").select("*").order("id")
-      if (!res.data) return
-      setComments(res.data)
+      const { data } = await supabase
+        .from("comments")
+        .select("*")
+        .order("id")
+
+      if (data) setComments(data)
     }
+
     load()
   }, [])
 
-  // ループアニメーション
+  // ループ制御（上 → 中央 → 下 を保証）
   useEffect(() => {
     if (comments.length === 0) return
 
-    const timer = setInterval(() => {
-      // 下に消える
-      setAnim("leave")
+    // 上 → 中央
+    setPhase("enter")
 
-      // leave完了後に次のコメントをセット
-      setTimeout(() => {
-        setIndex((prev) => (prev + 1) % comments.length)
+    const stayTimer = setTimeout(() => {
+      setPhase("stay")
+    }, 300)
 
-        // 必ず「上から出てくる」
-        setAnim("enter")
-      }, 300)
+    const leaveTimer = setTimeout(() => {
+      setPhase("leave")
+    }, 2500)
+
+    const nextTimer = setTimeout(() => {
+      setIndex((prev) => (prev + 1) % comments.length)
     }, 3000)
 
-    return () => clearInterval(timer)
-  }, [comments])
+    return () => {
+      clearTimeout(stayTimer)
+      clearTimeout(leaveTimer)
+      clearTimeout(nextTimer)
+    }
+  }, [index, comments.length])
 
   const current = comments[index]?.comment ?? ""
 
   return (
-    <div className="relative h-[40px] flex justify-center items-center">
+    <div className="h-[40px] flex items-center justify-center overflow-hidden">
       <div
         className={`
-          absolute text-white text-sm font-medium
-          transition-all duration-300
+          bg-black/50 px-4 py-1 rounded-full
+          text-white text-sm font-medium
+          transition-all duration-300 ease-in-out
 
-          ${anim === "enter"
-            ? "opacity-100 -translate-y-3" // ← 上から出てくる
-            : "opacity-0 translate-y-3"     // ← 下へ消えていく
+          ${phase === "enter"
+            ? "opacity-0 -translate-y-4"   // ✅ 上から出現準備
+            : phase === "stay"
+              ? "opacity-100 translate-y-0"  // ✅ 中央で表示
+              : "opacity-0 translate-y-4"    // ✅ 下に消える
           }
         `}
       >
