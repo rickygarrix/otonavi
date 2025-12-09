@@ -48,27 +48,221 @@ export default function HomeFilterSections(props: Props) {
 
   return (
     <>
-      <AreaSelector onChange={(prefId, areaId) => {
-        p.setPrefecture(prefId)
-        p.setArea(areaId)
-      }} />
+      {/* ================= 店舗情報 ================= */}
+      <AreaSelector
+        onChange={(prefId, areaId) => {
+          p.setPrefecture(prefId)
+          p.setArea(areaId)
+        }}
+      />
 
-      <GenericSelector title="店舗タイプ" table="store_types" selection="single" onChange={p.setStoreType} />
-      <GenericSelector title="イベントの傾向" table="event_trend_definitions" selection="multi" onChange={p.setEventTrendKeys} columns={3} />
-      <GenericSelector title="ルール / マナー" table="rule_definitions" selection="multi" onChange={p.setRuleKeys} columns={3} />
+      <GenericSelector
+        title="店舗タイプ"
+        table="store_types"
+        selection="single"
+        onChange={p.setStoreType}
+      />
+
+      <GenericSelector
+        title="イベントの傾向"
+        table="event_trend_definitions"
+        selection="multi"
+        onChange={p.setEventTrendKeys}
+        columns={3}
+      />
+
+      <GenericSelector
+        title="ルール / マナー"
+        table="rule_definitions"
+        selection="multi"
+        onChange={p.setRuleKeys}
+        columns={3}
+      />
+
       <AchievementSelector onChange={p.setAchievementFilter} />
 
-      <GenericSelector title="荷物預かり" table="baggage_definitions" selection="multi" onChange={p.setBaggageKeys} columns={3} />
-      <GenericSelector title="セキュリティ" table="security_definitions" selection="multi" onChange={p.setSecurityKeys} columns={3} />
-      <GenericSelector title="トイレ" table="toilet_definitions" selection="multi" onChange={p.setToiletKeys} columns={3} />
-      <GenericSelector title="広さ" table="size_definitions" selection="single" onChange={p.setSizeKey} />
+      {/* ================= 設備 ================= */}
+      <GenericSelector
+        title="荷物預かり"
+        table="baggage_definitions"
+        selection="multi"
+        onChange={p.setBaggageKeys}
+        columns={3}
+      />
 
-      <DrinkSelector title="ドリンク" onChange={p.setDrinkKeys} />
-      <GenericSelector title="フード" table="food_definitions" selection="multi" onChange={p.setFoodKeys} columns={3} />
+      <GenericSelector
+        title="セキュリティ"
+        table="security_definitions"
+        selection="multi"
+        onChange={p.setSecurityKeys}
+        columns={3}
+      />
 
-      <GenericSelector title="客層" table="customer_definitions" selection="multi" onChange={p.setCustomerKeys} columns={3} />
-      <GenericSelector title="雰囲気" table="atmosphere_definitions" selection="multi" onChange={p.setAtmosphereKeys} columns={3} />
-      <GenericSelector title="接客" table="hospitality_definitions" selection="single" onChange={p.setHospitalityKey} />
+      <GenericSelector
+        title="トイレ"
+        table="toilet_definitions"
+        selection="multi"
+        onChange={p.setToiletKeys}
+        columns={3}
+      />
+
+      <GenericSelector
+        title="広さ"
+        table="size_definitions"
+        selection="single"
+        onChange={p.setSizeKey}
+      />
+
+      <GenericSelector
+        title="フロアの位置"
+        table="floor_definitions"
+        selection="multi"
+        onChange={p.setFloorKeys}
+        columns={3}
+      />
+
+      <GenericSelector
+        title="座席タイプ"
+        table="seat_type_definitions"
+        selection="multi"
+        onChange={p.setSeatTypeKeys}
+        columns={3}
+      />
+
+      <GenericSelector
+        title="喫煙"
+        table="smoking_definitions"
+        selection="multi"
+        onChange={p.setSmokingKeys}
+        columns={3}
+      />
+
+      <GenericSelector
+        title="周辺環境"
+        table="environment_definitions"
+        selection="multi"
+        onChange={p.setEnvironmentKeys}
+        columns={3}
+      />
+
+      <GenericSelector
+        title="その他"
+        table="other_definitions"
+        selection="multi"
+        onChange={p.setOtherKeys}
+        columns={3}
+      />
+
+      {/* ================= 料金 ================= */}
+      <GenericSelector
+        title="価格帯"
+        table="price_range_definitions"
+        selection="single"
+        onChange={p.setPriceRange}
+      />
+
+      <GenericSelector
+        title="料金システム"
+        table="pricing_system_definitions"
+        selection="multi"
+        onChange={p.setPricingSystemKeys}
+        columns={3}
+      />
+
+      <GenericSelector
+        title="ディスカウント"
+        table="discount_definitions"
+        selection="multi"
+        onChange={p.setDiscountKeys}
+        columns={3}
+      />
+
+      <GenericSelector
+        title="VIP"
+        table="vip_definitions"
+        selection="multi"
+        onChange={p.setVipKeys}
+        columns={3}
+      />
+
+      <GenericSelector
+        title="支払い方法"
+        table="payment_method_definitions"
+        selection="multi"
+        onChange={p.setPaymentMethodKeys}
+        columns={3}
+      />
+
+      {/* ================= 音響・照明・演出 ================= */}
+      <GenericSelector
+        title="音響"
+        table="sound_definitions"
+        selection="multi"
+        onChange={p.setSoundKeys}
+        columns={3}
+      />
+
+      <GenericSelector
+        title="照明"
+        table="lighting_definitions"
+        selection="multi"
+        onChange={p.setLightingKeys}
+        columns={3}
+      />
+
+      <GenericSelector
+        title="演出"
+        table="production_definitions"
+        selection="multi"
+        onChange={p.setProductionKeys}
+        columns={3}
+      />
+
+      {/* ================= 飲食・サービス ================= */}
+      <DrinkSelector
+        title="ドリンク"
+        onChange={p.setDrinkKeys}
+      />
+
+      <GenericSelector
+        title="フード"
+        table="food_definitions"
+        selection="multi"
+        onChange={p.setFoodKeys}
+        columns={3}
+      />
+
+      <GenericSelector
+        title="サービス"
+        table="service_definitions"
+        selection="multi"
+        onChange={p.setServiceKeys}
+        columns={3}
+      />
+
+      {/* ================= 客層・雰囲気 ================= */}
+      <GenericSelector
+        title="客層"
+        table="customer_definitions"
+        selection="multi"
+        onChange={p.setCustomerKeys}
+        columns={3}
+      />
+
+      <GenericSelector
+        title="雰囲気"
+        table="atmosphere_definitions"
+        selection="multi"
+        onChange={p.setAtmosphereKeys}
+        columns={3}
+      />
+
+      <GenericSelector
+        title="接客"
+        table="hospitality_definitions"
+        selection="single"
+        onChange={p.setHospitalityKey}
+      />
     </>
   )
 }
