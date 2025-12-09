@@ -130,7 +130,14 @@ export default function HomePage() {
         店舗情報
       </h2>
 
-      <AreaSelector onChange={(pref, a) => { setPrefecture(pref); setArea(a) }} />
+      {/* ✅ prefecture / area は string | null（uuid）で統一 */}
+      <AreaSelector
+        onChange={(prefId, areaId) => {
+          setPrefecture(prefId)
+          setArea(areaId)
+        }}
+      />
+
       <GenericSelector title="店舗タイプ" table="store_types" selection="single" onChange={setStoreType} />
       <GenericSelector title="イベントの傾向" table="event_trend_definitions" selection="multi" onChange={setEventTrendKeys} columns={3} />
       <GenericSelector title="ルール / マナー" table="rule_definitions" selection="multi" onChange={setRuleKeys} columns={3} />

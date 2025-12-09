@@ -1,3 +1,4 @@
+// hooks/useStoreFilters.ts
 "use client"
 
 import { useState, useMemo, useCallback } from "react"
@@ -5,10 +6,10 @@ import type { HomeStore } from "@/types/store"
 
 export function useStoreFilters(stores: HomeStore[]) {
   // ============================
-  // フィルタ state
+  // フィルタ state（全部 id ベース）
   // ============================
-  const [prefecture, setPrefecture] = useState<string | null>(null)
-  const [area, setArea] = useState<string | null>(null)
+  const [prefecture, setPrefecture] = useState<string | null>(null)  // prefecture_id
+  const [area, setArea] = useState<string | null>(null)              // area_id
   const [storeType, setStoreType] = useState<string | null>(null)
 
   const [eventTrendKeys, setEventTrendKeys] = useState<string[]>([])
@@ -29,7 +30,7 @@ export function useStoreFilters(stores: HomeStore[]) {
   const [floorKeys, setFloorKeys] = useState<string[]>([])
   const [sizeKey, setSizeKey] = useState<string | null>(null)
 
-  const [priceRange, setPriceRange] = useState<string | null>(null)
+  const [priceRange, setPriceRange] = useState<string | null>(null) // price_range_id
   const [pricingSystemKeys, setPricingSystemKeys] = useState<string[]>([])
   const [discountKeys, setDiscountKeys] = useState<string[]>([])
   const [vipKeys, setVipKeys] = useState<string[]>([])
@@ -94,8 +95,9 @@ export function useStoreFilters(stores: HomeStore[]) {
   // ============================
   const filteredStores = useMemo(() => {
     return stores.filter((s) => {
-      if (prefecture && s.prefecture !== prefecture) return false
-      if (area && s.area !== area) return false
+      // ★ ここで stores の id と比較する
+      if (prefecture && s.prefecture_id !== prefecture) return false
+      if (area && s.area_id !== area) return false
       if (storeType && s.store_type_id !== storeType) return false
 
       if (achievementFilter.hasAward && !s.hasAward) return false
@@ -173,6 +175,7 @@ export function useStoreFilters(stores: HomeStore[]) {
 
   const count = filteredStores.length
 
+  // いまは selectedFilters に id が入る状態のままで OK（後で label 化するときに直す）
   const selectedFilters = [
     prefecture,
     area,
@@ -228,54 +231,77 @@ export function useStoreFilters(stores: HomeStore[]) {
     setSelectedStore(null)
   }, [])
 
-  // ============================
-  // 外部へ公開
-  // ============================
   return {
-    // フィルター state
-    prefecture, setPrefecture,
-    area, setArea,
-    storeType, setStoreType,
+    prefecture,
+    setPrefecture,
+    area,
+    setArea,
+    storeType,
+    setStoreType,
 
-    eventTrendKeys, setEventTrendKeys,
-    ruleKeys, setRuleKeys,
+    eventTrendKeys,
+    setEventTrendKeys,
+    ruleKeys,
+    setRuleKeys,
 
-    achievementFilter, setAchievementFilter,
+    achievementFilter,
+    setAchievementFilter,
 
-    seatTypeKeys, setSeatTypeKeys,
-    smokingKeys, setSmokingKeys,
-    environmentKeys, setEnvironmentKeys,
-    otherKeys, setOtherKeys,
-    baggageKeys, setBaggageKeys,
-    securityKeys, setSecurityKeys,
-    toiletKeys, setToiletKeys,
-    floorKeys, setFloorKeys,
-    sizeKey, setSizeKey,
+    seatTypeKeys,
+    setSeatTypeKeys,
+    smokingKeys,
+    setSmokingKeys,
+    environmentKeys,
+    setEnvironmentKeys,
+    otherKeys,
+    setOtherKeys,
+    baggageKeys,
+    setBaggageKeys,
+    securityKeys,
+    setSecurityKeys,
+    toiletKeys,
+    setToiletKeys,
+    floorKeys,
+    setFloorKeys,
+    sizeKey,
+    setSizeKey,
 
-    priceRange, setPriceRange,
-    pricingSystemKeys, setPricingSystemKeys,
-    discountKeys, setDiscountKeys,
-    vipKeys, setVipKeys,
-    paymentMethodKeys, setPaymentMethodKeys,
+    priceRange,
+    setPriceRange,
+    pricingSystemKeys,
+    setPricingSystemKeys,
+    discountKeys,
+    setDiscountKeys,
+    vipKeys,
+    setVipKeys,
+    paymentMethodKeys,
+    setPaymentMethodKeys,
 
-    soundKeys, setSoundKeys,
-    lightingKeys, setLightingKeys,
-    productionKeys, setProductionKeys,
+    soundKeys,
+    setSoundKeys,
+    lightingKeys,
+    setLightingKeys,
+    productionKeys,
+    setProductionKeys,
 
-    customerKeys, setCustomerKeys,
-    atmosphereKeys, setAtmosphereKeys,
-    hospitalityKey, setHospitalityKey,
+    customerKeys,
+    setCustomerKeys,
+    atmosphereKeys,
+    setAtmosphereKeys,
+    hospitalityKey,
+    setHospitalityKey,
 
-    foodKeys, setFoodKeys,
-    serviceKeys, setServiceKeys,
-    drinkKeys, setDrinkKeys,
+    foodKeys,
+    setFoodKeys,
+    serviceKeys,
+    setServiceKeys,
+    drinkKeys,
+    setDrinkKeys,
 
-    // 結果
     filteredStores,
     selectedFilters,
     count,
 
-    // パネル制御
     isResultOpen,
     isDetailOpen,
     selectedStore,
@@ -283,7 +309,6 @@ export function useStoreFilters(stores: HomeStore[]) {
     handleSelectStore,
     handleCloseAll,
 
-    // その他
     handleClear,
   }
 }

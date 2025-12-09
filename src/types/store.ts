@@ -3,15 +3,30 @@ export type HomeStore = {
   name: string
   name_kana: string | null
 
-  prefecture: string | null
-  area: string | null
+  // ============================
+  // ✅ エリア系（idで検索・labelで表示）
+  // ============================
+  prefecture_id: string | null
+  prefecture_label: string | null
 
+  area_id: string | null
+  area_label: string | null
+
+  // ============================
+  // ✅ 店舗タイプ
+  // ============================
   store_type_id: string | null
-  type: string | null
+  type_label: string | null
 
+  // ============================
+  // ✅ 価格帯
+  // ============================
   price_range_id: string | null
   price_range_label: string | null
 
+  // ============================
+  // ✅ 基本情報
+  // ============================
   image_url: string
   description: string | null
 
@@ -33,7 +48,9 @@ export type HomeStore = {
 
   updated_at: string
 
-  /* --- M2M: keys + labels --- */
+  // ============================
+  // ✅ M2M（keys = 検索用 / labels = 表示用）
+  // ============================
   event_trend_keys: string[]
   event_trend_labels: string[]
 
@@ -97,16 +114,25 @@ export type HomeStore = {
   service_keys: string[]
   service_labels: string[]
 
-  /* --- drink --- */
+  // ============================
+  // ✅ ドリンク（カテゴリ対応）
+  // ============================
   drink_keys: string[]
   drink_labels: string[]
-  drink_categories: Record<string, { keys: string[]; labels: string[] }>
+  drink_categories: Record<
+    string,
+    {
+      keys: string[]
+      labels: string[]
+    }
+  >
 
-  /* --- hospitality (単一) --- */
+  // ============================
+  // ✅ 単一系
+  // ============================
   hospitality_key: string | null
   hospitality_label: string | null
 
-  /* --- size（単一） --- */
   size_key: string | null
   size_label: string | null
 }

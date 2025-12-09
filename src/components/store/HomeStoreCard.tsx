@@ -8,13 +8,13 @@ export default function HomeStoreCard({ store }: { store: HomeStore }) {
       ? store.image_url
       : '/noshop.svg'
 
+  // ✅ 「東京都 + エリア」表記 or 都道府県のみ
   const locationLabel =
-    store.prefecture === '東京都'
-      ? `東京 ${store.area}`
-      : store.prefecture
+    store.prefecture_label === '東京都' && store.area_label
+      ? `東京 ${store.area_label}`
+      : store.prefecture_label ?? ''
 
   return (
-    // ✅ 固定 w-[260px] を完全撤去
     <div className="w-full text-center flex flex-col items-center">
       {/* ✅ 正方形カード */}
       <div className="w-full aspect-square overflow-hidden rounded-3xl">
@@ -25,14 +25,14 @@ export default function HomeStoreCard({ store }: { store: HomeStore }) {
         />
       </div>
 
-      {/* 店舗情報 */}
+      {/* ✅ 店舗情報 */}
       <div className="mt-2 text-white w-full">
         <p className="font-bold text-xs line-clamp-1">
           {store.name}
         </p>
 
         <p className="text-[10px] opacity-80 mt-0.5 line-clamp-1">
-          {locationLabel} ・ {store.type}
+          {locationLabel} ・ {store.type_label}
         </p>
       </div>
     </div>
