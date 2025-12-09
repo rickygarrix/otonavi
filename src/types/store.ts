@@ -31,6 +31,8 @@ export type HomeStore = {
   hasAward: boolean
   hasMedia: boolean
 
+  updated_at: string
+
   /* --- M2M: keys + labels --- */
   event_trend_keys: string[]
   event_trend_labels: string[]
