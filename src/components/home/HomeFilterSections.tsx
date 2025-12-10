@@ -46,10 +46,14 @@ type Props = {
   areaRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>
   drinkCategoryRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>
   achievementRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>
+
+  genericSectionRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>
 }
 
-export default function HomeFilterSections(props: Props) {
-  const p = props
+export default function HomeFilterSections(p: Props) {
+  const register = (key: string) => (el: HTMLDivElement | null) => {
+    p.genericSectionRefs.current[key] = el
+  }
 
   return (
     <>
@@ -61,29 +65,37 @@ export default function HomeFilterSections(props: Props) {
         regionRefs={p.regionRefs}
         areaRefs={p.areaRefs}
       />
+
+      {/* ================= 店舗タイプ ================= */}
       <GenericSelector
         title="店舗タイプ"
         table="store_types"
         selection="single"
         onChange={p.setStoreType}
+        sectionRef={register("店舗タイプ")}
       />
 
+      {/* ================= イベントの傾向 ================= */}
       <GenericSelector
         title="イベントの傾向"
         table="event_trend_definitions"
         selection="multi"
         onChange={p.setEventTrendKeys}
         columns={3}
+        sectionRef={register("イベントの傾向")}
       />
 
+      {/* ================= ルール ================= */}
       <GenericSelector
         title="ルール / マナー"
         table="rule_definitions"
         selection="multi"
         onChange={p.setRuleKeys}
         columns={3}
+        sectionRef={register("ルール / マナー")}
       />
 
+      {/* ================= 実績 ================= */}
       <AchievementSelector
         onChange={p.setAchievementFilter}
         achievementRefs={p.achievementRefs}
@@ -96,6 +108,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setBaggageKeys}
         columns={3}
+        sectionRef={register("荷物預かり")}
       />
 
       <GenericSelector
@@ -104,6 +117,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setSecurityKeys}
         columns={3}
+        sectionRef={register("セキュリティ")}
       />
 
       <GenericSelector
@@ -112,6 +126,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setToiletKeys}
         columns={3}
+        sectionRef={register("トイレ")}
       />
 
       <GenericSelector
@@ -119,6 +134,7 @@ export default function HomeFilterSections(props: Props) {
         table="size_definitions"
         selection="single"
         onChange={p.setSizeKey}
+        sectionRef={register("広さ")}
       />
 
       <GenericSelector
@@ -127,6 +143,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setFloorKeys}
         columns={3}
+        sectionRef={register("フロアの位置")}
       />
 
       <GenericSelector
@@ -135,6 +152,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setSeatTypeKeys}
         columns={3}
+        sectionRef={register("座席タイプ")}
       />
 
       <GenericSelector
@@ -143,6 +161,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setSmokingKeys}
         columns={3}
+        sectionRef={register("喫煙")}
       />
 
       <GenericSelector
@@ -151,6 +170,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setEnvironmentKeys}
         columns={3}
+        sectionRef={register("周辺環境")}
       />
 
       <GenericSelector
@@ -159,6 +179,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setOtherKeys}
         columns={3}
+        sectionRef={register("その他")}
       />
 
       {/* ================= 料金 ================= */}
@@ -167,6 +188,7 @@ export default function HomeFilterSections(props: Props) {
         table="price_range_definitions"
         selection="single"
         onChange={p.setPriceRange}
+        sectionRef={register("価格帯")}
       />
 
       <GenericSelector
@@ -175,6 +197,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setPricingSystemKeys}
         columns={3}
+        sectionRef={register("料金システム")}
       />
 
       <GenericSelector
@@ -183,6 +206,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setDiscountKeys}
         columns={3}
+        sectionRef={register("ディスカウント")}
       />
 
       <GenericSelector
@@ -191,6 +215,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setVipKeys}
         columns={3}
+        sectionRef={register("VIP")}
       />
 
       <GenericSelector
@@ -199,6 +224,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setPaymentMethodKeys}
         columns={3}
+        sectionRef={register("支払い方法")}
       />
 
       {/* ================= 音響・照明・演出 ================= */}
@@ -208,6 +234,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setSoundKeys}
         columns={3}
+        sectionRef={register("音響")}
       />
 
       <GenericSelector
@@ -216,6 +243,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setLightingKeys}
         columns={3}
+        sectionRef={register("照明")}
       />
 
       <GenericSelector
@@ -224,6 +252,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setProductionKeys}
         columns={3}
+        sectionRef={register("演出")}
       />
 
       {/* ================= 飲食・サービス ================= */}
@@ -239,6 +268,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setFoodKeys}
         columns={3}
+        sectionRef={register("フード")}
       />
 
       <GenericSelector
@@ -247,6 +277,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setServiceKeys}
         columns={3}
+        sectionRef={register("サービス")}
       />
 
       {/* ================= 客層・雰囲気 ================= */}
@@ -256,6 +287,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setCustomerKeys}
         columns={3}
+        sectionRef={register("客層")}
       />
 
       <GenericSelector
@@ -264,6 +296,7 @@ export default function HomeFilterSections(props: Props) {
         selection="multi"
         onChange={p.setAtmosphereKeys}
         columns={3}
+        sectionRef={register("雰囲気")}
       />
 
       <GenericSelector
@@ -271,6 +304,7 @@ export default function HomeFilterSections(props: Props) {
         table="hospitality_definitions"
         selection="single"
         onChange={p.setHospitalityKey}
+        sectionRef={register("接客")}
       />
     </>
   )

@@ -20,7 +20,7 @@ import { useHomeMasters } from "@/hooks/useHomeMasters"
 
 import HomeFilterSections from "@/components/home/HomeFilterSections"
 
-// ✅ 地域キー
+// 地域キー
 export type RegionKey =
   | "北海道・東北"
   | "関東"
@@ -32,7 +32,15 @@ export type RegionKey =
 export default function HomePage() {
   const router = useRouter()
   const { stores, loading } = useHomeStores()
-  const { externalLabelMap, prefectureRegionMap, areaMap, drinkCategoryMap } = useHomeMasters()
+
+  // ★ ここが重要：labelToSectionMap を受け取る
+  const {
+    externalLabelMap,
+    prefectureRegionMap,
+    areaMap,
+    drinkCategoryMap,
+    labelToSectionMap,
+  } = useHomeMasters()
 
   const filter = useStoreFilters(stores, externalLabelMap)
 
@@ -80,7 +88,7 @@ export default function HomePage() {
     handleClear,
   } = filter
 
-  // ✅ 地域 ref
+  // 地域 ref
   const regionRefs: Record<RegionKey, React.RefObject<HTMLDivElement | null>> = {
     "北海道・東北": useRef(null),
     "関東": useRef(null),
@@ -90,25 +98,34 @@ export default function HomePage() {
     "九州・沖縄": useRef(null),
   }
 
-  // ✅ 東京23区・23区以外用 ref
+  // 東京エリア ref
   const areaRefs = useRef<Record<string, HTMLDivElement | null>>({})
+
+  // ドリンクカテゴリ ref
   const drinkCategoryRefs = useRef<Record<string, HTMLDivElement | null>>({})
+
+  // 実績 ref
   const achievementRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
-  // ✅ フィルターチップ → 地域 or 東京エリアへスクロール
+  // Generic セクション ref
+  const genericSectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
+
+  // ================================================================
+  //    ❤️  フィルターチップ → どのセクションにスクロールさせるか
+  // ================================================================
   const handleScrollByFilter = (label: string) => {
-    // ✅ 東京エリア（23区・23区以外）
+    // 1️⃣ 東京エリア（市区町村）
     const area = areaMap.get(label)
     if (area) {
-      const key = area.is_23ward ? "東京23区" : "東京23区以外"
-      const target = areaRefs.current[key]
+      const areaKey = area.is_23ward ? "東京23区" : "東京23区以外"
+      const target = areaRefs.current[areaKey]
       if (target) {
         target.scrollIntoView({ behavior: "smooth", block: "start" })
         return
       }
     }
 
-    // ✅ ✅ ドリンクカテゴリスクロール（NEW）
+    // 2️⃣ ドリンクカテゴリ（例：ビール → 「アルコール」セクション）
     const category = drinkCategoryMap.get(label)
     if (category) {
       const target = drinkCategoryRefs.current[category]
@@ -118,22 +135,36 @@ export default function HomePage() {
       }
     }
 
+    // 3️⃣ 実績
     const achievementTarget = achievementRefs.current[label]
     if (achievementTarget) {
       achievementTarget.scrollIntoView({ behavior: "smooth", block: "start" })
       return
     }
 
-    // ✅ 都道府県 → 地方
-    const region = prefectureRegionMap.get(label) as RegionKey | undefined
-    if (!region) return
+    // 4️⃣ Generic（方法A：label → section名 → ref）
+    const sectionName = labelToSectionMap.get(label)
 
-    regionRefs[region].current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    })
+    if (sectionName) {
+      const sectionRef = genericSectionRefs.current[sectionName]
+      if (sectionRef) {
+        sectionRef.scrollIntoView({ behavior: "smooth", block: "start" })
+        return
+      }
+    }
+
+    // 5️⃣ 都道府県 → 地方
+    const region = prefectureRegionMap.get(label) as RegionKey | undefined
+    if (region) {
+      regionRefs[region].current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+      return
+    }
   }
 
+  // 検索結果ページへ遷移
   const handleGoToStores = () => {
     const params = new URLSearchParams()
     selectedFilters.forEach((f) => params.append("filters", f))
@@ -152,10 +183,7 @@ export default function HomePage() {
 
         {!loading && (
           <div className="mt-[40px]">
-            <HomeLatestStores
-              stores={stores}
-              onSelectStore={handleSelectStore}
-            />
+            <HomeLatestStores stores={stores} onSelectStore={handleSelectStore} />
           </div>
         )}
 
@@ -166,7 +194,7 @@ export default function HomePage() {
         <div className="h-[160px]" />
       </div>
 
-      {/* Sticky Filter Tabs */}
+      {/* Sticky Tabs */}
       <SearchFilterStickyWrapper>
         <SearchFilter
           onScrollStore={() =>
@@ -190,12 +218,13 @@ export default function HomePage() {
         />
       </SearchFilterStickyWrapper>
 
-      {/* ✅ regionRefs & areaRefs を渡す */}
+      {/* フィルターセクション */}
       <HomeFilterSections
         regionRefs={regionRefs}
         areaRefs={areaRefs}
-        drinkCategoryRefs={drinkCategoryRefs}   // ✅ 追加
-        achievementRefs={achievementRefs}  // ✅ ← これを追加するだけ！！
+        drinkCategoryRefs={drinkCategoryRefs}
+        achievementRefs={achievementRefs}
+        genericSectionRefs={genericSectionRefs}
         setPrefecture={setPrefecture}
         setArea={setArea}
         setStoreType={setStoreType}

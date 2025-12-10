@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase"
 import Chip from "@/components/ui/Chip"
 
 // -------------------------------
-// マスタ型
+// 型
 // -------------------------------
 type Item = {
   id: string
@@ -15,30 +15,39 @@ type Item = {
   is_active: boolean
 }
 
-// -------------------------------
-// Props
-// -------------------------------
 type BaseProps = {
   title: string
   table: string
   columns?: 2 | 3
+
+  // ここを変更！
+  sectionRef?: React.RefObject<HTMLDivElement | null>
+  | React.RefCallback<HTMLDivElement>
+  | null
 }
 
 type SingleProps = BaseProps & {
   selection: "single"
-  onChange: (value: string | null) => void   // ✅ id を返す
+  onChange: (value: string | null) => void
 }
 
 type MultiProps = BaseProps & {
   selection: "multi"
-  onChange: (value: string[]) => void        // ✅ id の配列を返す
+  onChange: (value: string[]) => void
 }
 
 type Props = SingleProps | MultiProps
 
 // -------------------------------
 export default function GenericSelector(props: Props) {
-  const { title, table, selection, onChange, columns = 2 } = props
+  const {
+    title,
+    table,
+    selection,
+    onChange,
+    columns = 2,
+    sectionRef,       // ✅ 追加
+  } = props
 
   const [items, setItems] = useState<Item[]>([])
   const [selectedIds, setSelectedIds] = useState<string[] | string | null>(
@@ -81,7 +90,7 @@ export default function GenericSelector(props: Props) {
   }, [table])
 
   // -------------------------------
-  // ✅ 選択トグル（id 管理・再タップ解除）
+  // トグル処理
   // -------------------------------
   const toggle = (id: string) => {
     if (selection === "single") {
@@ -106,7 +115,7 @@ export default function GenericSelector(props: Props) {
       : Array.isArray(selectedIds) && selectedIds.includes(id)
 
   // -------------------------------
-  // description 表示（label用）
+  // description（選択中の補足説明）
   // -------------------------------
   const selectedDescriptions = (() => {
     if (!items.some((i) => i.description)) return null
@@ -126,19 +135,28 @@ export default function GenericSelector(props: Props) {
   })()
 
   // -------------------------------
-  // ✅ UI（表示は label のみ）
+  // UI
   // -------------------------------
   return (
     <div className="w-full px-6 py-6">
-      <h2 className="text-lg font-bold text-slate-900 mb-6">{title}</h2>
+
+      {/* 🎯 スクロールアンカー */}
+      <div
+        ref={sectionRef ?? null}
+        className="scroll-mt-[90px]"
+      />
+
+      <h2 className="text-lg font-bold text-slate-900 mb-6">
+        {title}
+      </h2>
 
       <div className={`grid gap-3 ${columns === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
         {items.map((item) => (
           <Chip
             key={item.id}
-            label={item.label}                // ✅ 表示は label
-            selected={isSelected(item.id)}   // ✅ 判定は id
-            onClick={() => toggle(item.id)}  // ✅ トグルは id
+            label={item.label}
+            selected={isSelected(item.id)}
+            onClick={() => toggle(item.id)}
           />
         ))}
       </div>
