@@ -93,6 +93,7 @@ export default function HomePage() {
   // ✅ 東京23区・23区以外用 ref
   const areaRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const drinkCategoryRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const achievementRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   // ✅ フィルターチップ → 地域 or 東京エリアへスクロール
   const handleScrollByFilter = (label: string) => {
@@ -115,6 +116,12 @@ export default function HomePage() {
         target.scrollIntoView({ behavior: "smooth", block: "start" })
         return
       }
+    }
+
+    const achievementTarget = achievementRefs.current[label]
+    if (achievementTarget) {
+      achievementTarget.scrollIntoView({ behavior: "smooth", block: "start" })
+      return
     }
 
     // ✅ 都道府県 → 地方
@@ -188,6 +195,7 @@ export default function HomePage() {
         regionRefs={regionRefs}
         areaRefs={areaRefs}
         drinkCategoryRefs={drinkCategoryRefs}   // ✅ 追加
+        achievementRefs={achievementRefs}  // ✅ ← これを追加するだけ！！
         setPrefecture={setPrefecture}
         setArea={setArea}
         setStoreType={setStoreType}

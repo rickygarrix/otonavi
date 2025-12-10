@@ -45,6 +45,7 @@ type Props = {
   regionRefs: Record<RegionKey, React.RefObject<HTMLDivElement | null>>
   areaRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>
   drinkCategoryRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>
+  achievementRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>
 }
 
 export default function HomeFilterSections(props: Props) {
@@ -83,7 +84,10 @@ export default function HomeFilterSections(props: Props) {
         columns={3}
       />
 
-      <AchievementSelector onChange={p.setAchievementFilter} />
+      <AchievementSelector
+        onChange={p.setAchievementFilter}
+        achievementRefs={p.achievementRefs}
+      />
 
       {/* ================= 設備 ================= */}
       <GenericSelector
