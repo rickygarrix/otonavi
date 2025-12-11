@@ -5,23 +5,34 @@ import type { HomeStore } from "@/types/store"
 
 type Props = {
   store: HomeStore
+  query?: string // ← 追加（検索条件を受け取る）
 }
 
-export default function StoreCard({ store }: Props) {
+export default function StoreCard({ store, query }: Props) {
   const router = useRouter()
 
-  // ✅ カードクリックで店舗詳細ページへ遷移
+  // =========================
+  // 店舗詳細へ遷移（検索条件維持）
+  // =========================
   const handleClick = () => {
-    router.push(`/stores/${store.id}`)
+    if (query && query.trim() !== "") {
+      router.push(`/stores/${store.id}?${query}`)
+    } else {
+      router.push(`/stores/${store.id}`)
+    }
   }
 
-  // ✅ 画像の安全取得
+  // =========================
+  // 画像の安全取得
+  // =========================
   const imageUrl =
     store.image_url && store.image_url.trim() !== ""
       ? store.image_url
       : "/defaultshop.svg"
 
-  // ✅ 表示用ロケーション（東京だけ特別表記）
+  // =========================
+  // ロケーション表示
+  // =========================
   const locationLabel =
     store.prefecture_label === "東京都" && store.area_label
       ? `東京 ${store.area_label}`

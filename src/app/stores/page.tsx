@@ -15,9 +15,10 @@ export default function StoresPage() {
   const searchParams = useSearchParams()
   const { stores } = useHomeStores()
 
-  // Home から渡ってきた表示用ラベル
+  // クエリを文字列化して StoreCard に渡す
+  const params = searchParams.toString()
+
   const selectedFilters = searchParams.getAll("filters")
-  // Home から渡ってきた「絞り込まれた store の id」
   const idParams = searchParams.getAll("ids")
 
   const filteredStores: HomeStore[] =
@@ -27,13 +28,9 @@ export default function StoresPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* ================= 固定ヘッダー ================= */}
-      <div
-        className="
-          px-4 py-4 flex items-center gap-4 border-b
-          sticky top-0 bg-white z-[70]
-        "
-      >
+
+      {/* ヘッダー */}
+      <div className="px-4 py-4 flex items-center gap-4 border-b sticky top-0 bg-white z-[70]">
         <HomeButton
           onHome={() => router.push("/")}
           size={56}
@@ -50,18 +47,18 @@ export default function StoresPage() {
         </div>
       </div>
 
-      {/* ================= 店舗一覧 ================= */}
+      {/* 店舗一覧 */}
       <div className="overflow-y-auto px-4 py-4 flex-1">
         <div className="grid grid-cols-2 gap-4 pb-24">
           {filteredStores.map((s) => (
             <div key={s.id} className="min-h-[250px] flex">
-              <StoreCard store={s} />
+              {/* ← 修正したポイント */}
+              <StoreCard store={s} query={params} />
             </div>
           ))}
         </div>
       </div>
 
-      {/* ================= 下部 戻るボタン ================= */}
       <BackToHomeButton
         onClick={() => router.push("/")}
         className="px-6 pb-8"

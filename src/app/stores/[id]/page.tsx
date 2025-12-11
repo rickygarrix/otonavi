@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter, useParams } from "next/navigation"
+import { useRouter, useParams, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 
 import type { HomeStore } from "@/types/store"
@@ -11,6 +11,9 @@ import HomeButton from "@/components/ui/HomeButton"
 export default function StoreDetailPage() {
   const router = useRouter()
   const params = useParams()
+  const searchParams = useSearchParams()
+  const query = searchParams.toString()
+
   const storeId = params?.id as string
 
   const [store, setStore] = useState<HomeStore | null>(null)
@@ -88,21 +91,21 @@ export default function StoreDetailPage() {
   return (
     <div className="relative min-h-screen bg-white">
 
-      {/* ================= ヘッダー ================= */}
-      <div
-        className="
-          fixed top-0 left-0 right-0 z-[90]
-          flex items-center gap-3
-          px-4 py-4
-          pt-[calc(env(safe-area-inset-top)+8px)]
-          bg-black/40 text-white backdrop-blur
-        "
-      >
-        <HomeButton onHome={() => router.back()} size={48} iconSize={24} />
+      {/* ヘッダー */}
+      <div className="fixed top-0 left-0 right-0 z-[90] flex items-center gap-3 px-4 py-4 pt-[calc(env(safe-area-inset-top)+8px)] bg-black/40 text-white backdrop-blur">
+
+        <HomeButton
+          onHome={() => {
+            if (query) router.push(`/`)
+            else router.back()
+          }}
+          size={48}
+          iconSize={24}
+        />
+
         <div className="font-semibold text-lg truncate">{store.name}</div>
       </div>
 
-      {/* ================= 本体 ================= */}
       <div className="pt-[90px]">
         <StoreDetailView store={store} />
       </div>

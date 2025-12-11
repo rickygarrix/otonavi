@@ -4,6 +4,8 @@ import { useEffect, useState } from "react"
 import type { HomeStore } from "@/types/store"
 import { supabase } from "@/lib/supabase"
 import Footer from "@/components/Footer"
+import BackToHomeButton from "@/components/ui/BackToHomeButton"
+import { useRouter, useSearchParams } from "next/navigation"
 
 type StoreImage = {
   id: string
@@ -54,10 +56,14 @@ const toJoined = (labels?: string[], keys?: string[]) => {
 type Props = { store: HomeStore }
 
 export default function StoreDetailView({ store }: Props) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const query = searchParams.toString()
+
   const [images, setImages] = useState<StoreImage[]>([])
   const [current, setCurrent] = useState(0)
 
-  // ================= 画像取得 =================
+  // ================ 画像取得 ================
   useEffect(() => {
     if (!store?.id) return
 
@@ -88,7 +94,7 @@ export default function StoreDetailView({ store }: Props) {
         },
       ]
 
-  // ================= 特別営業時間展開 =================
+  // ================ 特別営業時間 展開 ================
   const specialList: Array<{
     date: string
     dow: number
@@ -124,7 +130,7 @@ export default function StoreDetailView({ store }: Props) {
     }
   }
 
-  // ================= SNSリンク定義 =================
+  // ================ SNSリンク ================
   const socialLinks = [
     { key: "instagram_url", icon: "/instagram.svg" },
     { key: "x_url", icon: "/x.svg" },
@@ -136,7 +142,7 @@ export default function StoreDetailView({ store }: Props) {
   return (
     <div className="bg-white">
 
-      {/* ================= 画像スライダー ================= */}
+      {/* ================ 画像スライダー ================ */}
       <div className="relative w-full">
         <div
           className="flex overflow-x-scroll snap-x snap-mandatory scrollbar-none"
@@ -163,7 +169,7 @@ export default function StoreDetailView({ store }: Props) {
         </div>
       </div>
 
-      {/* ================= 基本情報 ================= */}
+      {/* ================ 基本情報 ================ */}
       <div className="px-4 py-5">
         <p className="text-slate-600 text-sm">
           {store.prefecture_label} {store.area_label}　{store.type_label}
@@ -179,7 +185,6 @@ export default function StoreDetailView({ store }: Props) {
           <p className="mt-4 text-slate-700 whitespace-pre-line">{store.description}</p>
         )}
 
-        {/* ================= SNSリンク（新規追加） ================= */}
         <div className="flex gap-5 mt-6">
           {socialLinks.map(({ key, icon }) => {
             const url = (store as any)[key]
@@ -204,16 +209,15 @@ export default function StoreDetailView({ store }: Props) {
         </div>
       </div>
 
-      {/* ================= アクセス ================= */}
+      {/* ================ アクセス ================ */}
       <div className="px-4 py-6">
         <h2 className="text-xl font-bold text-slate-900 mb-3">アクセス</h2>
 
         {store.access && <p className="text-slate-700 whitespace-pre-line mb-4">{store.access}</p>}
-
         {store.address && <p className="text-slate-700 whitespace-pre-line">{store.address}</p>}
       </div>
 
-      {/* ================= 営業時間 ================= */}
+      {/* ================ 営業時間 ================ */}
       <div className="px-4 mt-8">
         <h2 className="text-xl font-bold text-slate-900 mb-4">営業時間</h2>
 
@@ -234,7 +238,7 @@ export default function StoreDetailView({ store }: Props) {
         ))}
       </div>
 
-      {/* ================= 祝日営業 ================= */}
+      {/* ================ 祝日営業 ================ */}
       <div className="px-4 mt-8">
         <h3 className="text-lg font-bold text-slate-900">祝日営業</h3>
 
@@ -259,13 +263,12 @@ export default function StoreDetailView({ store }: Props) {
         )}
       </div>
 
-      {/* ================= 特徴 ================= */}
+      {/* ================ 特徴 ================ */}
       <div className="px-4 mt-10">
         <h2 className="text-xl font-bold text-slate-900 mb-4">この店舗の特徴</h2>
 
         <DetailItem label="店舗タイプ" value={store.type_label ?? null} />
 
-        {/* 以降あなたの UI をそのまま残してあります */}
         <DetailItem label="イベントの傾向" value={toJoined(store.event_trend_labels, store.event_trend_keys)} />
         <DetailItem label="ルール／マナー" value={toJoined(store.rule_labels, store.rule_keys)} />
         <DetailItem label="荷物預かり" value={toJoined(store.baggage_labels, store.baggage_keys)} />
@@ -288,7 +291,17 @@ export default function StoreDetailView({ store }: Props) {
         <DetailItem label="サービス" value={toJoined(store.service_labels, store.service_keys)} />
       </div>
 
+      {/* ================ 戻るボタン（storesへクエリ保持で戻る） ================ */}
+      <BackToHomeButton
+        onClick={() => {
+          if (query) router.push(`/stores?${query}`)
+          else router.push("/stores")
+        }}
+        className="px-4 mt-8"
+      />
+
       <div className="py-12" />
+
       <Footer />
     </div>
   )
