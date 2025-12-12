@@ -11,7 +11,7 @@ type Props = {
 
   setPrefecture: (v: string | null) => void
   setArea: (v: string | null) => void
-  setStoreType: (v: string | null) => void
+  setStoreTypeKeys: (v: string[]) => void
   setEventTrendKeys: (v: string[]) => void
   setRuleKeys: (v: string[]) => void
   setAchievementFilter: (v: any) => void
@@ -74,8 +74,9 @@ export default function HomeFilterSections(p: Props) {
       <GenericSelector
         title="店舗タイプ"
         table="store_types"
-        selection="single"
-        onChange={p.setStoreType}
+        selection="multi"
+        onChange={p.setStoreTypeKeys}
+        columns={3}
         sectionRef={register("店舗タイプ")}
         clearKey={p.clearKey}
       />

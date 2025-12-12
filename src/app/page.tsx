@@ -50,7 +50,7 @@ export default function HomePage() {
   const {
     setPrefecture,
     setArea,
-    setStoreType,
+    setStoreTypeKeys,
     setEventTrendKeys,
     setRuleKeys,
     setAchievementFilter,
@@ -224,7 +224,7 @@ export default function HomePage() {
         genericSectionRefs={genericSectionRefs}
         setPrefecture={setPrefecture}
         setArea={setArea}
-        setStoreType={setStoreType}
+        setStoreTypeKeys={setStoreTypeKeys}
         setEventTrendKeys={setEventTrendKeys}
         setRuleKeys={setRuleKeys}
         setAchievementFilter={setAchievementFilter}

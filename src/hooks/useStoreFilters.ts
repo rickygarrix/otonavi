@@ -12,7 +12,7 @@ export function useStoreFilters(
   // ============================
   const [prefecture, setPrefecture] = useState<string | null>(null)
   const [area, setArea] = useState<string | null>(null)
-  const [storeType, setStoreType] = useState<string | null>(null)
+  const [storeTypeKeys, setStoreTypeKeys] = useState<string[]>([])
 
   const [eventTrendKeys, setEventTrendKeys] = useState<string[]>([])
   const [ruleKeys, setRuleKeys] = useState<string[]>([])
@@ -74,7 +74,7 @@ export function useStoreFilters(
   const handleClear = useCallback(() => {
     setPrefecture(null)
     setArea(null)
-    setStoreType(null)
+    setStoreTypeKeys([])
 
     setEventTrendKeys([])
     setRuleKeys([])
@@ -117,7 +117,12 @@ export function useStoreFilters(
     return stores.filter((s: any) => {
       if (prefecture && s.prefecture_id !== prefecture) return false
       if (area && s.area_id !== area) return false
-      if (storeType && s.store_type_id !== storeType) return false
+      if (
+        storeTypeKeys.length > 0 &&
+        !storeTypeKeys.includes(s.store_type_id)
+      ) {
+        return false
+      }
 
       const m2mChecks: [string[], string[]][] = [
         [eventTrendKeys, s.event_trend_keys ?? []],
@@ -176,7 +181,7 @@ export function useStoreFilters(
     stores,
     prefecture,
     area,
-    storeType,
+    storeTypeKeys,
     eventTrendKeys,
     ruleKeys,
     seatTypeKeys,
@@ -213,7 +218,7 @@ export function useStoreFilters(
   const selectedFilters = [
     prefecture ? labelMap.get(prefecture) ?? prefecture : null,
     area ? labelMap.get(area) ?? area : null,
-    storeType ? labelMap.get(storeType) ?? storeType : null,
+    ...storeTypeKeys.map((k) => labelMap.get(k) ?? k),
 
     ...eventTrendKeys.map((k) => labelMap.get(k) ?? k),
     ...ruleKeys.map((k) => labelMap.get(k) ?? k),
@@ -279,7 +284,7 @@ export function useStoreFilters(
   return {
     prefecture, setPrefecture,
     area, setArea,
-    storeType, setStoreType,
+    storeTypeKeys, setStoreTypeKeys,
 
     eventTrendKeys, setEventTrendKeys,
     ruleKeys, setRuleKeys,
