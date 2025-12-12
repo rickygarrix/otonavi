@@ -12,7 +12,8 @@ type Props = {
 export default function HomeSlider({ stores, onSelectStore }: Props) {
   if (stores.length === 0) return null
 
-  // 無限ループ用：3セットつなげる
+  // 無限ループ用：3セットつなげる!
+
   const loopStores = [...stores, ...stores, ...stores]
   const middleIndex = stores.length // 真ん中セット開始点
 
