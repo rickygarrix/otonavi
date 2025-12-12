@@ -38,7 +38,7 @@ export default function HomeButton({
         style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
       >
         <Image
-          src="/logo.svg"    // ← あなたのアイコンを書き換えてOK
+          src="/.svg"    // ← あなたのアイコンを書き換えてOK
           alt="Home"
           fill
           className="object-contain"
