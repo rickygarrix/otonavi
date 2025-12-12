@@ -32,7 +32,7 @@ export function useStoreFilters(
   const [floorKeys, setFloorKeys] = useState<string[]>([])
   const [sizeKey, setSizeKey] = useState<string[]>([])
 
-  const [priceRange, setPriceRange] = useState<string | null>(null)
+  const [priceRangeKeys, setPriceRangeKeys] = useState<string[]>([])
   const [pricingSystemKeys, setPricingSystemKeys] = useState<string[]>([])
   const [discountKeys, setDiscountKeys] = useState<string[]>([])
   const [vipKeys, setVipKeys] = useState<string[]>([])
@@ -89,7 +89,7 @@ export function useStoreFilters(
     setFloorKeys([])
     setSizeKey([])
 
-    setPriceRange(null)
+    setPriceRangeKeys([])
     setPricingSystemKeys([])
     setDiscountKeys([])
     setVipKeys([])
@@ -154,7 +154,12 @@ export function useStoreFilters(
         }
       }
       if (sizeKey.length > 0 && !sizeKey.includes(s.size_key)) return false
-      if (priceRange && s.price_range_id !== priceRange) return false
+      if (
+        priceRangeKeys.length > 0 &&
+        !priceRangeKeys.includes(s.price_range_id)
+      ) {
+        return false
+      }
       if (
         hospitalityKeys.length > 0 &&
         !hospitalityKeys.includes(s.hospitality_key)
@@ -183,7 +188,7 @@ export function useStoreFilters(
     toiletKeys,
     floorKeys,
     sizeKey,
-    priceRange,
+    priceRangeKeys,
     pricingSystemKeys,
     discountKeys,
     vipKeys,
@@ -224,7 +229,7 @@ export function useStoreFilters(
 
     ...sizeKey.map((k) => labelMap.get(k) ?? k),
 
-    priceRange ? labelMap.get(priceRange) ?? priceRange : null,
+    ...priceRangeKeys.map((k) => labelMap.get(k) ?? k),
     ...pricingSystemKeys.map((k) => labelMap.get(k) ?? k),
     ...discountKeys.map((k) => labelMap.get(k) ?? k),
     ...vipKeys.map((k) => labelMap.get(k) ?? k),
@@ -291,7 +296,7 @@ export function useStoreFilters(
     floorKeys, setFloorKeys,
     sizeKey, setSizeKey,
 
-    priceRange, setPriceRange,
+    priceRangeKeys, setPriceRangeKeys,
     pricingSystemKeys, setPricingSystemKeys,
     discountKeys, setDiscountKeys,
     vipKeys, setVipKeys,

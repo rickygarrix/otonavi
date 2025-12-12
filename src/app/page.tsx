@@ -65,7 +65,7 @@ export default function HomePage() {
     setFloorKeys,
     setSizeKey,
 
-    setPriceRange,
+    setPriceRangeKeys,
     setPricingSystemKeys,
     setDiscountKeys,
     setVipKeys,
@@ -237,7 +237,7 @@ export default function HomePage() {
         setSmokingKeys={setSmokingKeys}
         setEnvironmentKeys={setEnvironmentKeys}
         setOtherKeys={setOtherKeys}
-        setPriceRange={setPriceRange}
+        setPriceRangeKeys={setPriceRangeKeys}
         setPricingSystemKeys={setPricingSystemKeys}
         setDiscountKeys={setDiscountKeys}
         setVipKeys={setVipKeys}

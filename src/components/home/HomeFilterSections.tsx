@@ -26,7 +26,7 @@ type Props = {
   setEnvironmentKeys: (v: string[]) => void
   setOtherKeys: (v: string[]) => void
 
-  setPriceRange: (v: string | null) => void
+  setPriceRangeKeys: (v: string[]) => void
   setPricingSystemKeys: (v: string[]) => void
   setDiscountKeys: (v: string[]) => void
   setVipKeys: (v: string[]) => void
@@ -204,8 +204,9 @@ export default function HomeFilterSections(p: Props) {
       <GenericSelector
         title="価格帯"
         table="price_range_definitions"
-        selection="single"
-        onChange={p.setPriceRange}
+        selection="multi"
+        onChange={p.setPriceRangeKeys}
+        columns={3}
         sectionRef={register("価格帯")}
         clearKey={p.clearKey}
       />
