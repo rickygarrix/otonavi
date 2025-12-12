@@ -5,6 +5,7 @@ import AchievementSelector from "@/components/filters/AchievementSelector"
 import GenericSelector from "@/components/filters/GenericSelector"
 import DrinkSelector from "@/components/filters/DrinkSelector"
 import { RegionKey } from "@/app/page"
+import { useCallback } from "react"
 
 type AchievementFilter = {
   hasAward: boolean
@@ -56,9 +57,13 @@ type Props = {
 }
 
 export default function HomeFilterSections(p: Props) {
-  const register = (key: string) => (el: HTMLDivElement | null) => {
-    p.genericSectionRefs.current[key] = el
-  }
+  const register = useCallback(
+    (key: string) => (el: HTMLDivElement | null) => {
+      p.genericSectionRefs.current[key] = el
+    },
+    []
+  )
+
 
   return (
 
