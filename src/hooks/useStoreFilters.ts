@@ -56,9 +56,13 @@ export function useStoreFilters(
   const labelMap = useMemo(() => {
     const map = new Map<string, string>()
 
-    stores.forEach((s: any) => {
-      if (s.prefecture_id && s.prefecture_label) map.set(s.prefecture_id, s.prefecture_label)
-      if (s.area_id && s.area_label) map.set(s.area_id, s.area_label)
+    stores.forEach((s: HomeStore) => {
+      if (s.prefecture_id && s.prefecture_label) {
+        map.set(s.prefecture_id, s.prefecture_label)
+      }
+      if (s.area_id && s.area_label) {
+        map.set(s.area_id, s.area_label)
+      }
     })
 
     externalLabelMap?.forEach((v, k) => {
@@ -114,23 +118,28 @@ export function useStoreFilters(
   // ✅ 検索ロジック【完全対応】
   // ============================
   const filteredStores = useMemo(() => {
-    return stores.filter((s: any) => {
+    return stores.filter((s: HomeStore) => {
+      // =====================
+      // エリア系
+      // =====================
       if (
         prefectureIds.length > 0 &&
-        !prefectureIds.includes(s.prefecture_id)
+        (!s.prefecture_id || !prefectureIds.includes(s.prefecture_id))
       ) return false
 
       if (
         areaIds.length > 0 &&
-        !areaIds.includes(s.area_id)
+        (!s.area_id || !areaIds.includes(s.area_id))
       ) return false
+
       if (
         storeTypeKeys.length > 0 &&
-        !storeTypeKeys.includes(s.store_type_id)
-      ) {
-        return false
-      }
+        (!s.store_type_id || !storeTypeKeys.includes(s.store_type_id))
+      ) return false
 
+      // =====================
+      // M2M 系（OR 条件）
+      // =====================
       const m2mChecks: [string[], string[]][] = [
         [eventTrendKeys, s.event_trend_keys ?? []],
         [ruleKeys, s.rule_keys ?? []],
@@ -161,24 +170,32 @@ export function useStoreFilters(
       ]
 
       for (const [selected, storeKeys] of m2mChecks) {
-        if (selected.length > 0 && !selected.some((k) => storeKeys.includes(k))) {
+        if (selected.length > 0 && !selected.some(k => storeKeys.includes(k))) {
           return false
         }
       }
-      if (sizeKey.length > 0 && !sizeKey.includes(s.size_key)) return false
+
+      // =====================
+      // 単一系
+      // =====================
+      if (
+        sizeKey.length > 0 &&
+        (!s.size_key || !sizeKey.includes(s.size_key))
+      ) return false
+
       if (
         priceRangeKeys.length > 0 &&
-        !priceRangeKeys.includes(s.price_range_id)
-      ) {
-        return false
-      }
+        (!s.price_range_id || !priceRangeKeys.includes(s.price_range_id))
+      ) return false
+
       if (
         hospitalityKeys.length > 0 &&
-        !hospitalityKeys.includes(s.hospitality_key)
-      ) {
-        return false
-      }
+        (!s.hospitality_key || !hospitalityKeys.includes(s.hospitality_key))
+      ) return false
 
+      // =====================
+      // 実績フラグ
+      // =====================
       if (achievementFilter.hasAward && !s.hasAward) return false
       if (achievementFilter.hasMedia && !s.hasMedia) return false
 

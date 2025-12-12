@@ -1,12 +1,16 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Image from "next/image"
 import type { HomeStore } from "@/types/store"
 import { supabase } from "@/lib/supabase"
 import Footer from "@/components/Footer"
 import BackToHomeButton from "@/components/ui/BackToHomeButton"
 import { useRouter, useSearchParams } from "next/navigation"
 
+// =====================
+// 型
+// =====================
 type StoreImage = {
   id: string
   image_url: string
@@ -14,6 +18,16 @@ type StoreImage = {
   caption: string | null
 }
 
+type SocialKey =
+  | "instagram_url"
+  | "x_url"
+  | "facebook_url"
+  | "tiktok_url"
+  | "official_site_url"
+
+// =====================
+// 定数
+// =====================
 const DAY_LABEL: Record<string | number, string> = {
   1: "月曜",
   2: "火曜",
@@ -79,7 +93,7 @@ export default function StoreDetailView({ store }: Props) {
     }
 
     load()
-  }, [store?.id])
+  }, [store.id])
 
   const validImages = images.filter((img) => img.image_url?.trim())
   const mainImages =
@@ -93,6 +107,15 @@ export default function StoreDetailView({ store }: Props) {
           caption: null,
         },
       ]
+
+  // ===================== SNS =====================
+  const socialLinks: { key: SocialKey; icon: string }[] = [
+    { key: "instagram_url", icon: "/instagram.svg" },
+    { key: "x_url", icon: "/x.svg" },
+    { key: "facebook_url", icon: "/facebook.svg" },
+    { key: "tiktok_url", icon: "/tiktok.svg" },
+    { key: "official_site_url", icon: "/website.svg" },
+  ]
 
   // ===================== 特別営業時間 =====================
   const specialList: Array<{
@@ -130,15 +153,6 @@ export default function StoreDetailView({ store }: Props) {
     }
   }
 
-  // ===================== SNS =====================
-  const socialLinks = [
-    { key: "instagram_url", icon: "/instagram.svg" },
-    { key: "x_url", icon: "/x.svg" },
-    { key: "facebook_url", icon: "/facebook.svg" },
-    { key: "tiktok_url", icon: "/tiktok.svg" },
-    { key: "official_site_url", icon: "/website.svg" },
-  ]
-
   return (
     <div className="bg-white">
 
@@ -147,17 +161,19 @@ export default function StoreDetailView({ store }: Props) {
         <div
           className="flex overflow-x-scroll snap-x snap-mandatory scrollbar-none"
           onScroll={(e) => {
-            const left = (e.target as HTMLDivElement).scrollLeft
-            const width = (e.target as HTMLDivElement).clientWidth
-            setCurrent(Math.round(left / width))
+            const el = e.target as HTMLDivElement
+            setCurrent(Math.round(el.scrollLeft / el.clientWidth))
           }}
         >
           {mainImages.map((img) => (
-            <div key={img.id} className="min-w-full snap-center">
-              <img
+            <div key={img.id} className="min-w-full snap-center relative h-72">
+              <Image
                 src={img.image_url}
                 alt={store.name}
-                className="w-full h-72 object-cover bg-gray-200"
+                fill
+                sizes="100vw"
+                className="object-cover bg-gray-200"
+                priority={img.id === mainImages[0].id}
               />
             </div>
           ))}
@@ -188,27 +204,25 @@ export default function StoreDetailView({ store }: Props) {
         )}
 
         {store.description && (
-          <p className="mt-4 text-slate-700 whitespace-pre-line">{store.description}</p>
+          <p className="mt-4 text-slate-700 whitespace-pre-line">
+            {store.description}
+          </p>
         )}
 
         {/* SNS */}
         <div className="flex gap-5 mt-6">
           {socialLinks.map(({ key, icon }) => {
-            const url = (store as any)[key]
+            const url = store[key]
             if (!url) return null
 
             return (
-              <a
-                key={key}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block"
-              >
-                <img
+              <a key={key} href={url} target="_blank" rel="noopener noreferrer">
+                <Image
                   src={icon}
                   alt={key}
-                  className="w-7 h-7 opacity-80 hover:opacity-100 transition"
+                  width={28}
+                  height={28}
+                  className="opacity-80 hover:opacity-100 transition"
                 />
               </a>
             )
