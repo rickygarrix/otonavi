@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase"
 import type { HomeStore } from "@/types/store"
 
 // =====================
-// Supabase row types
+// Supabase 返却用の最小型
 // =====================
 type DefinitionKV = {
   key: string
@@ -68,80 +68,19 @@ type StoreRow = {
 }
 
 // =====================
-// utils
+// util
 // =====================
-const extractKV = <T extends Record<string, DefinitionKV | null>>(
+const extractKeys = <T extends Record<string, DefinitionKV | null>>(
   rows: T[],
   field: keyof T
-) => {
-  const keys: string[] = []
-  const labels: string[] = []
+): string[] =>
+  rows.map((r) => r[field]?.key).filter((v): v is string => Boolean(v))
 
-  rows.forEach((r) => {
-    if (r[field]?.key) keys.push(r[field]!.key)
-    if (r[field]?.label) labels.push(r[field]!.label)
-  })
-
-  return { keys, labels }
-}
-
-const resolveStoreImage = (images: StoreImageRow[]) => {
-  if (!images.length) return "/default_shop.svg"
-
-  const main = images.find((i) => i.is_main)
-  if (main?.image_url) return main.image_url
-
-  return (
-    [...images]
-      .sort((a, b) => (a.order_num ?? 999) - (b.order_num ?? 999))[0]
-      ?.image_url ?? "/default_shop.svg"
-  )
-}
-
-// 未取得M2M初期値
-const EMPTY_M2M = {
-  baggage_keys: [],
-  baggage_labels: [],
-  security_keys: [],
-  security_labels: [],
-  toilet_keys: [],
-  toilet_labels: [],
-  floor_keys: [],
-  floor_labels: [],
-  seat_type_keys: [],
-  seat_type_labels: [],
-  smoking_keys: [],
-  smoking_labels: [],
-  environment_keys: [],
-  environment_labels: [],
-  other_keys: [],
-  other_labels: [],
-  pricing_system_keys: [],
-  pricing_system_labels: [],
-  discount_keys: [],
-  discount_labels: [],
-  vip_keys: [],
-  vip_labels: [],
-  payment_method_keys: [],
-  payment_method_labels: [],
-  sound_keys: [],
-  sound_labels: [],
-  lighting_keys: [],
-  lighting_labels: [],
-  production_keys: [],
-  production_labels: [],
-  customer_keys: [],
-  customer_labels: [],
-  atmosphere_keys: [],
-  atmosphere_labels: [],
-  food_keys: [],
-  food_labels: [],
-  service_keys: [],
-  service_labels: [],
-  drink_keys: [],
-  drink_labels: [],
-  drink_categories: {},
-} as const
+const extractLabels = <T extends Record<string, DefinitionKV | null>>(
+  rows: T[],
+  field: keyof T
+): string[] =>
+  rows.map((r) => r[field]?.label).filter((v): v is string => Boolean(v))
 
 // =====================
 // hook
@@ -211,57 +150,100 @@ export function useHomeStores() {
         return
       }
 
+      // 👇 ここだけ追加
       const rows = data as unknown as StoreRow[]
 
       const formatted: HomeStore[] = rows.map((s) => {
-        const eventTrends = extractKV(s.event_trends, "event_trend_definitions")
-        const rules = extractKV(s.rules, "rule_definitions")
+        let image_url = "/default_shop.svg"
+
+        if (s.store_images.length > 0) {
+          const main = s.store_images.find((i) => i.is_main)
+          image_url =
+            main?.image_url ??
+            [...s.store_images]
+              .sort((a, b) => (a.order_num ?? 999) - (b.order_num ?? 999))[0]
+              ?.image_url ??
+            image_url
+        }
 
         return {
           id: s.id,
           name: s.name,
           name_kana: s.name_kana,
-
           prefecture_id: s.prefecture?.id ?? null,
           prefecture_label: s.prefecture?.name_ja ?? null,
           area_id: s.area?.id ?? null,
           area_label: s.area?.name ?? null,
-
           store_type_id: s.store_type?.id ?? null,
           type_label: s.store_type?.label ?? null,
-
           price_range_id: s.price_range?.id ?? null,
           price_range_label: s.price_range?.label ?? null,
-
-          image_url: resolveStoreImage(s.store_images),
-
+          image_url,
           description: s.description,
-          access: s.access,
-          google_map_url: s.google_map_url,
-          address: s.address,
-
           instagram_url: s.instagram_url,
           x_url: s.x_url,
           facebook_url: s.facebook_url,
           tiktok_url: s.tiktok_url,
           official_site_url: s.official_site_url,
-
+          access: s.access,
+          google_map_url: s.google_map_url,
+          address: s.address,
           open_hours: s.open_hours,
           special_hours: s.special_hours,
           updated_at: s.updated_at,
 
-          event_trend_keys: eventTrends.keys,
-          event_trend_labels: eventTrends.labels,
-          rule_keys: rules.keys,
-          rule_labels: rules.labels,
+          event_trend_keys: extractKeys(s.event_trends, "event_trend_definitions"),
+          event_trend_labels: extractLabels(s.event_trends, "event_trend_definitions"),
+          rule_keys: extractKeys(s.rules, "rule_definitions"),
+          rule_labels: extractLabels(s.rules, "rule_definitions"),
 
-          ...EMPTY_M2M,
+          // 未取得M2M
+          baggage_keys: [],
+          baggage_labels: [],
+          security_keys: [],
+          security_labels: [],
+          toilet_keys: [],
+          toilet_labels: [],
+          floor_keys: [],
+          floor_labels: [],
+          seat_type_keys: [],
+          seat_type_labels: [],
+          smoking_keys: [],
+          smoking_labels: [],
+          environment_keys: [],
+          environment_labels: [],
+          other_keys: [],
+          other_labels: [],
+          pricing_system_keys: [],
+          pricing_system_labels: [],
+          discount_keys: [],
+          discount_labels: [],
+          vip_keys: [],
+          vip_labels: [],
+          payment_method_keys: [],
+          payment_method_labels: [],
+          sound_keys: [],
+          sound_labels: [],
+          lighting_keys: [],
+          lighting_labels: [],
+          production_keys: [],
+          production_labels: [],
+          customer_keys: [],
+          customer_labels: [],
+          atmosphere_keys: [],
+          atmosphere_labels: [],
+          food_keys: [],
+          food_labels: [],
+          service_keys: [],
+          service_labels: [],
+          drink_keys: [],
+          drink_labels: [],
+          drink_categories: {},
 
           hospitality_key: s.hospitality_def?.key ?? null,
           hospitality_label: s.hospitality_def?.label ?? null,
           size_key: s.size?.key ?? null,
           size_label: s.size?.label ?? null,
-
           hasAward: false,
           hasMedia: false,
         }
