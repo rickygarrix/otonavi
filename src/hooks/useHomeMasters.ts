@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
+import type { RegionKey } from "@/app/page"
 
 // ================================
 // 型定義
@@ -158,8 +159,12 @@ export function useHomeMasters() {
   // 都道府県名 → 地方
   // ============================
   const prefectureRegionMap = useMemo(() => {
-    const map = new Map<string, string>()
-    prefectures.forEach((p) => map.set(p.name_ja, p.region))
+    const map = new Map<string, RegionKey>()
+
+    prefectures.forEach((p) => {
+      map.set(p.name_ja, p.region as RegionKey)
+    })
+
     return map
   }, [prefectures])
 

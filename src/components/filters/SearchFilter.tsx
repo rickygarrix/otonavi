@@ -9,28 +9,26 @@ import {
   UserGroupIcon,
 } from '@heroicons/react/24/outline'
 
-export default function SearchFilter({
-  onScrollStore,
-  onScrollEquipment,
-  onScrollPrice,
-  onScrollSound,
-  onScrollDrink,
-  onScrollCustomer,
-}: {
-  onScrollStore: () => void
-  onScrollEquipment: () => void
-  onScrollPrice: () => void
-  onScrollSound: () => void
-  onScrollDrink: () => void
-  onScrollCustomer: () => void
-}) {
-  const filters = [
-    { label: '店舗', icon: BuildingStorefrontIcon, action: onScrollStore },
-    { label: '設備', icon: KeyIcon, action: onScrollEquipment },
-    { label: '料金', icon: BanknotesIcon, action: onScrollPrice },
-    { label: '音響', icon: MegaphoneIcon, action: onScrollSound },
-    { label: '飲食', icon: BeakerIcon, action: onScrollDrink },
-    { label: '客層', icon: UserGroupIcon, action: onScrollCustomer },
+import type { RegionKey } from '@/app/page'
+
+type FilterItem = {
+  label: string
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
+  region: RegionKey
+}
+
+type Props = {
+  onScroll: (region: RegionKey) => void
+}
+
+export default function SearchFilter({ onScroll }: Props) {
+  const filters: FilterItem[] = [
+    { label: '店舗', icon: BuildingStorefrontIcon, region: '北海道・東北' },
+    { label: '設備', icon: KeyIcon, region: '関東' },
+    { label: '料金', icon: BanknotesIcon, region: '中部' },
+    { label: '音響', icon: MegaphoneIcon, region: '近畿' },
+    { label: '飲食', icon: BeakerIcon, region: '中国・四国' },
+    { label: '客層', icon: UserGroupIcon, region: '九州・沖縄' },
   ]
 
   return (
@@ -42,11 +40,15 @@ export default function SearchFilter({
           flex justify-between items-center px-3 py-3 shadow-sm
         "
       >
-        {filters.map(({ label, icon: Icon, action }) => (
+        {filters.map(({ label, icon: Icon, region }) => (
           <button
             key={label}
-            onClick={action}
-            className="flex-1 flex flex-col items-center justify-center text-slate-700 hover:opacity-70 active:scale-95 transition-all py-1"
+            onClick={() => onScroll(region)}
+            className="
+              flex-1 flex flex-col items-center justify-center
+              text-slate-700 hover:opacity-70 active:scale-95
+              transition-all py-1
+            "
           >
             <Icon className="w-6 h-6 stroke-[1.5]" />
             <span className="text-[11px] mt-1">{label}</span>

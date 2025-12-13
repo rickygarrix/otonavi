@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 
 import CurvedBackground from "@/components/home/CurvedBackground"
@@ -13,14 +13,17 @@ import SearchFilterStickyWrapper from "@/components/filters/SearchFilterStickyWr
 
 import FixedSearchBar from "@/components/home/FixedSearchBar"
 import Footer from "@/components/Footer"
+import HomeFilterSections from "@/components/home/HomeFilterSections"
 
 import { useHomeStores } from "@/hooks/useHomeStores"
 import { useStoreFilters } from "@/hooks/useStoreFilters"
 import { useHomeMasters } from "@/hooks/useHomeMasters"
+import { useHomeScroll } from "@/hooks/useHomeScroll"
+import { useHomeRefs } from "@/hooks/useHomeRefs"
 
-import HomeFilterSections from "@/components/home/HomeFilterSections"
-
-// 地域キー
+// ==============================
+// 地域キー（スクロール用）
+// ==============================
 export type RegionKey =
   | "北海道・東北"
   | "関東"
@@ -31,133 +34,52 @@ export type RegionKey =
 
 export default function HomePage() {
   const router = useRouter()
+
+  // ==============================
+  // データ取得
+  // ==============================
   const { stores, loading } = useHomeStores()
+  const masters = useHomeMasters()
+  const filter = useStoreFilters(stores, masters.externalLabelMap)
 
-  // マスタ
-  const {
-    externalLabelMap,
-    prefectureRegionMap,
-    areaMap,
-    drinkCategoryMap,
-    labelToSectionMap,
-  } = useHomeMasters()
-
-  const filter = useStoreFilters(stores, externalLabelMap)
-
-  // ✅ クリアUI同期用キー
+  // ==============================
+  // クリア同期キー
+  // ==============================
   const [clearKey, setClearKey] = useState(0)
 
   const {
-    setPrefectureIds,
-    setAreaIds,
-    setStoreTypeKeys,
-    setEventTrendKeys,
-    setRuleKeys,
-    setAchievementFilter,
-
-    setSeatTypeKeys,
-    setSmokingKeys,
-    setEnvironmentKeys,
-    setOtherKeys,
-    setBaggageKeys,
-    setSecurityKeys,
-    setToiletKeys,
-    setFloorKeys,
-    setSizeKey,
-
-    setPriceRangeKeys,
-    setPricingSystemKeys,
-    setDiscountKeys,
-    setVipKeys,
-    setPaymentMethodKeys,
-
-    setSoundKeys,
-    setLightingKeys,
-    setProductionKeys,
-
-    setDrinkKeys,
-    setFoodKeys,
-    setServiceKeys,
-
-    setCustomerKeys,
-    setAtmosphereKeys,
-    setHospitalityKeys,
-
     filteredStores,
     selectedFilters,
     count,
-
     handleSelectStore,
     handleClear: rawHandleClear,
+    ...setters
   } = filter
 
-  // ✅ すべてクリア時にUIも完全リセット
   const handleClear = () => {
     rawHandleClear()
     setClearKey((v) => v + 1)
   }
 
-  // 地域 ref
-  const regionRefs: Record<RegionKey, React.RefObject<HTMLDivElement | null>> = {
-    "北海道・東北": useRef(null),
-    "関東": useRef(null),
-    "中部": useRef(null),
-    "近畿": useRef(null),
-    "中国・四国": useRef(null),
-    "九州・沖縄": useRef(null),
-  }
+  // ==============================
+  // refs（スクロール管理）
+  // ==============================
+  const refs = useHomeRefs()
 
-  const areaRefs = useRef<Record<string, HTMLDivElement | null>>({})
-  const drinkCategoryRefs = useRef<Record<string, HTMLDivElement | null>>({})
-  const achievementRefs = useRef<Record<string, HTMLDivElement | null>>({})
-  const genericSectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  // ==============================
+  // フィルターチップ → スクロール
+  // ==============================
+  const handleScrollByFilter = useHomeScroll({
+    areaMap: masters.areaMap,
+    drinkCategoryMap: masters.drinkCategoryMap,
+    prefectureRegionMap: masters.prefectureRegionMap,
+    labelToSectionMap: masters.labelToSectionMap,
+    refs,
+  })
 
-  // ✅ フィルターチップ → スクロール
-  const handleScrollByFilter = (label: string) => {
-    const area = areaMap.get(label)
-    if (area) {
-      const key = area.is_23ward ? "東京23区" : "東京23区以外"
-      const target = areaRefs.current[key]
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth", block: "start" })
-        return
-      }
-    }
-
-    const category = drinkCategoryMap.get(label)
-    if (category) {
-      const target = drinkCategoryRefs.current[category]
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth", block: "start" })
-        return
-      }
-    }
-
-    const achievementTarget = achievementRefs.current[label]
-    if (achievementTarget) {
-      achievementTarget.scrollIntoView({ behavior: "smooth", block: "start" })
-      return
-    }
-
-    const sectionName = labelToSectionMap.get(label)
-    if (sectionName) {
-      const ref = genericSectionRefs.current[sectionName]
-      if (ref) {
-        ref.scrollIntoView({ behavior: "smooth", block: "start" })
-        return
-      }
-    }
-
-    const region = prefectureRegionMap.get(label) as RegionKey | undefined
-    if (region) {
-      regionRefs[region].current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      })
-    }
-  }
-
-  // 検索結果遷移
+  // ==============================
+  // 検索結果ページ遷移
+  // ==============================
   const handleGoToStores = () => {
     const params = new URLSearchParams()
     selectedFilters.forEach((f) => params.append("filters", f))
@@ -165,11 +87,15 @@ export default function HomePage() {
     router.push(`/stores?${params.toString()}`)
   }
 
+  // ==============================
+  // UI
+  // ==============================
   return (
     <>
-      {/* Hero */}
+      {/* ================= Hero ================= */}
       <div className="relative w-full text-white overflow-hidden">
         <CurvedBackground />
+
         <div className="mt-[80px]">
           <LogoHero />
         </div>
@@ -190,70 +116,26 @@ export default function HomePage() {
         <div className="h-[160px]" />
       </div>
 
-      {/* Sticky Tabs */}
+      {/* ================= Sticky Tabs ================= */}
       <SearchFilterStickyWrapper>
         <SearchFilter
-          onScrollStore={() =>
-            regionRefs["北海道・東北"].current?.scrollIntoView({ behavior: "smooth" })
-          }
-          onScrollEquipment={() =>
-            regionRefs["関東"].current?.scrollIntoView({ behavior: "smooth" })
-          }
-          onScrollPrice={() =>
-            regionRefs["中部"].current?.scrollIntoView({ behavior: "smooth" })
-          }
-          onScrollSound={() =>
-            regionRefs["近畿"].current?.scrollIntoView({ behavior: "smooth" })
-          }
-          onScrollDrink={() =>
-            regionRefs["中国・四国"].current?.scrollIntoView({ behavior: "smooth" })
-          }
-          onScrollCustomer={() =>
-            regionRefs["九州・沖縄"].current?.scrollIntoView({ behavior: "smooth" })
-          }
+          onScroll={(region) => {
+            refs.regionRefs[region].current?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            })
+          }}
         />
       </SearchFilterStickyWrapper>
 
-      {/* フィルターセクション */}
+      {/* ================= Filters ================= */}
       <HomeFilterSections
         clearKey={clearKey}
-        regionRefs={regionRefs}
-        areaRefs={areaRefs}
-        drinkCategoryRefs={drinkCategoryRefs}
-        achievementRefs={achievementRefs}
-        genericSectionRefs={genericSectionRefs}
-        setPrefectureIds={setPrefectureIds}
-        setAreaIds={setAreaIds}
-        setStoreTypeKeys={setStoreTypeKeys}
-        setEventTrendKeys={setEventTrendKeys}
-        setRuleKeys={setRuleKeys}
-        setAchievementFilter={setAchievementFilter}
-        setBaggageKeys={setBaggageKeys}
-        setSecurityKeys={setSecurityKeys}
-        setToiletKeys={setToiletKeys}
-        setSizeKey={setSizeKey}
-        setFloorKeys={setFloorKeys}
-        setSeatTypeKeys={setSeatTypeKeys}
-        setSmokingKeys={setSmokingKeys}
-        setEnvironmentKeys={setEnvironmentKeys}
-        setOtherKeys={setOtherKeys}
-        setPriceRangeKeys={setPriceRangeKeys}
-        setPricingSystemKeys={setPricingSystemKeys}
-        setDiscountKeys={setDiscountKeys}
-        setVipKeys={setVipKeys}
-        setPaymentMethodKeys={setPaymentMethodKeys}
-        setSoundKeys={setSoundKeys}
-        setLightingKeys={setLightingKeys}
-        setProductionKeys={setProductionKeys}
-        setDrinkKeys={setDrinkKeys}
-        setFoodKeys={setFoodKeys}
-        setServiceKeys={setServiceKeys}
-        setCustomerKeys={setCustomerKeys}
-        setAtmosphereKeys={setAtmosphereKeys}
-        setHospitalityKeys={setHospitalityKeys}
+        {...refs}
+        {...setters}
       />
 
-      {/* Bottom Search Bar */}
+      {/* ================= Bottom Search Bar ================= */}
       <FixedSearchBar
         selectedFilters={selectedFilters}
         onClear={handleClear}
