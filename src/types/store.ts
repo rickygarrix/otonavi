@@ -78,6 +78,21 @@ export type HomeStore = {
   // ============================
   hasAward: boolean
   hasMedia: boolean
+  store_awards?: {
+    id: string
+    title: string
+    organization: string | null
+    year: number | null
+    url: string | null
+  }[]
+
+  store_media_mentions?: {
+    id: string
+    media_name: string
+    title: string | null
+    published_at: string | null
+    url: string | null
+  }[]
 
   updated_at: string
 

@@ -11,6 +11,7 @@ import StoreBasicInfo from "@/components/store/StoreBasicInfo"
 import StoreAccess from "@/components/store/StoreAccess"
 import StoreOpenHours from "@/components/store/StoreOpenHours"
 import StoreDetailSections from "@/components/store/StoreDetailSections"
+import StoreDetailMedia from "./StoreDetailMedia"
 
 // =====================
 // utils
@@ -96,14 +97,16 @@ export default function StoreDetailView({ store }: Props) {
         storeId={store.id}
         storeName={store.name}
       />
-
       <StoreBasicInfo store={store} />
-
       <StoreAccess store={store} />
-
-      <StoreOpenHours openHours={store.open_hours} />
-
-      {/* Viewで組み立てたUI構造を渡す */}
+      <StoreOpenHours
+        openHours={store.open_hours}
+        specialHours={store.special_hours}
+      />
+      <StoreDetailMedia
+        awards={(store as any).store_awards}
+        mediaMentions={(store as any).store_media_mentions}
+      />
       <StoreDetailSections sections={detailSections} />
 
       <BackToHomeButton
@@ -112,7 +115,6 @@ export default function StoreDetailView({ store }: Props) {
         }
         className="px-4 mt-8"
       />
-
       <Footer />
       <div className="h-12" />
     </div>
