@@ -199,6 +199,7 @@ export function useStoreFilters(
       if (achievementFilter.hasAward && !s.hasAward) return false
       if (achievementFilter.hasMedia && !s.hasMedia) return false
 
+
       return true
     })
   }, [
@@ -276,7 +277,7 @@ export function useStoreFilters(
     ...atmosphereKeys.map((k) => labelMap.get(k) ?? k),
     ...hospitalityKeys.map((k) => labelMap.get(k) ?? k),
 
-    achievementFilter.hasAward ? "受賞あり" : null,
+    achievementFilter.hasAward ? "受賞歴あり" : null,
     achievementFilter.hasMedia ? "メディア掲載あり" : null,
   ].filter(Boolean) as string[]
 
