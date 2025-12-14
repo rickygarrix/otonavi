@@ -19,11 +19,31 @@ export type StoreSpecialOpenHour = {
   close_time: string | null
   last_order_time: string | null
   is_closed: boolean
-  reason: string | null           // "クリスマス特別営業"
+  reason: string | null          // "クリスマス特別営業"
 }
 
 // ============================
-// Home 一覧用 Store 型
+// 実績（受賞）
+// ============================
+export type StoreAward = {
+  id: string
+  title: string
+  organization: string | null
+  year: number | null
+  url: string | null
+}
+
+// ============================
+// 実績（メディア）
+// ============================
+export type StoreMediaMention = {
+  id: string
+  media_name: string
+  year: number | null
+}
+
+// ============================
+// Home / 詳細 共通 Store 型
 // ============================
 export type HomeStore = {
   id: string
@@ -31,7 +51,7 @@ export type HomeStore = {
   name_kana: string | null
 
   // ============================
-  // エリア系（id = 検索 / label = 表示）
+  // エリア系
   // ============================
   prefecture_id: string | null
   prefecture_label: string | null
@@ -74,27 +94,13 @@ export type HomeStore = {
   special_hours: StoreSpecialOpenHour[]
 
   // ============================
-  // 実績
+  // 実績（★今回の肝）
   // ============================
   hasAward: boolean
   hasMedia: boolean
-  store_awards?: {
-    id: string
-    title: string
-    organization: string | null
-    year: number | null
-    url: string | null
-  }[]
 
-  store_media_mentions?: {
-    id: string
-    media_name: string
-    title: string | null
-    published_at: string | null
-    url: string | null
-  }[]
-
-  updated_at: string
+  store_awards: StoreAward[]
+  store_media_mentions: StoreMediaMention[]
 
   // ============================
   // M2M（keys = 検索 / labels = 表示）
@@ -104,18 +110,6 @@ export type HomeStore = {
 
   rule_keys: string[]
   rule_labels: string[]
-
-  seat_type_keys: string[]
-  seat_type_labels: string[]
-
-  smoking_keys: string[]
-  smoking_labels: string[]
-
-  environment_keys: string[]
-  environment_labels: string[]
-
-  other_keys: string[]
-  other_labels: string[]
 
   baggage_keys: string[]
   baggage_labels: string[]
@@ -128,6 +122,18 @@ export type HomeStore = {
 
   floor_keys: string[]
   floor_labels: string[]
+
+  seat_type_keys: string[]
+  seat_type_labels: string[]
+
+  smoking_keys: string[]
+  smoking_labels: string[]
+
+  environment_keys: string[]
+  environment_labels: string[]
+
+  other_keys: string[]
+  other_labels: string[]
 
   pricing_system_keys: string[]
   pricing_system_labels: string[]
@@ -183,4 +189,9 @@ export type HomeStore = {
 
   size_key: string | null
   size_label: string | null
+
+  // ============================
+  // その他
+  // ============================
+  updated_at: string
 }

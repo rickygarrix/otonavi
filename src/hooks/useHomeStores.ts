@@ -167,85 +167,138 @@ export function useHomeStores() {
         }
 
         return {
+          // ============================
+          // 基本
+          // ============================
           id: s.id,
           name: s.name,
           name_kana: s.name_kana,
+
           prefecture_id: s.prefecture?.id ?? null,
           prefecture_label: s.prefecture?.name_ja ?? null,
+
           area_id: s.area?.id ?? null,
           area_label: s.area?.name ?? null,
+
           store_type_id: s.store_type?.id ?? null,
           type_label: s.store_type?.label ?? null,
+
           price_range_id: s.price_range?.id ?? null,
           price_range_label: s.price_range?.label ?? null,
+
           image_url,
           description: s.description,
+
           instagram_url: s.instagram_url,
           x_url: s.x_url,
           facebook_url: s.facebook_url,
           tiktok_url: s.tiktok_url,
           official_site_url: s.official_site_url,
+
           access: s.access,
           google_map_url: s.google_map_url,
           address: s.address,
+
+          // ============================
+          // 営業時間
+          // ============================
           open_hours: s.open_hours,
           special_hours: s.special_hours,
-          updated_at: s.updated_at,
 
+          // ============================
+          // 実績（一覧では空でOK）
+          // ============================
+          hasAward: false,
+          hasMedia: false,
+          store_awards: [],
+          store_media_mentions: [],
+
+          // ============================
+          // M2M（取得済み）
+          // ============================
           event_trend_keys: extractKeys(s.event_trends, "event_trend_definitions"),
           event_trend_labels: extractLabels(s.event_trends, "event_trend_definitions"),
+
           rule_keys: extractKeys(s.rules, "rule_definitions"),
           rule_labels: extractLabels(s.rules, "rule_definitions"),
 
-          // 未取得M2M
+          // ============================
+          // M2M（未取得：空配列で埋める）
+          // ============================
           baggage_keys: [],
           baggage_labels: [],
+
           security_keys: [],
           security_labels: [],
+
           toilet_keys: [],
           toilet_labels: [],
+
           floor_keys: [],
           floor_labels: [],
+
           seat_type_keys: [],
           seat_type_labels: [],
+
           smoking_keys: [],
           smoking_labels: [],
+
           environment_keys: [],
           environment_labels: [],
+
           other_keys: [],
           other_labels: [],
+
           pricing_system_keys: [],
           pricing_system_labels: [],
+
           discount_keys: [],
           discount_labels: [],
+
           vip_keys: [],
           vip_labels: [],
+
           payment_method_keys: [],
           payment_method_labels: [],
+
           sound_keys: [],
           sound_labels: [],
+
           lighting_keys: [],
           lighting_labels: [],
+
           production_keys: [],
           production_labels: [],
+
           customer_keys: [],
           customer_labels: [],
+
           atmosphere_keys: [],
           atmosphere_labels: [],
+
           food_keys: [],
           food_labels: [],
+
           service_keys: [],
           service_labels: [],
+
           drink_keys: [],
           drink_labels: [],
           drink_categories: {},
 
+          // ============================
+          // 単一選択
+          // ============================
           hospitality_key: s.hospitality_def?.key ?? null,
           hospitality_label: s.hospitality_def?.label ?? null,
+
           size_key: s.size?.key ?? null,
           size_label: s.size?.label ?? null,
-          hasAward: false,
-          hasMedia: false,
+
+          // ============================
+          // その他
+          // ============================
+          updated_at: s.updated_at,
         }
       })
 

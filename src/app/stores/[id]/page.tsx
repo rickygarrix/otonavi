@@ -62,7 +62,16 @@ export default function StoreDetailPage() {
           store_environment(environment_definitions(*)),
           store_other(other_definitions(*)),
           store_pricing_system(pricing_system_definitions(*)),
-          store_discounts(discount_definitions(*)),
+store_discounts(
+  id,
+  discount_definitions(*)
+),
+
+store_discount_details(
+  id,
+  discount_id,
+  text
+),
           store_vips(vip_definitions(*)),
           store_payment_methods(payment_method_definitions(*)),
           store_sounds(sound_definitions(*)),

@@ -1,13 +1,31 @@
 // lib/normalizeStore.ts
 import type { HomeStore } from "@/types/store"
 
+// ================================
+// 共通型
+// ================================
 type DefinitionKV = {
   key: string
   label: string
-  category?: string
+}
+
+type StoreDiscountRow = {
+  discount_definitions: DefinitionKV | null
+  store_discount_details?: { id: string; text: string }[] | null
 }
 
 type M2MRow = Record<string, DefinitionKV | null>
+
+// ================================
+// util
+// ================================
+const asString = (v: unknown): string | null =>
+  typeof v === "string" ? v : null
+
+
+
+const asArray = <T>(v: unknown): T[] =>
+  Array.isArray(v) ? (v as T[]) : []
 
 function extractM2M(
   list: unknown,
@@ -28,12 +46,9 @@ function extractM2M(
   return { keys, labels }
 }
 
-const asString = (v: unknown): string | null =>
-  typeof v === "string" ? v : null
-
-const asArray = <T>(v: unknown): T[] =>
-  Array.isArray(v) ? (v as T[]) : []
-
+// ================================
+// normalize
+// ================================
 export function normalizeStore(raw: unknown): HomeStore {
   if (!raw || typeof raw !== "object") {
     throw new Error("normalizeStore: raw is invalid")
@@ -41,24 +56,71 @@ export function normalizeStore(raw: unknown): HomeStore {
 
   const r = raw as any
 
-  const awards = Array.isArray(r.store_awards)
-    ? r.store_awards.map((a: any) => ({
-      id: String(a.id),
-      title: String(a.title),
-      organization: a.organization ?? null,
-      year: typeof a.year === "number" ? a.year : null,
-      url: a.url ?? null,
-    }))
-    : []
-  const media = Array.isArray(r.store_media_mentions)
-    ? r.store_media_mentions.map((m: any) => ({
-      id: String(m.id),
-      media_name: String(m.media_name),
-      year: typeof m.year === "number" ? m.year : null,
-    }))
-    : []
+  // =====================
+  // 実績
+  // =====================
+  const store_awards = asArray(r.store_awards).map((a: any) => ({
+    id: String(a.id),
+    title: String(a.title),
+    organization: asString(a.organization),
+    year: typeof a.year === "number" ? a.year : null,
+    url: asString(a.url),
+  }))
+
+  const store_media_mentions = asArray(r.store_media_mentions).map((m: any) => ({
+    id: String(m.id),
+    media_name: String(m.media_name),
+    year: typeof m.year === "number" ? m.year : null,
+  }))
+
+  // =====================
+  // ★ ディスカウント（ここが肝）
+  // =====================
+  // =====================
+  // ★ ディスカウント（正解版）
+  // =====================
+  const discount_keys: string[] = []
+  const discount_labels: string[] = []
+
+  const detailsByDiscountId = new Map<string, string[]>()
+
+  // store_discount_details を index 化
+  if (Array.isArray(r.store_discount_details)) {
+    for (const d of r.store_discount_details as any[]) {
+      if (!d.discount_id || !d.text) continue
+
+      if (!detailsByDiscountId.has(d.discount_id)) {
+        detailsByDiscountId.set(d.discount_id, [])
+      }
+      detailsByDiscountId.get(d.discount_id)!.push(d.text)
+    }
+  }
+
+  // store_discounts を基準に組み立て
+  if (Array.isArray(r.store_discounts)) {
+    for (const row of r.store_discounts as any[]) {
+      const def = row.discount_definitions
+      if (!def) continue
+
+      // 検索用 key
+      if (def.key) {
+        discount_keys.push(def.key)
+      }
+
+      // 表示用 label（詳細優先）
+      const detailTexts = detailsByDiscountId.get(def.id)
+      if (detailTexts && detailTexts.length > 0) {
+        discount_labels.push(...detailTexts)
+      } else if (def.label) {
+        discount_labels.push(def.label)
+      }
+    }
+  }
 
   return {
+    // =====================
+    // 基本
+    // =====================
     id: asString(r.id) ?? "",
     name: asString(r.name) ?? "",
     name_kana: asString(r.name_kana),
@@ -93,15 +155,20 @@ export function normalizeStore(raw: unknown): HomeStore {
 
     updated_at: asString(r.updated_at) ?? "",
 
-    // ===== 実績 =====
-    hasAward: awards.length > 0,
-    hasMedia: media.length > 0,
-    store_awards: awards,
-    store_media_mentions: media,
+    // =====================
+    // 実績
+    // =====================
+    hasAward: store_awards.length > 0,
+    hasMedia: store_media_mentions.length > 0,
+    store_awards,
+    store_media_mentions,
 
-    // ===== 以下 M2M は今まで通り =====
+    // =====================
+    // M2M
+    // =====================
     event_trend_keys: extractM2M(r.store_event_trends, "event_trend_definitions").keys,
     event_trend_labels: extractM2M(r.store_event_trends, "event_trend_definitions").labels,
+
     rule_keys: extractM2M(r.store_rules, "rule_definitions").keys,
     rule_labels: extractM2M(r.store_rules, "rule_definitions").labels,
 
@@ -132,8 +199,9 @@ export function normalizeStore(raw: unknown): HomeStore {
     pricing_system_keys: extractM2M(r.store_pricing_system, "pricing_system_definitions").keys,
     pricing_system_labels: extractM2M(r.store_pricing_system, "pricing_system_definitions").labels,
 
-    discount_keys: extractM2M(r.store_discounts, "discount_definitions").keys,
-    discount_labels: extractM2M(r.store_discounts, "discount_definitions").labels,
+    // ★ ここが変わった
+    discount_keys,
+    discount_labels,
 
     vip_keys: extractM2M(r.store_vips, "vip_definitions").keys,
     vip_labels: extractM2M(r.store_vips, "vip_definitions").labels,
