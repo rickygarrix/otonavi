@@ -30,6 +30,10 @@ export default function Footer() {
         <Link href="/tokusho" className="hover:opacity-70">
           特定商取引法に基づく表記
         </Link>
+
+        <Link href="/contact" className="hover:opacity-70">
+          お問い合わせ
+        </Link>
       </nav>
 
       {/* コピーライト */}
