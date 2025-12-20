@@ -1,239 +1,206 @@
 "use client"
 
-import { useEffect, useMemo, useState, RefObject } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { supabase } from "@/lib/supabase"
-import PrefectureChip from "./PrefectureChip"
-import Chip from "@/components/ui/Chip"
-import { RegionKey } from "@/app/page"
 
-// ================================
-// 型
-// ================================
 type Prefecture = {
   id: string
   name_ja: string
-  region: string
 }
 
 type Area = {
   id: string
   name: string
-  prefecture_id: string
   is_23ward: boolean
 }
 
 type Props = {
-  onChange: (prefectureIds: string[], areaIds: string[]) => void
-  regionRefs?: Record<RegionKey, RefObject<HTMLDivElement | null>>
-  areaRefs?: React.MutableRefObject<Record<string, HTMLDivElement | null>>
   clearKey: number
+  onChange: (prefectureIds: string[], areaIds: string[]) => void
 }
 
-// ================================
-// 定数
-// ================================
 const TOKYO_NAME = "東京都"
 
-const REGION_ORDER: RegionKey[] = [
-  "北海道・東北",
-  "関東",
-  "中部",
-  "近畿",
-  "中国・四国",
-  "九州・沖縄",
-]
-
-// ================================
-// Component
-// ================================
-export default function AreaSelector({
-  onChange,
-  regionRefs,
-  areaRefs,
-  clearKey,
-}: Props) {
+export default function AreaSelector({ clearKey, onChange }: Props) {
   const [prefectures, setPrefectures] = useState<Prefecture[]>([])
   const [areas, setAreas] = useState<Area[]>([])
 
-  const [selectedPrefectureIds, setSelectedPrefectureIds] = useState<string[]>([])
-  const [selectedAreaIds, setSelectedAreaIds] = useState<string[]>([])
+  const [selectedPrefecture, setSelectedPrefecture] =
+    useState<Prefecture | null>(null)
+  const [selectedArea, setSelectedArea] = useState<Area | null>(null)
+
+  const [openPref, setOpenPref] = useState(false)
+  const [openArea, setOpenArea] = useState(false)
 
   // ============================
-  // 初期ロード（都道府県）
+  // 初期ロード
   // ============================
   useEffect(() => {
-    const load = async () => {
-      const { data } = await supabase
-        .from("prefectures")
-        .select("*")
-        .order("code")
-
-      setPrefectures(data ?? [])
-    }
-    load()
+    supabase
+      .from("prefectures")
+      .select("id, name_ja")
+      .order("code")
+      .then(({ data }) => setPrefectures(data ?? []))
   }, [])
 
   // ============================
   // 東京判定
   // ============================
-  const tokyoPrefecture = useMemo(
-    () => prefectures.find((p) => p.name_ja === TOKYO_NAME),
-    [prefectures]
-  )
-
-  const isTokyoSelected =
-    !!tokyoPrefecture &&
-    selectedPrefectureIds.includes(tokyoPrefecture.id)
+  const isTokyo = selectedPrefecture?.name_ja === TOKYO_NAME
 
   // ============================
-  // 東京エリアロード
+  // 東京エリア取得
   // ============================
   useEffect(() => {
-    const loadTokyoAreas = async () => {
-      if (!isTokyoSelected || !tokyoPrefecture) {
-        setAreas([])
-        setSelectedAreaIds([])
-        return
-      }
-
-      const { data } = await supabase
-        .from("areas")
-        .select("*")
-        .eq("prefecture_id", tokyoPrefecture.id)
-        .order("name")
-
-      setAreas(data ?? [])
+    if (!isTokyo || !selectedPrefecture) {
+      setAreas([])
+      setSelectedArea(null)
+      return
     }
 
-    loadTokyoAreas()
-  }, [isTokyoSelected, tokyoPrefecture])
+    supabase
+      .from("areas")
+      .select("id, name, is_23ward")
+      .eq("prefecture_id", selectedPrefecture.id)
+      .order("name")
+      .then(({ data }) => setAreas(data ?? []))
+  }, [isTokyo, selectedPrefecture])
 
   // ============================
-  // 全クリア（唯一の副作用）
+  // clear 同期
   // ============================
   useEffect(() => {
-    setSelectedPrefectureIds([])
-    setSelectedAreaIds([])
+    setSelectedPrefecture(null)
+    setSelectedArea(null)
     onChange([], [])
   }, [clearKey, onChange])
 
   // ============================
-  // 表示用整理
+  // handlers
   // ============================
-  const groupedPrefectures = useMemo(() => {
-    return prefectures.reduce<Record<string, Prefecture[]>>((acc, p) => {
-      acc[p.region] ??= []
-      acc[p.region].push(p)
-      return acc
-    }, {})
-  }, [prefectures])
-
-  const tokyoWards = areas.filter((a) => a.is_23ward)
-  const tokyoOthers = areas.filter((a) => !a.is_23ward)
-
-  // ============================
-  // handlers（event-driven）
-  // ============================
-  const togglePrefecture = (id: string) => {
-    const next = selectedPrefectureIds.includes(id)
-      ? selectedPrefectureIds.filter((v) => v !== id)
-      : [...selectedPrefectureIds, id]
-
-    setSelectedPrefectureIds(next)
-    onChange(next, selectedAreaIds)
+  const selectPrefecture = (p: Prefecture) => {
+    setSelectedPrefecture(p)
+    setSelectedArea(null)
+    setOpenPref(false)
+    onChange([p.id], [])
   }
 
-  const toggleArea = (id: string) => {
-    const next = selectedAreaIds.includes(id)
-      ? selectedAreaIds.filter((v) => v !== id)
-      : [...selectedAreaIds, id]
-
-    setSelectedAreaIds(next)
-    onChange(selectedPrefectureIds, next)
+  const selectArea = (a: Area) => {
+    setSelectedArea(a)
+    setOpenArea(false)
+    onChange(
+      selectedPrefecture ? [selectedPrefecture.id] : [],
+      [a.id]
+    )
   }
+
+  const wards = useMemo(() => areas.filter(a => a.is_23ward), [areas])
+  const others = useMemo(() => areas.filter(a => !a.is_23ward), [areas])
+
+  // ============================
+  // 共通スタイル
+  // ============================
+  const buttonBase =
+    "flex-1 h-12 px-4 bg-white rounded-[99px] outline outline-1 outline-offset-[-1px] outline-zinc-100 flex justify-between items-center gap-2 text-sm"
+
+  const labelMuted = "text-gray-400"
+  const labelActive = "text-gray-800"
+
+  const pickerBase =
+    "absolute z-50 mt-2 w-full max-h-[320px] overflow-y-auto rounded-xl border bg-white shadow-lg"
 
   // ============================
   // UI
   // ============================
   return (
-    <div className="w-full px-6 py-6">
-      {REGION_ORDER.map((region) => {
-        const list = groupedPrefectures[region]
-        if (!list) return null
+    <div className="w-full flex gap-2 relative">
+      {/* ================= 都道府県 ================= */}
+      <div className="relative flex-1">
+        <button
+          onClick={() => setOpenPref(v => !v)}
+          className={buttonBase}
+        >
+          <span
+            className={`line-clamp-1 ${selectedPrefecture ? labelActive : labelMuted
+              }`}
+          >
+            {selectedPrefecture?.name_ja ?? "都道府県"}
+          </span>
 
-        return (
-          <div key={region} className="mb-10">
-            <div ref={regionRefs?.[region]} className="scroll-mt-[90px]" />
+          <span className="text-gray-400">▾</span>
+        </button>
 
-            <h3 className="font-semibold text-slate-800 mb-3">
-              {region}（{list.length}県）
-            </h3>
-
-            <div className="grid grid-cols-3 gap-3">
-              {list.map((p) => (
-                <PrefectureChip
-                  key={p.id}
-                  label={p.name_ja}
-                  selected={selectedPrefectureIds.includes(p.id)}
-                  onClick={() => togglePrefecture(p.id)}
-                />
-              ))}
-            </div>
-
-            {region === "関東" && isTokyoSelected && (
-              <>
-                {/* 東京23区 */}
-                <div
-                  ref={(el) => {
-                    if (!el || !areaRefs) return
-                    areaRefs.current["東京23区"] = el
-                  }}
-                  className="scroll-mt-[90px]"
-                />
-
-                <h3 className="font-semibold text-slate-800 mt-8 mb-3">
-                  東京23区
-                </h3>
-
-                <div className="grid grid-cols-3 gap-3">
-                  {tokyoWards.map((a) => (
-                    <Chip
-                      key={a.id}
-                      label={a.name}
-                      selected={selectedAreaIds.includes(a.id)}
-                      onClick={() => toggleArea(a.id)}
-                    />
-                  ))}
-                </div>
-
-                {/* 東京23区以外 */}
-                <div
-                  ref={(el) => {
-                    if (!el || !areaRefs) return
-                    areaRefs.current["東京23区以外"] = el
-                  }}
-                  className="scroll-mt-[90px]"
-                />
-
-                <h3 className="font-semibold text-slate-800 mt-8 mb-3">
-                  東京23区以外
-                </h3>
-
-                <div className="grid grid-cols-3 gap-3">
-                  {tokyoOthers.map((a) => (
-                    <Chip
-                      key={a.id}
-                      label={a.name}
-                      selected={selectedAreaIds.includes(a.id)}
-                      onClick={() => toggleArea(a.id)}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
+        {openPref && (
+          <div className={pickerBase}>
+            {prefectures.map(p => (
+              <button
+                key={p.id}
+                onClick={() => selectPrefecture(p)}
+                className="w-full px-4 py-3 text-left text-sm hover:bg-zinc-50"
+              >
+                {p.name_ja}
+              </button>
+            ))}
           </div>
-        )
-      })}
+        )}
+      </div>
+
+      {/* ================= 東京エリア ================= */}
+      {isTokyo && (
+        <div className="relative flex-1">
+          <button
+            onClick={() => setOpenArea(v => !v)}
+            className={buttonBase}
+          >
+            <span
+              className={`line-clamp-1 ${selectedArea ? labelActive : labelMuted
+                }`}
+            >
+              {selectedArea?.name ?? "エリア"}
+            </span>
+
+            <span className="text-gray-400">▾</span>
+          </button>
+
+          {openArea && (
+            <div className={pickerBase}>
+              {wards.length > 0 && (
+                <>
+                  <div className="px-4 py-2 text-xs font-semibold text-zinc-500">
+                    東京23区
+                  </div>
+                  {wards.map(a => (
+                    <button
+                      key={a.id}
+                      onClick={() => selectArea(a)}
+                      className="w-full px-4 py-3 text-left text-sm hover:bg-zinc-50"
+                    >
+                      {a.name}
+                    </button>
+                  ))}
+                </>
+              )}
+
+              {others.length > 0 && (
+                <>
+                  <div className="px-4 py-2 text-xs font-semibold text-zinc-500">
+                    その他
+                  </div>
+                  {others.map(a => (
+                    <button
+                      key={a.id}
+                      onClick={() => selectArea(a)}
+                      className="w-full px-4 py-3 text-left text-sm hover:bg-zinc-50"
+                    >
+                      {a.name}
+                    </button>
+                  ))}
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

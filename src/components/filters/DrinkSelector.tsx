@@ -1,43 +1,39 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import Chip from "@/components/ui/Chip"
 
 type DrinkItem = {
   id: string
   key: string
-  category: string
   label: string
-  description?: string | null
   is_active: boolean
 }
 
 type Props = {
   title: string
   onChange: (keys: string[]) => void
-  drinkCategoryRefs?: React.MutableRefObject<Record<string, HTMLDivElement | null>>
   clearKey: number
 }
 
 export default function DrinkSelector({
   title,
   onChange,
-  drinkCategoryRefs,
   clearKey,
 }: Props) {
   const [items, setItems] = useState<DrinkItem[]>([])
   const [selectedKeys, setSelectedKeys] = useState<string[]>([])
 
   // ============================
-  // ✅ 選択変更 → 親に通知
+  // 選択変更 → 親に通知
   // ============================
   useEffect(() => {
     onChange(selectedKeys)
   }, [selectedKeys, onChange])
 
   // ============================
-  // ✅ クリア時リセット
+  // クリア同期
   // ============================
   useEffect(() => {
     setSelectedKeys([])
@@ -45,15 +41,14 @@ export default function DrinkSelector({
   }, [clearKey, onChange])
 
   // ============================
-  // ✅ マスタ読込（初回のみ）
+  // マスタ読込
   // ============================
   useEffect(() => {
     const load = async () => {
       const { data, error } = await supabase
         .from("drink_definitions")
-        .select("*")
+        .select("id, key, label, is_active")
         .eq("is_active", true)
-        .order("category", { ascending: true })
         .order("label", { ascending: true })
 
       if (error) {
@@ -68,19 +63,7 @@ export default function DrinkSelector({
   }, [])
 
   // ============================
-  // カテゴリごとにグループ化
-  // ============================
-  const groups = useMemo(() => {
-    const map: Record<string, DrinkItem[]> = {}
-    items.forEach((item) => {
-      if (!map[item.category]) map[item.category] = []
-      map[item.category].push(item)
-    })
-    return map
-  }, [items])
-
-  // ============================
-  // トグル
+  // toggle
   // ============================
   const toggle = (key: string) => {
     setSelectedKeys((prev) =>
@@ -95,35 +78,20 @@ export default function DrinkSelector({
   // ============================
   return (
     <div className="w-full px-6 py-6">
-      <h2 className="text-lg font-bold text-slate-900 mb-6">{title}</h2>
+      <h2 className="text-lg font-bold text-slate-900 mb-6">
+        {title}
+      </h2>
 
-      {Object.entries(groups).map(([category, list]) => (
-        <div key={category} className="mb-8">
-          {/* 🎯 スクロールアンカー */}
-          <div
-            ref={(el) => {
-              if (!el || !drinkCategoryRefs) return
-              drinkCategoryRefs.current[category] = el
-            }}
-            className="scroll-mt-[90px]"
+      <div className="grid grid-cols-2 gap-3">
+        {items.map((item) => (
+          <Chip
+            key={item.id}
+            label={item.label}
+            selected={selectedKeys.includes(item.key)}
+            onClick={() => toggle(item.key)}
           />
-
-          <p className="font-semibold text-slate-800 mb-3 text-base">
-            {category}
-          </p>
-
-          <div className="grid grid-cols-2 gap-3">
-            {list.map((item) => (
-              <Chip
-                key={item.id}
-                label={item.label}
-                selected={selectedKeys.includes(item.key)}
-                onClick={() => toggle(item.key)}
-              />
-            ))}
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   )
 }

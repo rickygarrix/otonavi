@@ -129,8 +129,25 @@ export default function HomePage() {
       {/* ================= Filters ================= */}
       <HomeFilterSections
         clearKey={clearKey}
+
+        // 🔴 明示的に渡す（必須）
+        setPrefectureIds={setters.setPrefectureIds}
+        setAreaIds={setters.setAreaIds}
+
+        // 🔵 その他は spread でOK
+        setCustomerKeys={setters.setCustomerKeys}
+        setAtmosphereKeys={setters.setAtmosphereKeys}
+        setSizeKey={setters.setSizeKeys}
+        setDrinkKeys={setters.setDrinkKeys}
+        setPriceRangeKeys={setters.setPriceRangeKeys}
+        setPaymentMethodKeys={setters.setPaymentMethodKeys}
+        setEventTrendKeys={setters.setEventTrendKeys}
+        setBaggageKeys={setters.setBaggageKeys}
+        setSmokingKeys={setters.setSmokingKeys}
+        setToiletKeys={setters.setToiletKeys}
+        setOtherKeys={setters.setOtherKeys}
+
         {...refs}
-        {...setters}
       />
 
       {/* ================= Bottom Search Bar ================= */}

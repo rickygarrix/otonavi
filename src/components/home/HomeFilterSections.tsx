@@ -4,7 +4,6 @@ import { useCallback } from "react"
 import AreaSelector from "@/components/filters/AreaSelector"
 import GenericSelector from "@/components/filters/GenericSelector"
 import DrinkSelector from "@/components/filters/DrinkSelector"
-import { RegionKey } from "@/app/page"
 
 // ==============================
 // 型
@@ -13,7 +12,6 @@ type GenericConfig = {
   title: string
   table: string
   section: string
-  columns?: 2 | 3
   onChange?: (v: string[]) => void
 }
 
@@ -38,12 +36,6 @@ type Props = {
   setSmokingKeys?: (v: string[]) => void
   setToiletKeys?: (v: string[]) => void
   setOtherKeys?: (v: string[]) => void
-
-  // refs
-  regionRefs: Record<RegionKey, React.RefObject<HTMLDivElement | null>>
-  areaRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>
-  drinkCategoryRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>
-  genericSectionRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>
 }
 
 // ==============================
@@ -68,22 +60,7 @@ export default function HomeFilterSections({
   setSmokingKeys,
   setToiletKeys,
   setOtherKeys,
-
-  regionRefs,
-  areaRefs,
-  drinkCategoryRefs,
-  genericSectionRefs,
 }: Props) {
-  // ============================
-  // ref 登録（スクロール用）
-  // ============================
-  const register = useCallback(
-    (key: string) => (el: HTMLDivElement | null) => {
-      genericSectionRefs.current[key] = el
-    },
-    [genericSectionRefs]
-  )
-
   // ============================
   // エリア
   // ============================
@@ -114,29 +91,21 @@ export default function HomeFilterSections({
   return (
     <>
       {/* ================= エリア ================= */}
-      <section className="mt-10">
-        <h2
-          ref={register("エリア")}
-          className="px-4 mb-6 text-lg font-bold border-b pb-2"
-        >
+      <section className="mt-10 px-4">
+        <h2 className="mb-4 text-lg font-bold border-b pb-2">
           エリア
         </h2>
 
         <AreaSelector
           clearKey={clearKey}
           onChange={handleAreaChange}
-          regionRefs={regionRefs}
-          areaRefs={areaRefs}
         />
       </section>
 
       {/* ================= ドリンク ================= */}
       {setDrinkKeys && (
-        <section className="mt-14">
-          <h2
-            ref={register("ドリンク")}
-            className="px-4 mb-6 text-lg font-bold border-b pb-2"
-          >
+        <section className="mt-14 px-4">
+          <h2 className="mb-4 text-lg font-bold border-b pb-2">
             ドリンク
           </h2>
 
@@ -144,14 +113,13 @@ export default function HomeFilterSections({
             clearKey={clearKey}
             title="ドリンク"
             onChange={setDrinkKeys}
-            drinkCategoryRefs={drinkCategoryRefs}
           />
         </section>
       )}
 
       {/* ================= 軽量フィルタ ================= */}
       {ITEMS.map((item) => (
-        <section key={item.table} className="mt-14">
+        <section key={item.table} className="mt-14 px-4">
           <GenericSelector
             title={item.title}
             table={item.table}
