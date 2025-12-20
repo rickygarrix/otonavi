@@ -12,6 +12,7 @@ type GenericConfig = {
   title: string
   table: string
   section: string
+  columns?: 2 | 3
   onChange?: (v: string[]) => void
 }
 
@@ -22,7 +23,7 @@ type Props = {
   setPrefectureIds: (v: string[]) => void
   setAreaIds: (v: string[]) => void
 
-  // 軽量フィルタ（optional）
+  // 軽量フィルタ
   setCustomerKeys?: (v: string[]) => void
   setAtmosphereKeys?: (v: string[]) => void
   setSizeKey?: (v: string[]) => void
@@ -73,20 +74,80 @@ export default function HomeFilterSections({
   )
 
   // ============================
-  // 表示項目（順番がすべて）
+  // 表示項目（司令塔）
   // ============================
-  const ITEMS: GenericConfig[] = [
-    { title: "客層", table: "customer_definitions", section: "客層", onChange: setCustomerKeys },
-    { title: "雰囲気", table: "atmosphere_definitions", section: "雰囲気", onChange: setAtmosphereKeys },
-    { title: "広さ", table: "size_definitions", section: "広さ", onChange: setSizeKey },
-    { title: "価格帯", table: "price_range_definitions", section: "価格帯", onChange: setPriceRangeKeys },
-    { title: "支払い方法", table: "payment_method_definitions", section: "支払い方法", onChange: setPaymentMethodKeys },
-    { title: "イベントの傾向", table: "event_trend_definitions", section: "イベントの傾向", onChange: setEventTrendKeys },
-    { title: "荷物預かり", table: "baggage_definitions", section: "荷物預かり", onChange: setBaggageKeys },
-    { title: "喫煙", table: "smoking_definitions", section: "喫煙", onChange: setSmokingKeys },
-    { title: "トイレ", table: "toilet_definitions", section: "トイレ", onChange: setToiletKeys },
-    { title: "その他", table: "other_definitions", section: "その他", onChange: setOtherKeys },
-  ].filter((item) => item.onChange)
+  const ITEMS = [
+    {
+      title: "客層",
+      table: "customer_definitions",
+      section: "客層",
+      columns: 2,
+      onChange: setCustomerKeys,
+    },
+    {
+      title: "雰囲気",
+      table: "atmosphere_definitions",
+      section: "雰囲気",
+      columns: 3,
+      onChange: setAtmosphereKeys,
+    },
+    {
+      title: "広さ",
+      table: "size_definitions",
+      section: "広さ",
+      columns: 3,
+      onChange: setSizeKey,
+    },
+    {
+      title: "価格帯",
+      table: "price_range_definitions",
+      section: "価格帯",
+      columns: 3,
+      onChange: setPriceRangeKeys,
+    },
+    {
+      title: "支払い方法",
+      table: "payment_method_definitions",
+      section: "支払い方法",
+      columns: 3,
+      onChange: setPaymentMethodKeys,
+    },
+    {
+      title: "イベントの傾向",
+      table: "event_trend_definitions",
+      section: "イベントの傾向",
+      columns: 3,
+      onChange: setEventTrendKeys,
+    },
+    {
+      title: "荷物預かり",
+      table: "baggage_definitions",
+      section: "荷物預かり",
+      columns: 2,
+      onChange: setBaggageKeys,
+    },
+    {
+      title: "喫煙",
+      table: "smoking_definitions",
+      section: "喫煙",
+      columns: 2,
+      onChange: setSmokingKeys,
+    },
+    {
+      title: "トイレ",
+      table: "toilet_definitions",
+      section: "トイレ",
+      columns: 2,
+      onChange: setToiletKeys,
+    },
+    {
+      title: "その他",
+      table: "other_definitions",
+      section: "その他",
+      columns: 2,
+      onChange: setOtherKeys,
+    },
+  ] satisfies GenericConfig[]
 
   return (
     <>
@@ -102,7 +163,7 @@ export default function HomeFilterSections({
         />
       </section>
 
-      {/* ================= ドリンク ================= */}
+      {/* ================= ドリンク（専用） ================= */}
       {setDrinkKeys && (
         <section className="mt-14 px-4">
           <h2 className="mb-4 text-lg font-bold border-b pb-2">
@@ -117,7 +178,7 @@ export default function HomeFilterSections({
         </section>
       )}
 
-      {/* ================= 軽量フィルタ ================= */}
+      {/* ================= その他フィルタ ================= */}
       {ITEMS.map((item) => (
         <section key={item.table} className="mt-14 px-4">
           <GenericSelector
@@ -126,6 +187,7 @@ export default function HomeFilterSections({
             selection="multi"
             onChange={item.onChange!}
             clearKey={clearKey}
+            columns={item.columns}
           />
         </section>
       ))}

@@ -23,7 +23,7 @@ import { useHomeStoreFilters } from "@/hooks/useStoreFilters"
 import type { StoreType } from "@/types/store"
 
 // ==============================
-// 地域キー（AreaSelector用）
+// 地域キー
 // ==============================
 export type RegionKey =
   | "北海道・東北"
@@ -36,68 +36,41 @@ export type RegionKey =
 export default function HomePage() {
   const router = useRouter()
 
-  // ==============================
-  // 店舗タイプ（最上位）
-  // ==============================
-  const [storeType, setStoreType] = useState<StoreType>("club")
+  // ✅ 未選択 = null に統一
+  const [storeType, setStoreType] = useState<StoreType | null>(null)
 
-  // ==============================
-  // データ取得
-  // ==============================
   const { stores, loading } = useHomeStores()
   const masters = useHomeMasters()
 
-  // ==============================
-  // Home 専用フィルタ（軽量）
-  // ==============================
-  const filter = useHomeStoreFilters(
-    stores,
-    masters.externalLabelMap,
-    { storeType }
-  )
+  const filter = useHomeStoreFilters(stores, masters.externalLabelMap, {
+    storeType, // null OK
+  })
 
-  const {
-    filteredStores,
-    selectedFilters,
-    count,
-    handleClear,
-    ...setters
-  } = filter
+  const { filteredStores, selectedFilters, count, handleClear, ...setters } = filter
 
-  // ==============================
-  // clearKey（Selector 同期用）
-  // ==============================
   const [clearKey, setClearKey] = useState(0)
-
   const handleClearAll = () => {
     handleClear()
     setClearKey((v) => v + 1)
+    setStoreType(null) // ✅ 店舗タイプもクリアしたいなら入れる
   }
 
-  // ==============================
-  // refs（スクロール / セクション管理）
-  // ==============================
   const refs = useHomeRefs()
 
-  // ==============================
-  // 検索結果ページ遷移
-  // ==============================
   const handleGoToStores = () => {
     const params = new URLSearchParams()
 
-    params.set("type", storeType)
+    // ✅ 選択されているときだけ付与
+    if (storeType) params.set("type", storeType)
+
     selectedFilters.forEach((f) => params.append("filters", f))
     filteredStores.forEach((s) => params.append("ids", s.id))
 
     router.push(`/stores?${params.toString()}`)
   }
 
-  // ==============================
-  // UI
-  // ==============================
   return (
     <>
-      {/* ================= Hero ================= */}
       <div className="relative w-full text-white overflow-hidden">
         <CurvedBackground />
 
@@ -118,23 +91,17 @@ export default function HomePage() {
         <div className="h-[160px]" />
       </div>
 
-      {/* ================= Sticky StoreType ================= */}
       <SearchFilterStickyWrapper>
         <StoreTypeFilter
-          activeType={storeType}
-          onChange={setStoreType}
+          activeType={storeType}     // ✅ null OK
+          onChange={setStoreType}    // ✅ (StoreType | null) => void
         />
       </SearchFilterStickyWrapper>
 
-      {/* ================= Filters ================= */}
       <HomeFilterSections
         clearKey={clearKey}
-
-        // 🔴 明示的に渡す（必須）
         setPrefectureIds={setters.setPrefectureIds}
         setAreaIds={setters.setAreaIds}
-
-        // 🔵 その他は spread でOK
         setCustomerKeys={setters.setCustomerKeys}
         setAtmosphereKeys={setters.setAtmosphereKeys}
         setSizeKey={setters.setSizeKeys}
@@ -146,11 +113,9 @@ export default function HomePage() {
         setSmokingKeys={setters.setSmokingKeys}
         setToiletKeys={setters.setToiletKeys}
         setOtherKeys={setters.setOtherKeys}
-
         {...refs}
       />
 
-      {/* ================= Bottom Search Bar ================= */}
       <FixedSearchBar
         selectedFilters={selectedFilters}
         onClear={handleClearAll}

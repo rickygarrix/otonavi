@@ -82,7 +82,7 @@ export default function DrinkSelector({
         {title}
       </h2>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         {items.map((item) => (
           <Chip
             key={item.id}

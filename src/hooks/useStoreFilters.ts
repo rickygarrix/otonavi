@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback } from "react"
 import type { HomeStore, StoreType } from "@/types/store"
 
 type Options = {
-  storeType?: StoreType
+  storeType?: StoreType | null
 }
 
 export function useHomeStoreFilters(
@@ -12,9 +12,6 @@ export function useHomeStoreFilters(
   externalLabelMap?: Map<string, string>,
   options?: Options
 ) {
-  // ============================
-  // state（Homeで使う分だけ）
-  // ============================
   const [prefectureIds, setPrefectureIds] = useState<string[]>([])
   const [areaIds, setAreaIds] = useState<string[]>([])
 
@@ -32,19 +29,12 @@ export function useHomeStoreFilters(
   const [toiletKeys, setToiletKeys] = useState<string[]>([])
   const [otherKeys, setOtherKeys] = useState<string[]>([])
 
-  // ============================
-  // labelMap（表示用）
-  // ============================
   const labelMap = useMemo(() => {
     const map = new Map<string, string>()
 
     stores.forEach((s) => {
-      if (s.prefecture_id && s.prefecture_label) {
-        map.set(s.prefecture_id, s.prefecture_label)
-      }
-      if (s.area_id && s.area_label) {
-        map.set(s.area_id, s.area_label)
-      }
+      if (s.prefecture_id && s.prefecture_label) map.set(s.prefecture_id, s.prefecture_label)
+      if (s.area_id && s.area_label) map.set(s.area_id, s.area_label)
     })
 
     externalLabelMap?.forEach((v, k) => {
@@ -54,28 +44,21 @@ export function useHomeStoreFilters(
     return map
   }, [stores, externalLabelMap])
 
-  // ============================
-  // 検索ロジック（Home特化）
-  // ============================
   const filteredStores = useMemo(() => {
     return stores.filter((s) => {
-      // 最上位：店舗タイプ
-      if (options?.storeType && s.store_type_id !== options.storeType) {
+      // ✅ null のときは無視、値があるときだけ絞る
+      if (options?.storeType != null && s.store_type_id !== options.storeType) {
         return false
       }
 
-      // エリア
-      if (
-        prefectureIds.length &&
-        (!s.prefecture_id || !prefectureIds.includes(s.prefecture_id))
-      ) return false
+      if (prefectureIds.length && (!s.prefecture_id || !prefectureIds.includes(s.prefecture_id))) {
+        return false
+      }
 
-      if (
-        areaIds.length &&
-        (!s.area_id || !areaIds.includes(s.area_id))
-      ) return false
+      if (areaIds.length && (!s.area_id || !areaIds.includes(s.area_id))) {
+        return false
+      }
 
-      // OR 条件まとめ
       const checks: [string[], string[]][] = [
         [customerKeys, s.customer_keys ?? []],
         [atmosphereKeys, s.atmosphere_keys ?? []],
@@ -91,7 +74,7 @@ export function useHomeStoreFilters(
       ]
 
       for (const [selected, storeValues] of checks) {
-        if (selected.length && !selected.some(k => storeValues.includes(k))) {
+        if (selected.length && !selected.some((k) => storeValues.includes(k))) {
           return false
         }
       }
@@ -118,9 +101,6 @@ export function useHomeStoreFilters(
 
   const count = filteredStores.length
 
-  // ============================
-  // 検索バー表示用
-  // ============================
   const selectedFilters = [
     ...prefectureIds,
     ...areaIds,
@@ -135,12 +115,8 @@ export function useHomeStoreFilters(
     ...smokingKeys,
     ...toiletKeys,
     ...otherKeys,
-  ]
-    .map((k) => labelMap.get(k) ?? k)
+  ].map((k) => labelMap.get(k) ?? k)
 
-  // ============================
-  // 全クリア
-  // ============================
   const handleClear = useCallback(() => {
     setPrefectureIds([])
     setAreaIds([])
@@ -158,7 +134,6 @@ export function useHomeStoreFilters(
   }, [])
 
   return {
-    // state
     prefectureIds, setPrefectureIds,
     areaIds, setAreaIds,
     customerKeys, setCustomerKeys,
@@ -173,7 +148,6 @@ export function useHomeStoreFilters(
     toiletKeys, setToiletKeys,
     otherKeys, setOtherKeys,
 
-    // result
     filteredStores,
     selectedFilters,
     count,
