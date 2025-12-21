@@ -5,7 +5,7 @@ import Link from "next/link"
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0D1B2A] text-white py-10 px-6 mt-12">
+    <footer className="bg-[#0D1B2A] text-white py-10 px-6">
       {/* ロゴ */}
       <div className="flex items-center space-x-3 mb-8">
         <Image
