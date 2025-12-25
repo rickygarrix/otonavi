@@ -59,7 +59,7 @@ export default function TokushoPage() {
 
         <section>
           <h2 className="font-semibold mb-2">動作環境</h2>
-          <p>スマートフォン／PCのブラウザ（Chrome / Safari / Edge）にて動作します。</p>
+          <p>スマートフォン/PCのブラウザ（Chrome / Safari / Edge）にて動作します。</p>
         </section>
       </div>
     </div>
