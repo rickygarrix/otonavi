@@ -35,6 +35,7 @@ export default function StoreDetailView({ store }: Props) {
     ["荷物預かり", join(store.baggage_labels)],
     ["喫煙", join(store.smoking_labels)],
     ["トイレ", join(store.toilet_labels)],
+    ["周辺環境", join(store.environment_labels)],
     ["その他", join(store.other_labels)],
   ]
 
