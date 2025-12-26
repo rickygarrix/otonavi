@@ -207,6 +207,8 @@ export function normalizeStore(raw: unknown): HomeStore {
       "payment_method_definitions"
     ).labels,
 
+    payment_method_other: asString(r.payment_method_other),
+
 
 
 

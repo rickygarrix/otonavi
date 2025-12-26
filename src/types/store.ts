@@ -1,8 +1,5 @@
 // types/store.ts
 export type StoreType = "club" | "bar" | "livehouse" | "other"
-// ============================
-// 営業時間（特別）
-// ============================
 
 // ============================
 // 実績（受賞）
@@ -52,7 +49,7 @@ export type HomeStore = {
   // ============================
   price_range_id: string | null
   price_range_label: string | null
-
+  payment_method_other?: string | null
   // ============================
   // 基本情報
   // ============================

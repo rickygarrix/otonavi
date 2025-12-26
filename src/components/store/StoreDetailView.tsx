@@ -14,10 +14,25 @@ import StoreOpenHours from "@/components/store/StoreOpenHours"
 import StoreDetailSections from "@/components/store/StoreDetailSections"
 import StoreDetailMedia from "./StoreDetailMedia"
 
+// ---------------------------------
+// utils
+// ---------------------------------
 const join = (v?: string[]) => (v?.length ? v.join("、") : null)
+const formatPaymentMethods = (
+  labels?: string[],
+  otherText?: string | null
+) => {
+  if (!labels?.length) return null
 
-type DetailRow = [label: string, value: string | null]
+  const hasOther = labels.includes("その他")
+  if (hasOther && otherText) {
+    const filtered = labels.filter((l) => l !== "その他")
+    return [...filtered, otherText].join("、")
+  }
+  return labels.join("、")
+}
 
+// ---------------------------------
 type Props = { store: HomeStore }
 
 export default function StoreDetailView({ store }: Props) {
@@ -30,7 +45,13 @@ export default function StoreDetailView({ store }: Props) {
     ["広さ", store.size_label],
     ["ドリンク", join(store.drink_labels)],
     ["価格帯", store.price_range_label],
-    ["支払い方法", join(store.payment_method_labels)],
+    [
+      "支払い方法",
+      formatPaymentMethods(
+        store.payment_method_labels,
+        store.payment_method_other
+      ),
+    ],
     ["イベントの傾向", join(store.event_trend_labels)],
     ["荷物預かり", join(store.baggage_labels)],
     ["喫煙", join(store.smoking_labels)],
