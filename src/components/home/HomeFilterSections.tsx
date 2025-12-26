@@ -32,6 +32,7 @@ type Props = {
   setBaggageKeys?: (v: string[]) => void
   setSmokingKeys?: (v: string[]) => void
   setToiletKeys?: (v: string[]) => void
+  setEnvironmentKeys?: (v: string[]) => void
   setOtherKeys?: (v: string[]) => void
 }
 
@@ -52,6 +53,7 @@ export default function HomeFilterSections({
   setBaggageKeys,
   setSmokingKeys,
   setToiletKeys,
+  setEnvironmentKeys,
   setOtherKeys,
 }: Props) {
   const handleAreaChange = useCallback(
@@ -72,6 +74,7 @@ export default function HomeFilterSections({
     { title: "荷物預かり", table: "baggage_definitions", section: "荷物預かり", columns: 2, onChange: setBaggageKeys },
     { title: "喫煙", table: "smoking_definitions", section: "喫煙", columns: 2, onChange: setSmokingKeys },
     { title: "トイレ", table: "toilet_definitions", section: "トイレ", columns: 2, onChange: setToiletKeys },
+    { title: "周辺環境", table: "environment_definitions", section: "周辺環境", columns: 3, onChange: setEnvironmentKeys },
     { title: "その他", table: "other_definitions", section: "その他", columns: 2, onChange: setOtherKeys },
   ] satisfies GenericConfig[]
 
@@ -90,7 +93,6 @@ export default function HomeFilterSections({
           ref={(el) => { sectionRefs.current["ドリンク"] = el }}
           className="mt-14 px-4 scroll-mt-[90px]"
         >
-          <h2 className="mb-4 text-lg font-bold border-b pb-2">ドリンク</h2>
           <DrinkSelector clearKey={clearKey} title="ドリンク" onChange={setDrinkKeys} />
         </section>
       )}

@@ -9,9 +9,9 @@ import Chip from "@/components/ui/Chip"
 // -------------------------------
 type Item = {
   id: string
-  key?: string | null
+  key: string
   label: string
-  description?: string | null
+  description?: string | null // ★ optional のまま
   is_active: boolean
 }
 
@@ -19,24 +19,21 @@ type BaseProps = {
   title: string
   table: string
   columns?: 2 | 3
-
-  // ✅ スクロール用
-  sectionRef?: React.RefObject<HTMLDivElement | null>
+  sectionRef?:
+  | React.RefObject<HTMLDivElement | null>
   | React.RefCallback<HTMLDivElement>
   | null
-
-  // ✅ 追加：クリア用
   clearKey?: number
 }
 
 type SingleProps = BaseProps & {
   selection: "single"
-  onChange: (value: string | null) => void
+  onChange?: (value: string | null) => void
 }
 
 type MultiProps = BaseProps & {
   selection: "multi"
-  onChange: (value: string[]) => void
+  onChange?: (value: string[]) => void
 }
 
 type Props = SingleProps | MultiProps
@@ -50,22 +47,22 @@ export default function GenericSelector(props: Props) {
     onChange,
     columns = 2,
     sectionRef,
-    clearKey, // ✅ 追加
+    clearKey,
   } = props
 
   const [items, setItems] = useState<Item[]>([])
-  const [selectedIds, setSelectedIds] = useState<string[] | string | null>(
+  const [selectedKeys, setSelectedKeys] = useState<string[] | string | null>(
     selection === "single" ? null : []
   )
 
   // -------------------------------
-  // ✅ マスタ読込（初回だけ）
+  // マスタ読込（★ description を select しない）
   // -------------------------------
   useEffect(() => {
     const load = async () => {
       const { data, error } = await supabase
         .from(table)
-        .select("*")
+        .select("id, key, label, is_active")
         .eq("is_active", true)
         .order("label", { ascending: true })
 
@@ -81,63 +78,62 @@ export default function GenericSelector(props: Props) {
   }, [table])
 
   // -------------------------------
-  // ✅ すべてクリア時の完全リセット
+  // クリア
   // -------------------------------
   useEffect(() => {
     if (clearKey === undefined) return
 
     if (selection === "single") {
-      setSelectedIds(null)
-      onChange(null)
+      setSelectedKeys(null)
+      onChange?.(null)
     } else {
-      setSelectedIds([])
-      onChange([])
+      setSelectedKeys([])
+      onChange?.([])
     }
   }, [clearKey, selection, onChange])
 
   // -------------------------------
-  // トグル処理
+  // toggle（key ベース）
   // -------------------------------
-  const toggle = (id: string) => {
+  const toggle = (key: string) => {
     if (selection === "single") {
-      const next = selectedIds === id ? null : id
-      setSelectedIds(next)
-      onChange(next)
+      const next = selectedKeys === key ? null : key
+      setSelectedKeys(next)
+      onChange?.(next)
       return
     }
 
-    const prev = Array.isArray(selectedIds) ? selectedIds : []
-    const next = prev.includes(id)
-      ? prev.filter((v) => v !== id)
-      : [...prev, id]
+    const prev = Array.isArray(selectedKeys) ? selectedKeys : []
+    const next = prev.includes(key)
+      ? prev.filter((v) => v !== key)
+      : [...prev, key]
 
-    setSelectedIds(next)
-    onChange(next)
+    setSelectedKeys(next)
+    onChange?.(next)
   }
 
-  const isSelected = (id: string) =>
+  const isSelected = (key: string) =>
     selection === "single"
-      ? selectedIds === id
-      : Array.isArray(selectedIds) && selectedIds.includes(id)
+      ? selectedKeys === key
+      : Array.isArray(selectedKeys) && selectedKeys.includes(key)
 
   // -------------------------------
-  // description（補足説明）
+  // description（存在する時だけ）
   // -------------------------------
   const selectedDescriptions = (() => {
     if (!items.some((i) => i.description)) return null
 
     if (selection === "single") {
-      const id = selectedIds as string | null
-      const found = items.find((i) => i.id === id)
-      return found?.description ?? null
+      const key = selectedKeys as string | null
+      return items.find((i) => i.key === key)?.description ?? null
     }
 
-    const ids = Array.isArray(selectedIds) ? selectedIds : []
-    const descs = ids
-      .map((id) => items.find((i) => i.id === id)?.description)
+    const keys = Array.isArray(selectedKeys) ? selectedKeys : []
+    const descs = keys
+      .map((k) => items.find((i) => i.key === k)?.description)
       .filter(Boolean)
 
-    return descs.length > 0 ? descs.join(" / ") : null
+    return descs.length ? descs.join(" / ") : null
   })()
 
   // -------------------------------
@@ -145,7 +141,6 @@ export default function GenericSelector(props: Props) {
   // -------------------------------
   return (
     <div className="w-full px-6 py-6">
-      {/* 🎯 スクロールアンカー */}
       <div ref={sectionRef ?? null} className="scroll-mt-[90px]" />
 
       <h2 className="text-lg font-bold text-slate-900 mb-6">
@@ -158,10 +153,10 @@ export default function GenericSelector(props: Props) {
       >
         {items.map((item) => (
           <Chip
-            key={item.id}
+            key={item.key}
             label={item.label}
-            selected={isSelected(item.id)}
-            onClick={() => toggle(item.id)}
+            selected={isSelected(item.key)}
+            onClick={() => toggle(item.key)}
           />
         ))}
       </div>

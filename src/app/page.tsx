@@ -132,6 +132,7 @@ export default function HomePage() {
         setBaggageKeys={setters.setBaggageKeys}
         setSmokingKeys={setters.setSmokingKeys}
         setToiletKeys={setters.setToiletKeys}
+        setEnvironmentKeys={setters.setEnvironmentKeys}
         setOtherKeys={setters.setOtherKeys}
       />
 

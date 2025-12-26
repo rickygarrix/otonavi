@@ -34,7 +34,6 @@ type StoreRow = {
   tiktok_url: string | null
   official_site_url: string | null
 
-  // ★ 追加
   business_hours: string | null
 
   prefecture: { id: string; name_ja: string } | null
@@ -42,27 +41,8 @@ type StoreRow = {
 
   store_type: { id: string; label: string } | null
   price_range: { id: string; label: string } | null
-
   size: DefinitionKV | null
-  hospitality_def: DefinitionKV | null
 
-  open_hours: {
-    day_of_week: number
-    open_time: string | null
-    close_time: string | null
-    last_order_time: string | null
-    is_closed: boolean
-  }[]
-
-  special_hours: {
-    start_date: string
-    end_date: string
-    open_time: string | null
-    close_time: string | null
-    last_order_time: string | null
-    is_closed: boolean
-    reason: string | null
-  }[]
 
   event_trends: { event_trend_definitions: DefinitionKV | null }[]
   rules: { rule_definitions: DefinitionKV | null }[]
@@ -118,28 +98,8 @@ export function useHomeStores() {
           store_type:store_type_id ( id, label ),
           price_range:price_range_id ( id, label ),
           size:size ( key, label ),
-          hospitality_def:hospitality ( key, label ),
-
-          open_hours:store_open_hours (
-            day_of_week,
-            open_time,
-            close_time,
-            last_order_time,
-            is_closed
-          ),
-
-          special_hours:store_special_open_hours (
-            start_date,
-            end_date,
-            open_time,
-            close_time,
-            last_order_time,
-            is_closed,
-            reason
-          ),
 
           event_trends:store_event_trends ( event_trend_definitions ( key, label ) ),
-          rules:store_rules ( rule_definitions ( key, label ) ),
 
           store_images:store_images (
             image_url,
@@ -147,6 +107,13 @@ export function useHomeStores() {
             order_num
           )
         `)
+
+      if (error) {
+        console.error("useHomeStores load error:", error)
+        setStores([])
+        setLoading(false)
+        return
+      }
 
       if (!data) {
         setStores([])
@@ -189,6 +156,9 @@ export function useHomeStores() {
           price_range_id: s.price_range?.id ?? null,
           price_range_label: s.price_range?.label ?? null,
 
+          size_key: s.size?.key ?? null,
+          size_label: s.size?.label ?? null,
+
           image_url,
           description: s.description,
 
@@ -205,12 +175,10 @@ export function useHomeStores() {
           // ============================
           // 営業時間
           // ============================
-          open_hours: s.open_hours,
-          special_hours: s.special_hours,
-          business_hours: s.business_hours, // ★ 正解
+          business_hours: s.business_hours,
 
           // ============================
-          // 実績
+          // 実績（仮）
           // ============================
           hasAward: false,
           hasMedia: false,
@@ -223,62 +191,35 @@ export function useHomeStores() {
           event_trend_keys: extractKeys(s.event_trends, "event_trend_definitions"),
           event_trend_labels: extractLabels(s.event_trends, "event_trend_definitions"),
 
-          rule_keys: extractKeys(s.rules, "rule_definitions"),
-          rule_labels: extractLabels(s.rules, "rule_definitions"),
-
           // ============================
-          // M2M（未取得）
+          // M2M（未取得：空配列）
           // ============================
           baggage_keys: [],
           baggage_labels: [],
-          security_keys: [],
-          security_labels: [],
+
           toilet_keys: [],
           toilet_labels: [],
-          floor_keys: [],
-          floor_labels: [],
-          seat_type_keys: [],
-          seat_type_labels: [],
+
           smoking_keys: [],
           smoking_labels: [],
+
           environment_keys: [],
           environment_labels: [],
+
           other_keys: [],
           other_labels: [],
-          pricing_system_keys: [],
-          pricing_system_labels: [],
-          discount_keys: [],
-          discount_labels: [],
-          vip_keys: [],
-          vip_labels: [],
+
           payment_method_keys: [],
           payment_method_labels: [],
-          sound_keys: [],
-          sound_labels: [],
-          lighting_keys: [],
-          lighting_labels: [],
-          production_keys: [],
-          production_labels: [],
+
           customer_keys: [],
           customer_labels: [],
+
           atmosphere_keys: [],
           atmosphere_labels: [],
-          food_keys: [],
-          food_labels: [],
-          service_keys: [],
-          service_labels: [],
+
           drink_keys: [],
           drink_labels: [],
-          drink_categories: {},
-
-          // ============================
-          // 単一選択
-          // ============================
-          hospitality_key: s.hospitality_def?.key ?? null,
-          hospitality_label: s.hospitality_def?.label ?? null,
-
-          size_key: s.size?.key ?? null,
-          size_label: s.size?.label ?? null,
 
           // ============================
           // その他
