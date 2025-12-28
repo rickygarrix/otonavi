@@ -5,9 +5,6 @@ import { useCallback } from "react"
 import type React from "react"
 import type { RegionKey } from "@/types/region"
 
-// --------------------
-// Refs 型
-// --------------------
 type Refs = {
   regionRefs: Record<RegionKey, React.RefObject<HTMLDivElement | null>>
   areaRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>
@@ -16,9 +13,6 @@ type Refs = {
   genericSectionRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>
 }
 
-// --------------------
-// Params 型
-// --------------------
 type Params = {
   areaMap: Map<string, { is_23ward: boolean }>
   drinkCategoryMap: Map<string, string>
@@ -27,9 +21,6 @@ type Params = {
   refs: Refs
 }
 
-// --------------------
-// Hook
-// --------------------
 export function useHomeScroll({
   areaMap,
   drinkCategoryMap,

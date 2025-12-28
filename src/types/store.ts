@@ -1,9 +1,6 @@
 // types/store.ts
 export type StoreType = "club" | "bar" | "livehouse" | "other"
 
-// ============================
-// 実績（受賞）
-// ============================
 export type StoreAward = {
   id: string
   title: string
@@ -12,47 +9,30 @@ export type StoreAward = {
   url: string | null
 }
 
-// ============================
-// 実績（メディア）
-// ============================
 export type StoreMediaMention = {
   id: string
   media_name: string
   year: number | null
 }
 
-// ============================
-// Home / 詳細 共通 Store 型
-// ============================
 export type HomeStore = {
   id: string
   name: string
   name_kana: string | null
 
-  // ============================
-  // エリア系
-  // ============================
   prefecture_id: string | null
   prefecture_label: string | null
 
   area_id: string | null
   area_label: string | null
 
-  // ============================
-  // 店舗タイプ
-  // ============================
   store_type_id: string | null
   type_label: string | null
 
-  // ============================
-  // 価格帯
-  // ============================
   price_range_id: string | null
   price_range_label: string | null
   payment_method_other?: string | null
-  // ============================
-  // 基本情報
-  // ============================
+
   image_url: string
   description: string | null
 
@@ -66,23 +46,14 @@ export type HomeStore = {
   google_map_url: string | null
   address: string | null
 
-  // ============================
-  // 営業時間
-  // ============================
   business_hours: string | null
 
-  // ============================
-  // 実績（★今回の肝）
-  // ============================
   hasAward: boolean
   hasMedia: boolean
 
   store_awards: StoreAward[]
   store_media_mentions: StoreMediaMention[]
 
-  // ============================
-  // M2M（keys = 検索 / labels = 表示）
-  // ============================
   event_trend_keys: string[]
   event_trend_labels: string[]
 
@@ -110,18 +81,11 @@ export type HomeStore = {
   atmosphere_keys: string[]
   atmosphere_labels: string[]
 
-  // ============================
-  // ドリンク（カテゴリ対応）
-  // ============================
   drink_keys: string[]
   drink_labels: string[]
-
 
   size_key: string | null
   size_label: string | null
 
-  // ============================
-  // その他
-  // ============================
   updated_at: string
 }

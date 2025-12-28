@@ -12,9 +12,7 @@ export function useHomeStoreFilters(
   externalLabelMap?: Map<string, string>,
   options?: Options
 ) {
-  // ============================
-  // state
-  // ============================
+
   const [prefectureIds, setPrefectureIds] = useState<string[]>([])
   const [areaIds, setAreaIds] = useState<string[]>([])
 
@@ -33,9 +31,6 @@ export function useHomeStoreFilters(
   const [toiletKeys, setToiletKeys] = useState<string[]>([])
   const [otherKeys, setOtherKeys] = useState<string[]>([])
 
-  // ============================
-  // ID / key → label map
-  // ============================
   const labelMap = useMemo(() => {
     const map = new Map<string, string>()
 
@@ -57,9 +52,6 @@ export function useHomeStoreFilters(
     return map
   }, [stores, externalLabelMap])
 
-  // ============================
-  // filtering core
-  // ============================
   const filteredStores = useMemo(() => {
     return stores.filter((s) => {
       if (
@@ -125,9 +117,6 @@ export function useHomeStoreFilters(
     otherKeys,
   ])
 
-  // ============================
-  // derived
-  // ============================
   const count = filteredStores.length
 
   const selectedFilters = [
@@ -147,9 +136,6 @@ export function useHomeStoreFilters(
     ...otherKeys,
   ].map((k) => labelMap.get(k) ?? k)
 
-  // ============================
-  // clear
-  // ============================
   const handleClear = useCallback(() => {
     setPrefectureIds([])
     setAreaIds([])
@@ -167,9 +153,6 @@ export function useHomeStoreFilters(
     setOtherKeys([])
   }, [])
 
-  // ============================
-  // return
-  // ============================
   return {
     prefectureIds, setPrefectureIds,
     areaIds, setAreaIds,

@@ -1,9 +1,6 @@
 // lib/normalizeStore.ts
 import type { HomeStore } from "@/types/store"
 
-// ================================
-// 型ガード / util
-// ================================
 type Rec = Record<string, unknown>
 
 const isRec = (v: unknown): v is Rec =>
@@ -18,17 +15,11 @@ const asNumber = (v: unknown): number | null =>
 const asArray = (v: unknown): unknown[] =>
   Array.isArray(v) ? v : []
 
-// ================================
-// M2M definitions（key / label）
-// ================================
 type DefinitionKV = {
   key: string
   label: string
 }
 
-// ================================
-// extract M2M helper
-// ================================
 function extractM2M(
   list: unknown,
   defKey: string
@@ -53,9 +44,6 @@ function extractM2M(
   return { keys, labels }
 }
 
-// ================================
-// normalize
-// ================================
 export function normalizeStore(raw: unknown): HomeStore {
   if (!isRec(raw)) {
     throw new Error("normalizeStore: raw is invalid")
@@ -63,9 +51,6 @@ export function normalizeStore(raw: unknown): HomeStore {
 
   const r = raw
 
-  // =====================
-  // 実績
-  // =====================
   const store_awards = asArray(r.store_awards)
     .filter(isRec)
     .map((a) => ({
@@ -84,13 +69,7 @@ export function normalizeStore(raw: unknown): HomeStore {
       year: asNumber(m.year),
     }))
 
-  // =====================
-  // return
-  // =====================
   return {
-    // ============================
-    // 基本
-    // ============================
     id: asString(r.id) ?? "",
     name: asString(r.name) ?? "",
     name_kana: asString(r.name_kana),
@@ -132,17 +111,11 @@ export function normalizeStore(raw: unknown): HomeStore {
 
     updated_at: asString(r.updated_at) ?? "",
 
-    // ============================
-    // 実績
-    // ============================
     hasAward: store_awards.length > 0,
     hasMedia: store_media_mentions.length > 0,
     store_awards,
     store_media_mentions,
 
-    // ============================
-    // M2M（検索・表示用）
-    // ============================
     event_trend_keys: extractM2M(
       r.store_event_trends,
       "event_trend_definitions"
@@ -197,7 +170,6 @@ export function normalizeStore(raw: unknown): HomeStore {
       "other_definitions"
     ).labels,
 
-
     payment_method_keys: extractM2M(
       r.store_payment_methods,
       "payment_method_definitions"
@@ -208,9 +180,6 @@ export function normalizeStore(raw: unknown): HomeStore {
     ).labels,
 
     payment_method_other: asString(r.payment_method_other),
-
-
-
 
     customer_keys: extractM2M(
       r.store_customers,
@@ -230,15 +199,9 @@ export function normalizeStore(raw: unknown): HomeStore {
       "atmosphere_definitions"
     ).labels,
 
-    // ============================
-    // ドリンク
-    // ============================
     drink_keys: [],
     drink_labels: [],
 
-    // ============================
-    // 単一選択
-    // ============================
     size_key: asString(r.size),
     size_label: isRec(r.size_definitions)
       ? asString(r.size_definitions.label)

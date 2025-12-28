@@ -3,37 +3,8 @@
 import { useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import type { RegionKey } from "@/types/region"
+import type { Prefecture, Area, DrinkDefinition, GenericMaster, } from "@/types/master"
 
-// ================================
-// 型定義
-// ================================
-type Prefecture = {
-  id: string
-  name_ja: string
-  region: string
-}
-
-type Area = {
-  id: string
-  name: string
-  is_23ward: boolean
-}
-
-type DrinkDefinition = {
-  key: string
-  label: string
-}
-
-type GenericMaster = {
-  id: string
-  key: string
-  label: string
-  table: string
-}
-
-// ================================
-// テーブル → セクション名
-// ================================
 const TABLE_TO_SECTION: Record<string, string> = {
   store_types: "店舗タイプ",
   event_trend_definitions: "イベントの傾向",
