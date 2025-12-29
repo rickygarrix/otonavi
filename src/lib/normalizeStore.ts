@@ -1,10 +1,8 @@
 // lib/normalizeStore.ts
 import type { HomeStore } from "@/types/store"
+import type { StoreRow } from "@/types/store-db"
 
 type Rec = Record<string, unknown>
-
-const isRec = (v: unknown): v is Rec =>
-  typeof v === "object" && v !== null && !Array.isArray(v)
 
 const asString = (v: unknown): string | null =>
   typeof v === "string" ? v : null
@@ -12,104 +10,99 @@ const asString = (v: unknown): string | null =>
 const asNumber = (v: unknown): number | null =>
   typeof v === "number" ? v : null
 
-const asArray = (v: unknown): unknown[] =>
-  Array.isArray(v) ? v : []
-
-type DefinitionKV = {
-  key: string
-  label: string
-}
+const asArray = <T = unknown>(v: unknown): T[] =>
+  Array.isArray(v) ? (v as T[]) : []
 
 function extractM2M(
   list: unknown,
   defKey: string
 ): { keys: string[]; labels: string[] } {
-  const rows = asArray(list)
-
   const keys: string[] = []
   const labels: string[] = []
 
-  for (const row of rows) {
-    if (!isRec(row)) continue
-    const def = row[defKey]
-    if (!isRec(def)) continue
+  if (!Array.isArray(list)) {
+    return { keys, labels }
+  }
 
-    const key = asString(def.key)
-    const label = asString(def.label)
+  for (const row of list) {
+    const def = (row as any)?.[defKey]
+    if (!def) continue
 
-    if (key) keys.push(key)
-    if (label) labels.push(label)
+    if (typeof def.key === "string") keys.push(def.key)
+    if (typeof def.label === "string") labels.push(def.label)
   }
 
   return { keys, labels }
 }
 
-export function normalizeStore(raw: unknown): HomeStore {
-  if (!isRec(raw)) {
-    throw new Error("normalizeStore: raw is invalid")
-  }
+function selectImage(store_images: StoreRow["store_images"]): string {
+  if (!store_images?.length) return "/default_shop.svg"
 
-  const r = raw
+  const main = store_images.find((i) => i.is_main)
+  if (main?.image_url) return main.image_url
 
-  const store_awards = asArray(r.store_awards)
-    .filter(isRec)
-    .map((a) => ({
-      id: String(a.id ?? ""),
-      title: String(a.title ?? ""),
-      organization: asString(a.organization),
-      year: asNumber(a.year),
-      url: asString(a.url),
-    }))
+  const sorted = [...store_images].sort(
+    (a, b) => (a.order_num ?? 999) - (b.order_num ?? 999)
+  )
 
-  const store_media_mentions = asArray(r.store_media_mentions)
-    .filter(isRec)
-    .map((m) => ({
-      id: String(m.id ?? ""),
-      media_name: String(m.media_name ?? ""),
-      year: asNumber(m.year),
-    }))
+  return sorted[0]?.image_url ?? "/default_shop.svg"
+}
+
+export function normalizeStore(raw: StoreRow): HomeStore {
+  const store_awards = asArray(raw.store_awards).map((a: any) => ({
+    id: String(a.id ?? ""),
+    title: String(a.title ?? ""),
+    organization: asString(a.organization),
+    year: asNumber(a.year),
+    url: asString(a.url),
+  }))
+
+  const store_media_mentions = asArray(raw.store_media_mentions).map((m: any) => ({
+    id: String(m.id ?? ""),
+    media_name: String(m.media_name ?? ""),
+    year: asNumber(m.year),
+  }))
 
   return {
-    id: asString(r.id) ?? "",
-    name: asString(r.name) ?? "",
-    name_kana: asString(r.name_kana),
+    id: raw.id,
+    name: raw.name,
+    name_kana: raw.name_kana,
 
-    prefecture_id: asString(r.prefecture_id),
-    prefecture_label: isRec(r.prefectures)
-      ? asString(r.prefectures.name_ja)
-      : null,
+    prefecture_id: raw.prefectures?.id ?? null,
+    prefecture_label: raw.prefectures?.name_ja ?? null,
 
-    area_id: asString(r.area_id),
-    area_label: isRec(r.areas)
-      ? asString(r.areas.name)
-      : null,
+    area_id: raw.areas?.id ?? null,
+    area_label: raw.areas?.name ?? null,
 
-    store_type_id: asString(r.store_type_id),
-    type_label: isRec(r.store_types)
-      ? asString(r.store_types.label)
-      : null,
+    store_type_id: raw.store_types?.id ?? null,
+    type_label: raw.store_types?.label ?? null,
 
-    price_range_id: asString(r.price_range_id),
-    price_range_label: isRec(r.price_range_definitions)
-      ? asString(r.price_range_definitions.label)
-      : null,
+    price_range_id: raw.price_range_definitions?.id ?? null,
+    price_range_label: raw.price_range_definitions?.label ?? null,
 
-    image_url: asString(r.image_url) ?? "",
-    description: asString(r.description),
+    payment_method_keys: extractM2M(
+      raw.store_payment_methods,
+      "payment_method_definitions"
+    ).keys,
+    payment_method_labels: extractM2M(
+      raw.store_payment_methods,
+      "payment_method_definitions"
+    ).labels,
+    payment_method_other: raw.payment_method_other,
 
-    instagram_url: asString(r.instagram_url),
-    x_url: asString(r.x_url),
-    facebook_url: asString(r.facebook_url),
-    tiktok_url: asString(r.tiktok_url),
-    official_site_url: asString(r.official_site_url),
+    image_url: selectImage(raw.store_images),
+    description: raw.description,
 
-    access: asString(r.access),
-    google_map_url: asString(r.google_map_url),
-    address: asString(r.address),
+    instagram_url: raw.instagram_url,
+    x_url: raw.x_url,
+    facebook_url: raw.facebook_url,
+    tiktok_url: raw.tiktok_url,
+    official_site_url: raw.official_site_url,
 
-    business_hours: asString(r.business_hours),
-
-    updated_at: asString(r.updated_at) ?? "",
+    access: raw.access,
+    google_map_url: raw.google_map_url,
+    address: raw.address,
+    business_hours: raw.business_hours,
 
     hasAward: store_awards.length > 0,
     hasMedia: store_media_mentions.length > 0,
@@ -117,94 +110,53 @@ export function normalizeStore(raw: unknown): HomeStore {
     store_media_mentions,
 
     event_trend_keys: extractM2M(
-      r.store_event_trends,
+      raw.store_event_trends,
       "event_trend_definitions"
     ).keys,
     event_trend_labels: extractM2M(
-      r.store_event_trends,
+      raw.store_event_trends,
       "event_trend_definitions"
     ).labels,
 
-    baggage_keys: extractM2M(
-      r.store_baggage,
-      "baggage_definitions"
-    ).keys,
-    baggage_labels: extractM2M(
-      r.store_baggage,
-      "baggage_definitions"
-    ).labels,
+    baggage_keys: extractM2M(raw.store_baggage, "baggage_definitions").keys,
+    baggage_labels: extractM2M(raw.store_baggage, "baggage_definitions").labels,
 
-    toilet_keys: extractM2M(
-      r.store_toilet,
-      "toilet_definitions"
-    ).keys,
-    toilet_labels: extractM2M(
-      r.store_toilet,
-      "toilet_definitions"
-    ).labels,
+    toilet_keys: extractM2M(raw.store_toilet, "toilet_definitions").keys,
+    toilet_labels: extractM2M(raw.store_toilet, "toilet_definitions").labels,
 
-    smoking_keys: extractM2M(
-      r.store_smoking,
-      "smoking_definitions"
-    ).keys,
-    smoking_labels: extractM2M(
-      r.store_smoking,
-      "smoking_definitions"
-    ).labels,
+    smoking_keys: extractM2M(raw.store_smoking, "smoking_definitions").keys,
+    smoking_labels: extractM2M(raw.store_smoking, "smoking_definitions").labels,
 
     environment_keys: extractM2M(
-      r.store_environment,
+      raw.store_environment,
       "environment_definitions"
     ).keys,
     environment_labels: extractM2M(
-      r.store_environment,
+      raw.store_environment,
       "environment_definitions"
     ).labels,
 
-    other_keys: extractM2M(
-      r.store_other,
-      "other_definitions"
-    ).keys,
-    other_labels: extractM2M(
-      r.store_other,
-      "other_definitions"
-    ).labels,
+    other_keys: extractM2M(raw.store_other, "other_definitions").keys,
+    other_labels: extractM2M(raw.store_other, "other_definitions").labels,
 
-    payment_method_keys: extractM2M(
-      r.store_payment_methods,
-      "payment_method_definitions"
-    ).keys,
-    payment_method_labels: extractM2M(
-      r.store_payment_methods,
-      "payment_method_definitions"
-    ).labels,
-
-    payment_method_other: asString(r.payment_method_other),
-
-    customer_keys: extractM2M(
-      r.store_customers,
-      "customer_definitions"
-    ).keys,
-    customer_labels: extractM2M(
-      r.store_customers,
-      "customer_definitions"
-    ).labels,
+    customer_keys: extractM2M(raw.store_customers, "customer_definitions").keys,
+    customer_labels: extractM2M(raw.store_customers, "customer_definitions").labels,
 
     atmosphere_keys: extractM2M(
-      r.store_atmospheres,
+      raw.store_atmospheres,
       "atmosphere_definitions"
     ).keys,
     atmosphere_labels: extractM2M(
-      r.store_atmospheres,
+      raw.store_atmospheres,
       "atmosphere_definitions"
     ).labels,
 
     drink_keys: [],
     drink_labels: [],
 
-    size_key: asString(r.size),
-    size_label: isRec(r.size_definitions)
-      ? asString(r.size_definitions.label)
-      : null,
+    size_key: raw.size_definitions?.key ?? null,
+    size_label: raw.size_definitions?.label ?? null,
+
+    updated_at: raw.updated_at,
   }
 }

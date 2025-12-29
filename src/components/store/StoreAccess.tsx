@@ -2,20 +2,12 @@
 
 import type { HomeStore } from "@/types/store"
 
-// -------------------------------
-// Google Map 埋め込み（URL → lat,lng 抽出）
-// -------------------------------
 function GoogleMapEmbed({ url }: { url: string }) {
-  /**
-   * Google Maps のURL例：
-   * https://www.google.com/maps/place/.../@35.6583059,139.6928299,16z/...
-   *
-   * → @lat,lng を抽出する
-   */
+
   const match = url.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/)
 
   if (!match) {
-    // 想定外のURL形式の場合は地図を出さない（安全）
+
     return null
   }
 
@@ -36,9 +28,6 @@ function GoogleMapEmbed({ url }: { url: string }) {
   )
 }
 
-// -------------------------------
-// StoreAccess
-// -------------------------------
 type Props = {
   store: HomeStore
 }

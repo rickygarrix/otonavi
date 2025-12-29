@@ -30,9 +30,6 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-Brand-Light-2 flex flex-col">
-      {/* =========================
-          固定ヘッダー
-      ========================= */}
       <div
         className="
           fixed top-0 left-0 right-0 z-50
@@ -41,12 +38,9 @@ export default function ContactPage() {
           bg-white/70 backdrop-blur
         "
       >
-        {/* 左：ホームボタン */}
         <HomeButton onHome={() => router.push("/")} />
 
-        {/* 入力ステップ */}
         <div className="flex items-center gap-3">
-          {/* 入力（アクティブ） */}
           <div className="w-10 h-10 rounded-full bg-blue-600 text-white
                           flex items-center justify-center
                           text-xs font-bold">
@@ -55,22 +49,16 @@ export default function ContactPage() {
 
           <div className="w-16 h-[2px] bg-blue-400" />
 
-          {/* 確認（未到達） */}
           <div className="w-3 h-3 rounded-full bg-slate-300" />
 
           <div className="w-16 h-[2px] bg-slate-200" />
 
-          {/* 完了（未到達） */}
           <div className="w-3 h-3 rounded-full bg-slate-300" />
         </div>
       </div>
 
-      {/* ヘッダー分の余白 */}
       <div className="h-20" />
 
-      {/* =========================
-          ヘッダー説明文
-      ========================= */}
       <div className="w-full px-6 py-10 flex flex-col items-center gap-6">
         <h1
           className="
@@ -102,9 +90,6 @@ export default function ContactPage() {
         </p>
       </div>
 
-      {/* =========================
-    フォーム
-========================= */}
       <div className="px-6 pb-20 flex flex-col gap-6">
 
         {/* お名前 */}
@@ -128,7 +113,6 @@ export default function ContactPage() {
           />
         </div>
 
-        {/* メールアドレス */}
         <div className="w-full flex flex-col gap-2">
           <div className="flex items-center gap-1 text-sm text-Brand-Dark-1">
             <span>メールアドレス</span>
@@ -149,7 +133,6 @@ export default function ContactPage() {
           />
         </div>
 
-        {/* お問い合わせ内容 */}
         <div className="w-full flex flex-col gap-2">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-1 text-sm text-Brand-Dark-1">

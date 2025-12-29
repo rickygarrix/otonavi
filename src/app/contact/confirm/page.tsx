@@ -38,7 +38,6 @@ export default function ContactConfirmPage() {
         body: JSON.stringify(form),
       })
 
-      // ★ ここでは消さない
       router.push("/contact/complete")
     } finally {
       setSending(false)
@@ -148,8 +147,6 @@ export default function ContactConfirmPage() {
           </button>
         </div>
       </div>
-
-      {/* Footerは普通に最後 */}
       <Footer />
     </div>
   )

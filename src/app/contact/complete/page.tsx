@@ -25,9 +25,7 @@ export default function ContactCompletePage() {
 
   return (
     <div className="min-h-screen bg-Brand-Light-2 flex flex-col">
-      {/* =========================
-          固定ヘッダー（完了）
-      ========================= */}
+
       <div className="fixed top-0 left-0 right-0 z-50 h-20 px-4 flex items-center gap-4 bg-white/70 backdrop-blur">
         <HomeButton onHome={() => router.push("/")} />
 
@@ -42,12 +40,7 @@ export default function ContactCompletePage() {
         </div>
       </div>
 
-      {/* ヘッダー余白 */}
       <div className="h-20" />
-
-      {/* =========================
-          完了メッセージ
-      ========================= */}
       <div className="px-6 py-10 flex flex-col gap-6">
         <h1 className="text-xl font-bold tracking-widest text-Brand-Dark-1">
           お問い合わせ完了
@@ -80,10 +73,6 @@ export default function ContactCompletePage() {
           ホームへ
         </button>
       </div>
-
-      {/* =========================
-          ★ 送信内容（ホームボタンの下）
-      ========================= */}
       {form && (
         <div className="px-6 pt-10 pb-20 bg-Brand-Light-2 flex flex-col gap-4">
           <h2 className="text-base font-bold tracking-wider text-Brand-Dark-1">
@@ -119,9 +108,6 @@ export default function ContactCompletePage() {
         </div>
       )}
 
-      {/* =========================
-          Footer（常に一番最後）
-      ========================= */}
       <Footer />
     </div>
   )

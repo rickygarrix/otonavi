@@ -1,4 +1,5 @@
-// types/store.ts
+// src/types/store.ts
+
 export type StoreType = "club" | "bar" | "livehouse" | "other"
 
 export type StoreAward = {
@@ -16,6 +17,7 @@ export type StoreMediaMention = {
 }
 
 export type HomeStore = {
+
   id: string
   name: string
   name_kana: string | null
@@ -31,7 +33,10 @@ export type HomeStore = {
 
   price_range_id: string | null
   price_range_label: string | null
-  payment_method_other?: string | null
+
+  payment_method_keys: string[]
+  payment_method_labels: string[]
+  payment_method_other: string | null
 
   image_url: string
   description: string | null
@@ -45,12 +50,10 @@ export type HomeStore = {
   access: string | null
   google_map_url: string | null
   address: string | null
-
   business_hours: string | null
 
   hasAward: boolean
   hasMedia: boolean
-
   store_awards: StoreAward[]
   store_media_mentions: StoreMediaMention[]
 
@@ -71,9 +74,6 @@ export type HomeStore = {
 
   other_keys: string[]
   other_labels: string[]
-
-  payment_method_keys: string[]
-  payment_method_labels: string[]
 
   customer_keys: string[]
   customer_labels: string[]

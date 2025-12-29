@@ -2,17 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react"
 import { supabase } from "@/lib/supabase"
-
-type Prefecture = {
-  id: string
-  name_ja: string
-}
-
-type Area = {
-  id: string
-  name: string
-  is_23ward: boolean
-}
+import type { Prefecture, Area } from "@/types/location"
 
 type Props = {
   clearKey: number
@@ -32,25 +22,16 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
   const [openPref, setOpenPref] = useState(false)
   const [openArea, setOpenArea] = useState(false)
 
-  // ============================
-  // 初期ロード
-  // ============================
   useEffect(() => {
     supabase
       .from("prefectures")
-      .select("id, name_ja")
+      .select("id, name_ja, region")
       .order("code")
       .then(({ data }) => setPrefectures(data ?? []))
   }, [])
 
-  // ============================
-  // 東京判定
-  // ============================
   const isTokyo = selectedPrefecture?.name_ja === TOKYO_NAME
 
-  // ============================
-  // 東京エリア取得
-  // ============================
   useEffect(() => {
     if (!isTokyo || !selectedPrefecture) {
       setAreas([])
@@ -66,18 +47,12 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
       .then(({ data }) => setAreas(data ?? []))
   }, [isTokyo, selectedPrefecture])
 
-  // ============================
-  // clear 同期
-  // ============================
   useEffect(() => {
     setSelectedPrefecture(null)
     setSelectedArea(null)
     onChange([], [])
   }, [clearKey, onChange])
 
-  // ============================
-  // handlers
-  // ============================
   const selectPrefecture = (p: Prefecture) => {
     setSelectedPrefecture(p)
     setSelectedArea(null)
@@ -98,40 +73,24 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
   const others = useMemo(() => areas.filter(a => !a.is_23ward), [areas])
 
   // ============================
-  // 共通スタイル
-  // ============================
-  const buttonBase =
-    "flex-1 h-12 px-4 bg-white rounded-[99px] outline outline-1 outline-offset-[-1px] outline-zinc-100 flex justify-between items-center gap-2 text-sm"
-
-  const labelMuted = "text-gray-400"
-  const labelActive = "text-gray-800"
-
-  const pickerBase =
-    "absolute z-50 mt-2 w-full max-h-[320px] overflow-y-auto rounded-xl border bg-white shadow-lg"
-
-  // ============================
   // UI
   // ============================
   return (
     <div className="w-full flex gap-2 relative">
-      {/* ================= 都道府県 ================= */}
+      {/* 都道府県 */}
       <div className="relative flex-1">
         <button
           onClick={() => setOpenPref(v => !v)}
-          className={buttonBase}
+          className="flex-1 h-12 px-4 bg-white rounded-full border flex justify-between items-center text-sm"
         >
-          <span
-            className={`line-clamp-1 ${selectedPrefecture ? labelActive : labelMuted
-              }`}
-          >
+          <span className={selectedPrefecture ? "text-gray-800" : "text-gray-400"}>
             {selectedPrefecture?.name_ja ?? "都道府県"}
           </span>
-
           <span className="text-gray-400">▾</span>
         </button>
 
         {openPref && (
-          <div className={pickerBase}>
+          <div className="absolute z-50 mt-2 w-full rounded-xl border bg-white shadow-lg">
             {prefectures.map(p => (
               <button
                 key={p.id}
@@ -145,25 +104,21 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
         )}
       </div>
 
-      {/* ================= 東京エリア ================= */}
+      {/* 東京エリア */}
       {isTokyo && (
         <div className="relative flex-1">
           <button
             onClick={() => setOpenArea(v => !v)}
-            className={buttonBase}
+            className="flex-1 h-12 px-4 bg-white rounded-full border flex justify-between items-center text-sm"
           >
-            <span
-              className={`line-clamp-1 ${selectedArea ? labelActive : labelMuted
-                }`}
-            >
+            <span className={selectedArea ? "text-gray-800" : "text-gray-400"}>
               {selectedArea?.name ?? "エリア"}
             </span>
-
             <span className="text-gray-400">▾</span>
           </button>
 
           {openArea && (
-            <div className={pickerBase}>
+            <div className="absolute z-50 mt-2 w-full rounded-xl border bg-white shadow-lg">
               {wards.length > 0 && (
                 <>
                   <div className="px-4 py-2 text-xs font-semibold text-zinc-500">
