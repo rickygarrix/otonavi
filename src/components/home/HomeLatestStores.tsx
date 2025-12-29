@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import HomeStoreCard from "../store/HomeStoreCard"
+import HomeStoreCard from "../home/HomeStoreCard"
 import type { HomeStore } from "@/types/store"
 
 type Props = {
@@ -11,7 +11,6 @@ type Props = {
 export default function HomeLatestStores({ stores }: Props) {
   const router = useRouter()
 
-  // updated_at の新しい順 → 上位3件
   const latestStores = [...stores]
     .sort(
       (a, b) =>

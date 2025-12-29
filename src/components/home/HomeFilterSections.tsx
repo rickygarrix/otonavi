@@ -5,18 +5,8 @@ import AreaSelector from "@/components/filters/selectors/AreaSelector"
 import GenericSelector from "@/components/filters/selectors/GenericSelector"
 import DrinkSelector from "@/components/filters/selectors/DrinkSelector"
 
-type GenericConfig = {
-  title: string
-  table: string
-  section: string
-  columns?: 2 | 3
-  onChange?: (v: string[]) => void
-}
-
 type Props = {
   clearKey: number
-
-  // ✅ HTMLElement に統一
   sectionRefs: React.MutableRefObject<Record<string, HTMLElement | null>>
 
   setPrefectureIds: (v: string[]) => void
@@ -64,22 +54,9 @@ export default function HomeFilterSections({
     [setPrefectureIds, setAreaIds]
   )
 
-  const ITEMS = [
-    { title: "客層", table: "customer_definitions", section: "客層", columns: 2, onChange: setCustomerKeys },
-    { title: "雰囲気", table: "atmosphere_definitions", section: "雰囲気", columns: 3, onChange: setAtmosphereKeys },
-    { title: "広さ", table: "size_definitions", section: "広さ", columns: 3, onChange: setSizeKey },
-    { title: "価格帯", table: "price_range_definitions", section: "価格帯", columns: 3, onChange: setPriceRangeKeys },
-    { title: "支払い方法", table: "payment_method_definitions", section: "支払い方法", columns: 3, onChange: setPaymentMethodKeys },
-    { title: "イベントの傾向", table: "event_trend_definitions", section: "イベントの傾向", columns: 3, onChange: setEventTrendKeys },
-    { title: "荷物預かり", table: "baggage_definitions", section: "荷物預かり", columns: 2, onChange: setBaggageKeys },
-    { title: "喫煙", table: "smoking_definitions", section: "喫煙", columns: 2, onChange: setSmokingKeys },
-    { title: "トイレ", table: "toilet_definitions", section: "トイレ", columns: 2, onChange: setToiletKeys },
-    { title: "周辺環境", table: "environment_definitions", section: "周辺環境", columns: 3, onChange: setEnvironmentKeys },
-    { title: "その他", table: "other_definitions", section: "その他", columns: 2, onChange: setOtherKeys },
-  ] satisfies GenericConfig[]
-
   return (
     <>
+      {/* エリア */}
       <section
         ref={(el) => { sectionRefs.current["エリア"] = el }}
         className="mt-10 px-4 scroll-mt-[90px]"
@@ -88,31 +65,184 @@ export default function HomeFilterSections({
         <AreaSelector clearKey={clearKey} onChange={handleAreaChange} />
       </section>
 
+      {/* 客層 */}
+      <section
+        ref={(el) => { sectionRefs.current["客層"] = el }}
+        className="mt-14 px-4 scroll-mt-[90px]"
+      >
+        <GenericSelector
+          title="客層"
+          table="customer_definitions"
+          selection="multi"
+          columns={2}
+          clearKey={clearKey}
+          onChange={setCustomerKeys!}
+        />
+      </section>
+
+      {/* 雰囲気 */}
+      <section
+        ref={(el) => { sectionRefs.current["雰囲気"] = el }}
+        className="mt-14 px-4 scroll-mt-[90px]"
+      >
+        <GenericSelector
+          title="雰囲気"
+          table="atmosphere_definitions"
+          selection="multi"
+          columns={3}
+          clearKey={clearKey}
+          onChange={setAtmosphereKeys!}
+        />
+      </section>
+
+      {/* 広さ */}
+      <section
+        ref={(el) => { sectionRefs.current["広さ"] = el }}
+        className="mt-14 px-4 scroll-mt-[90px]"
+      >
+        <GenericSelector
+          title="広さ"
+          table="size_definitions"
+          selection="multi"
+          columns={3}
+          clearKey={clearKey}
+          onChange={setSizeKey!}
+        />
+      </section>
+
+      {/* ドリンク */}
       {setDrinkKeys && (
         <section
           ref={(el) => { sectionRefs.current["ドリンク"] = el }}
           className="mt-14 px-4 scroll-mt-[90px]"
         >
-          <DrinkSelector clearKey={clearKey} title="ドリンク" onChange={setDrinkKeys} />
+          <DrinkSelector
+            title="ドリンク"
+            clearKey={clearKey}
+            onChange={setDrinkKeys}
+          />
         </section>
       )}
 
-      {ITEMS.map((item) => (
-        <section
-          key={item.table}
-          ref={(el) => { sectionRefs.current[item.section] = el }}
-          className="mt-14 px-4 scroll-mt-[90px]"
-        >
-          <GenericSelector
-            title={item.title}
-            table={item.table}
-            selection="multi"
-            onChange={item.onChange!}
-            clearKey={clearKey}
-            columns={item.columns}
-          />
-        </section>
-      ))}
+      {/* 価格帯 */}
+      <section
+        ref={(el) => { sectionRefs.current["価格帯"] = el }}
+        className="mt-14 px-4 scroll-mt-[90px]"
+      >
+        <GenericSelector
+          title="価格帯"
+          table="price_range_definitions"
+          selection="multi"
+          columns={3}
+          clearKey={clearKey}
+          onChange={setPriceRangeKeys!}
+        />
+      </section>
+
+      {/* 支払い方法 */}
+      <section
+        ref={(el) => { sectionRefs.current["支払い方法"] = el }}
+        className="mt-14 px-4 scroll-mt-[90px]"
+      >
+        <GenericSelector
+          title="支払い方法"
+          table="payment_method_definitions"
+          selection="multi"
+          columns={3}
+          clearKey={clearKey}
+          onChange={setPaymentMethodKeys!}
+        />
+      </section>
+
+      {/* イベントの傾向 */}
+      <section
+        ref={(el) => { sectionRefs.current["イベントの傾向"] = el }}
+        className="mt-14 px-4 scroll-mt-[90px]"
+      >
+        <GenericSelector
+          title="イベントの傾向"
+          table="event_trend_definitions"
+          selection="multi"
+          columns={3}
+          clearKey={clearKey}
+          onChange={setEventTrendKeys!}
+        />
+      </section>
+
+      {/* 荷物預かり */}
+      <section
+        ref={(el) => { sectionRefs.current["荷物預かり"] = el }}
+        className="mt-14 px-4 scroll-mt-[90px]"
+      >
+        <GenericSelector
+          title="荷物預かり"
+          table="baggage_definitions"
+          selection="multi"
+          columns={2}
+          clearKey={clearKey}
+          onChange={setBaggageKeys!}
+        />
+      </section>
+
+      {/* 喫煙 */}
+      <section
+        ref={(el) => { sectionRefs.current["喫煙"] = el }}
+        className="mt-14 px-4 scroll-mt-[90px]"
+      >
+        <GenericSelector
+          title="喫煙"
+          table="smoking_definitions"
+          selection="multi"
+          columns={2}
+          clearKey={clearKey}
+          onChange={setSmokingKeys!}
+        />
+      </section>
+
+      {/* トイレ */}
+      <section
+        ref={(el) => { sectionRefs.current["トイレ"] = el }}
+        className="mt-14 px-4 scroll-mt-[90px]"
+      >
+        <GenericSelector
+          title="トイレ"
+          table="toilet_definitions"
+          selection="multi"
+          columns={2}
+          clearKey={clearKey}
+          onChange={setToiletKeys!}
+        />
+      </section>
+
+      {/* 周辺環境 */}
+      <section
+        ref={(el) => { sectionRefs.current["周辺環境"] = el }}
+        className="mt-14 px-4 scroll-mt-[90px]"
+      >
+        <GenericSelector
+          title="周辺環境"
+          table="environment_definitions"
+          selection="multi"
+          columns={3}
+          clearKey={clearKey}
+          onChange={setEnvironmentKeys!}
+        />
+      </section>
+
+      {/* その他 */}
+      <section
+        ref={(el) => { sectionRefs.current["その他"] = el }}
+        className="mt-14 px-4 scroll-mt-[90px]"
+      >
+        <GenericSelector
+          title="その他"
+          table="other_definitions"
+          selection="multi"
+          columns={2}
+          clearKey={clearKey}
+          onChange={setOtherKeys!}
+        />
+      </section>
     </>
   )
 }

@@ -3,20 +3,16 @@
 import Image from "next/image"
 
 type Props = {
-  onHome: () => void             // ホームに戻るための関数
-  size?: number                  // 直径（オプション）
-  iconSize?: number              // アイコンの大きさ（オプション）
-  className?: string             // 追加クラス
+  onHome: () => void
+  size?: number
+  iconSize?: number
+  className?: string
 }
 
-/**
- * ホームに戻るボタン（どの画面でも共通で使う）
- * 丸い背景 + マップピンのアイコン
- */
 export default function HomeButton({
   onHome,
-  size = 56,        // デフォルト直径
-  iconSize = 28,    // デフォルトのアイコンサイズ
+  size = 56,
+  iconSize = 28,
   className = "",
 }: Props) {
   return (
@@ -38,7 +34,7 @@ export default function HomeButton({
         style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
       >
         <Image
-          src="/.svg"
+          src="/logo_white.svg"
           alt="Home"
           fill
           className="object-contain"

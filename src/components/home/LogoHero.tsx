@@ -8,7 +8,7 @@ export default function LogoHero() {
   return (
     <div className="pt-14 pb-4 flex flex-col items-center justify-center">
       <Image
-        src="/logo2.svg"
+        src="/otnv_logo.svg"
         alt="オトナビ"
         width={180}
         height={60}

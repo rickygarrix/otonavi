@@ -1,5 +1,13 @@
-import Image from "next/image"
+"use client"
+
 import type { HomeStore } from "@/types/store"
+import {
+  FaInstagram,
+  FaFacebook,
+  FaLink,
+} from "react-icons/fa"
+import { FaXTwitter } from "react-icons/fa6"
+import { SiTiktok } from "react-icons/si"
 
 type Props = {
   store: HomeStore
@@ -21,35 +29,62 @@ export default function StoreBasicInfo({ store }: Props) {
       )}
 
       {/* SNS */}
-      <div className="flex gap-5 mt-6">
-        {[
-          ["instagram_url", "/instagram.svg"],
-          ["x_url", "/x.svg"],
-          ["facebook_url", "/facebook.svg"],
-          ["tiktok_url", "/tiktok.svg"],
-          ["official_site_url", "/website.svg"],
-        ].map(([key, icon]) => {
-          const url = store[key as keyof HomeStore] as string | null
-          if (!url) return null
+      <div className="flex gap-5 mt-6 items-center">
+        {store.instagram_url && (
+          <SNSLink href={store.instagram_url}>
+            <FaInstagram />
+          </SNSLink>
+        )}
 
-          return (
-            <a
-              key={key}
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Image
-                src={icon}
-                alt={key}
-                width={28}
-                height={28}
-                className="opacity-80 hover:opacity-100 transition"
-              />
-            </a>
-          )
-        })}
+        {store.x_url && (
+          <SNSLink href={store.x_url}>
+            <FaXTwitter />
+          </SNSLink>
+        )}
+
+        {store.facebook_url && (
+          <SNSLink href={store.facebook_url}>
+            <FaFacebook />
+          </SNSLink>
+        )}
+
+        {store.tiktok_url && (
+          <SNSLink href={store.tiktok_url}>
+            <SiTiktok />
+          </SNSLink>
+        )}
+
+        {store.official_site_url && (
+          <SNSLink href={store.official_site_url}>
+            <FaLink />
+          </SNSLink>
+        )}
       </div>
     </div>
+  )
+}
+
+function SNSLink({
+  href,
+  children,
+}: {
+  href: string
+  children: React.ReactNode
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="
+        text-slate-600
+        hover:text-slate-900
+        transition
+        text-[26px]
+        hover:scale-110
+      "
+    >
+      {children}
+    </a>
   )
 }

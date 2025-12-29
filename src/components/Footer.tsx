@@ -9,7 +9,7 @@ export default function Footer() {
       {/* ロゴ */}
       <div className="flex items-center space-x-3 mb-8">
         <Image
-          src="/logo2.svg"
+          src="/otnv_logo.svg"
           alt="Otonavi Logo"
           width={36}
           height={36}

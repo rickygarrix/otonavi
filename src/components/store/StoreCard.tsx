@@ -12,9 +12,6 @@ type Props = {
 export default function StoreCard({ store, query }: Props) {
   const router = useRouter()
 
-  // =========================
-  // 店舗詳細へ遷移（検索条件維持）
-  // =========================
   const handleClick = () => {
     if (query && query.trim() !== "") {
       router.push(`/stores/${store.id}?${query}`)
@@ -23,17 +20,11 @@ export default function StoreCard({ store, query }: Props) {
     }
   }
 
-  // =========================
-  // 画像の安全取得
-  // =========================
   const imageUrl =
     store.image_url && store.image_url.trim() !== ""
       ? store.image_url
       : "/defaultshop.svg"
 
-  // =========================
-  // ロケーション表示
-  // =========================
   const locationLabel =
     store.prefecture_label === "東京都" && store.area_label
       ? `東京 ${store.area_label}`
@@ -49,7 +40,6 @@ export default function StoreCard({ store, query }: Props) {
         text-left overflow-hidden
       "
     >
-      {/* ================= 画像 ================= */}
       <div className="relative w-full h-[140px] bg-gray-200">
         <Image
           src={imageUrl}
@@ -60,7 +50,6 @@ export default function StoreCard({ store, query }: Props) {
         />
       </div>
 
-      {/* ================= テキスト ================= */}
       <div className="px-3 py-2 flex flex-col gap-1">
         <div className="px-1">
           <p className="text-slate-900 text-sm font-bold leading-5 line-clamp-1">

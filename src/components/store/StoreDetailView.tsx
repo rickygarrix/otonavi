@@ -14,9 +14,6 @@ import StoreOpenHours from "@/components/store/StoreOpenHours"
 import StoreDetailSections from "@/components/store/StoreDetailSections"
 import StoreDetailMedia from "./StoreDetailMedia"
 
-// ---------------------------------
-// utils
-// ---------------------------------
 const join = (v?: string[]) => (v?.length ? v.join("、") : null)
 const formatPaymentMethods = (
   labels?: string[],

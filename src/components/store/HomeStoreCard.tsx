@@ -13,7 +13,6 @@ export default function HomeStoreCard({ store }: Props) {
       ? store.image_url
       : '/noshop.svg'
 
-  // ✅ 「東京都 + エリア」表記 or 都道府県のみ
   const locationLabel =
     store.prefecture_label === '東京都' && store.area_label
       ? `東京 ${store.area_label}`
@@ -21,7 +20,7 @@ export default function HomeStoreCard({ store }: Props) {
 
   return (
     <div className="w-full text-center flex flex-col items-center">
-      {/* ✅ 正方形カード */}
+
       <div className="relative w-full aspect-square overflow-hidden rounded-3xl">
         <Image
           src={imageUrl}
@@ -33,7 +32,6 @@ export default function HomeStoreCard({ store }: Props) {
         />
       </div>
 
-      {/* ✅ 店舗情報 */}
       <div className="mt-2 text-white w-full">
         <p className="font-bold text-xs line-clamp-1">
           {store.name}

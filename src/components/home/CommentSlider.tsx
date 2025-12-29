@@ -29,11 +29,9 @@ export default function CommentSlider() {
     load()
   }, [])
 
-  // ループ制御（上 → 中央 → 下 を保証）
   useEffect(() => {
     if (comments.length === 0) return
 
-    // 上 → 中央
     setPhase("enter")
 
     const stayTimer = setTimeout(() => {
@@ -66,10 +64,10 @@ export default function CommentSlider() {
           transition-all duration-300 ease-in-out
 
           ${phase === "enter"
-            ? "opacity-0 -translate-y-4"   // ✅ 上から出現準備
+            ? "opacity-0 -translate-y-4"
             : phase === "stay"
-              ? "opacity-100 translate-y-0"  // ✅ 中央で表示
-              : "opacity-0 translate-y-4"    // ✅ 下に消える
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-4"
           }
         `}
       >
