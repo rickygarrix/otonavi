@@ -1,9 +1,9 @@
 "use client"
 
 import { useCallback } from "react"
-import AreaSelector from "@/components/filters/AreaSelector"
-import GenericSelector from "@/components/filters/GenericSelector"
-import DrinkSelector from "@/components/filters/DrinkSelector"
+import AreaSelector from "@/components/filters/selectors/AreaSelector"
+import GenericSelector from "@/components/filters/selectors/GenericSelector"
+import DrinkSelector from "@/components/filters/selectors/DrinkSelector"
 
 type GenericConfig = {
   title: string
@@ -84,7 +84,7 @@ export default function HomeFilterSections({
         ref={(el) => { sectionRefs.current["エリア"] = el }}
         className="mt-10 px-4 scroll-mt-[90px]"
       >
-        <h2 className="mb-4 text-lg font-bold border-b pb-2">エリア</h2>
+        <h2 className="mb-4 text-lg font-bold pb-2">エリア</h2>
         <AreaSelector clearKey={clearKey} onChange={handleAreaChange} />
       </section>
 
