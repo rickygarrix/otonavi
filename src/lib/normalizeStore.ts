@@ -41,7 +41,7 @@ function extractM2M(
 }
 
 function selectImage(store_images: StoreRow["store_images"]): string {
-  if (!store_images?.length) return "/default_shop.svg"
+  if (!store_images?.length) return "/noshop.svg"
 
   const main = store_images.find((i) => i.is_main)
   if (main?.image_url) return main.image_url

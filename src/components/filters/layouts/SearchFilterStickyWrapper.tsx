@@ -9,7 +9,7 @@ type Props = {
 
 export default function SearchFilterStickyWrapper({
   children,
-  zIndex = 100, // ★ デフォルトを強めに
+  zIndex = 100,
 }: Props) {
   const [isSticky, setIsSticky] = useState(false)
   const [height, setHeight] = useState(0)
@@ -17,14 +17,12 @@ export default function SearchFilterStickyWrapper({
   const wrapperRef = useRef<HTMLDivElement | null>(null)
   const sentinelRef = useRef<HTMLDivElement | null>(null)
 
-  // 高さ取得
   useEffect(() => {
     if (wrapperRef.current) {
       setHeight(wrapperRef.current.offsetHeight)
     }
   }, [])
 
-  // 画面外に出たら fixed 化
   useEffect(() => {
     const sentinel = sentinelRef.current
     if (!sentinel) return
@@ -42,10 +40,8 @@ export default function SearchFilterStickyWrapper({
 
   return (
     <>
-      {/* sentinel */}
       <div ref={sentinelRef} />
 
-      {/* 本体 */}
       <div
         ref={wrapperRef}
         className={`
@@ -54,14 +50,12 @@ export default function SearchFilterStickyWrapper({
         `}
         style={
           isSticky
-            ? { zIndex } // ★ ここが超重要
+            ? { zIndex }
             : undefined
         }
       >
         {children}
       </div>
-
-      {/* スペーサー */}
       {isSticky && <div style={{ height }} />}
     </>
   )
