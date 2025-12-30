@@ -1,31 +1,18 @@
 "use client"
 
-// =====================
-// Props 用の最小型
-// =====================
-type Award = {
-  id: string
-  title: string
-  year: number | null
-}
-
-type MediaMention = {
-  id: string
-  media_name: string
-  year: number | null
-}
+import { useMemo } from "react"
+import type {
+  StoreAward,
+  StoreMediaMention,
+} from "@/types/store"
 
 type Props = {
-  awards?: Award[] | null
-  mediaMentions?: MediaMention[] | null
+  awards?: StoreAward[] | null
+  mediaMentions?: StoreMediaMention[] | null
 }
 
-// =====================
-// UI用内部型
-// =====================
 type AchievementItem = {
   id: string
-  year: number
   text: string
 }
 
@@ -33,37 +20,32 @@ export default function StoreDetailMedia({
   awards,
   mediaMentions,
 }: Props) {
-  const safeAwards = awards ?? []
-  const safeMedia = mediaMentions ?? []
+  const grouped = useMemo(() => {
+    const map = new Map<number, AchievementItem[]>()
 
-  // ---------------------
-  // 年ごとにまとめる
-  // ---------------------
-  const grouped = new Map<number, AchievementItem[]>()
-
-  for (const a of safeAwards) {
-    if (!a.year) continue
-    if (!grouped.has(a.year)) grouped.set(a.year, [])
-    grouped.get(a.year)!.push({
-      id: `award-${a.id}`,
-      year: a.year,
-      text: a.title,
+    awards?.forEach((a) => {
+      if (!a.year) return
+      if (!map.has(a.year)) map.set(a.year, [])
+      map.get(a.year)!.push({
+        id: `award-${a.id}`,
+        text: a.title,
+      })
     })
-  }
 
-  for (const m of safeMedia) {
-    if (!m.year) continue
-    if (!grouped.has(m.year)) grouped.set(m.year, [])
-    grouped.get(m.year)!.push({
-      id: `media-${m.id}`,
-      year: m.year,
-      text: m.media_name,
+    mediaMentions?.forEach((m) => {
+      if (!m.year) return
+      if (!map.has(m.year)) map.set(m.year, [])
+      map.get(m.year)!.push({
+        id: `media-${m.id}`,
+        text: m.media_name,
+      })
     })
-  }
+
+    return map
+  }, [awards, mediaMentions])
 
   if (grouped.size === 0) return null
 
-  // 年降順
   const years = Array.from(grouped.keys()).sort((a, b) => b - a)
 
   return (

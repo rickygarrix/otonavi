@@ -32,11 +32,7 @@ export default function StoreDetailPage() {
           areas:area_id(*),
           store_types:store_type_id(*),
           price_range_definitions:price_range_id(*),
-          hospitality_definitions:hospitality(*),
           size_definitions:size(*),
-
-          store_open_hours(*),
-          store_special_open_hours(*),
 
           store_drinks(
             id,
@@ -52,34 +48,13 @@ export default function StoreDetailPage() {
           ),
 
           store_event_trends(event_trend_definitions(*)),
-          store_rules(rule_definitions(*)),
           store_baggage(baggage_definitions(*)),
-          store_security(security_definitions(*)),
           store_toilet(toilet_definitions(*)),
-          store_floor(floor_definitions(*)),
-          store_seat_type(seat_type_definitions(*)),
+
           store_smoking(smoking_definitions(*)),
           store_environment(environment_definitions(*)),
           store_other(other_definitions(*)),
-          store_pricing_system(pricing_system_definitions(*)),
-store_discounts(
-  id,
-  discount_definitions(*)
-),
-
-store_discount_details(
-  id,
-  discount_id,
-  text
-),
-          store_vips(vip_definitions(*)),
           store_payment_methods(payment_method_definitions(*)),
-          store_sounds(sound_definitions(*)),
-          store_lightings(lighting_definitions(*)),
-          store_productions(production_definitions(*)),
-          store_foods(food_definitions(*)),
-          store_services(service_definitions(*)),
-
           store_awards(*),
           store_media_mentions(*)
         `)

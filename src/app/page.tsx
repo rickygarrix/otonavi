@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 
 import LogoHero from "@/components/home/LogoHero"
@@ -8,59 +8,46 @@ import CommentSlider from "@/components/home/CommentSlider"
 import HomeLatestStores from "@/components/home/HomeLatestStores"
 
 import StoreTypeFilter from "@/components/filters/StoreTypeFilter"
-import SearchFilterStickyWrapper from "@/components/filters/SearchFilterStickyWrapper"
-import FixedSearchBar from "@/components/home/FixedSearchBar"
+import SearchFilterStickyWrapper from "@/components/filters/layouts/SearchFilterStickyWrapper"
+import SearchBar from "@/components/home/SearchBar"
 import Footer from "@/components/Footer"
 import HomeFilterSections from "@/components/home/HomeFilterSections"
 
 import { useHomeStores } from "@/hooks/useHomeStores"
 import { useHomeMasters } from "@/hooks/useHomeMasters"
 import { useHomeStoreFilters } from "@/hooks/useStoreFilters"
+import type { GenericMaster } from "@/types/master"
 
 export default function HomePage() {
   const router = useRouter()
 
-  // ============================
-  // section scroll refs
-  // ============================
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
 
-  // ============================
-  // state
-  // ============================
   const [storeTypeId, setStoreTypeId] = useState<string | null>(null)
   const [clearKey, setClearKey] = useState(0)
 
-  // ============================
-  // data
-  // ============================
   const { stores, loading } = useHomeStores()
   const masters = useHomeMasters()
+
+  const storeTypes = useMemo<GenericMaster[]>(() => {
+    return Array.from(masters.genericMasters.values()).filter(
+      (m) => m.table === "store_types"
+    )
+  }, [masters.genericMasters])
 
   const filter = useHomeStoreFilters(stores, masters.externalLabelMap, {
     storeTypeId,
   })
 
-  const {
-    filteredStores,
-    selectedFilters,
-    count,
-    handleClear,
-    ...setters
-  } = filter
+  const { filteredStores, selectedFilters, count, handleClear, ...setters } =
+    filter
 
-  // ============================
-  // clear
-  // ============================
   const handleClearAll = () => {
     handleClear()
     setClearKey((v) => v + 1)
     setStoreTypeId(null)
   }
 
-  // ============================
-  // search
-  // ============================
   const handleGoToStores = () => {
     const params = new URLSearchParams()
 
@@ -71,9 +58,6 @@ export default function HomePage() {
     router.push(`/stores?${params.toString()}`)
   }
 
-  // ============================
-  // chip → scroll
-  // ============================
   const handleClickFilter = (label: string) => {
     const section = masters.labelToSectionMap.get(label)
     if (!section) return
@@ -104,6 +88,7 @@ export default function HomePage() {
       {/* ===== Store Type ===== */}
       <SearchFilterStickyWrapper>
         <StoreTypeFilter
+          storeTypes={storeTypes} // ★ 必須
           activeTypeId={storeTypeId}
           onChange={setStoreTypeId}
         />
@@ -125,11 +110,12 @@ export default function HomePage() {
         setBaggageKeys={setters.setBaggageKeys}
         setSmokingKeys={setters.setSmokingKeys}
         setToiletKeys={setters.setToiletKeys}
+        setEnvironmentKeys={setters.setEnvironmentKeys}
         setOtherKeys={setters.setOtherKeys}
       />
 
       {/* ===== Fixed Search Bar ===== */}
-      <FixedSearchBar
+      <SearchBar
         selectedFilters={selectedFilters}
         onClear={handleClearAll}
         onSearch={handleGoToStores}
