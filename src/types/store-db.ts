@@ -34,7 +34,7 @@ export type StoreRow = {
   prefectures: { id: string; name_ja: string } | null
   areas: { id: string; name: string } | null
   store_types: { id: string; label: string } | null
-  price_range_definitions: { id: string; label: string } | null
+  price_range_definitions: { key: string; label: string } | null
   size_definitions: DefinitionKV | null
 
   store_event_trends: M2MRow<"event_trend_definitions">[]

@@ -18,8 +18,41 @@ export function useHomeStores() {
           prefectures ( id, name_ja ),
           areas ( id, name ),
           store_types ( id, label ),
-          price_range_definitions ( id, label ),
+          price_range_definitions ( key, label, display_order ),
           size_definitions ( key, label ),
+
+          store_customers (
+            customer_definitions ( key, label )
+          ),
+
+          store_atmospheres (
+            atmosphere_definitions ( key, label )
+          ),
+
+          store_drinks (
+            drink_definitions ( key, label, display_order )
+          ),
+
+          store_baggage (
+            baggage_definitions ( key, label )
+          ),
+
+          store_toilet (
+            toilet_definitions ( key, label )
+          ),
+
+
+          store_smoking (
+            smoking_definitions ( key, label )
+          ),
+
+          store_environment (
+            environment_definitions ( key, label )
+          ),
+
+          store_other (
+            other_definitions ( key, label )
+          ),
 
           store_event_trends (
             event_trend_definitions ( key, label )
@@ -42,6 +75,7 @@ export function useHomeStores() {
         setLoading(false)
         return
       }
+
       setStores(data.map(normalizeStore))
       setLoading(false)
     }

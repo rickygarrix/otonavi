@@ -17,11 +17,22 @@ export default function StoreBasicInfo({ store }: Props) {
   return (
     <div className="px-4 py-5">
       <p className="text-sm text-slate-600">
-        {store.prefecture_label} {store.area_label} {store.type_label}
+        {store.prefecture_label} {store.area_label}・{store.type_label}
       </p>
 
-      <h1 className="text-2xl font-extrabold mt-1">{store.name}</h1>
+      {/* 店舗名 */}
+      <h1 className="text-2xl font-extrabold mt-1">
+        {store.name}
+      </h1>
 
+      {/* 読み仮名 */}
+      {store.name_kana && (
+        <p className="mt-1 text-sm text-slate-500 tracking-wide">
+          {store.name_kana}
+        </p>
+      )}
+
+      {/* 説明文 */}
       {store.description && (
         <p className="mt-4 whitespace-pre-line text-slate-700">
           {store.description}

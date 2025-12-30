@@ -38,6 +38,9 @@ export default function ContactConfirmPage() {
         body: JSON.stringify(form),
       })
 
+      // ★ 完了時にクリア（重要）
+      sessionStorage.removeItem("contactForm")
+
       router.push("/contact/complete")
     } finally {
       setSending(false)
@@ -62,7 +65,6 @@ export default function ContactConfirmPage() {
         </div>
       </div>
 
-      {/* ヘッダー余白 */}
       <div className="h-20" />
 
       {/* 本文 */}
@@ -70,6 +72,7 @@ export default function ContactConfirmPage() {
         <h1 className="text-xl font-bold tracking-widest text-Brand-Dark-1">
           お問い合わせ内容の確認
         </h1>
+
         <p className="text-sm text-Brand-Dark-1">
           入力した内容に間違いがないかご確認ください。
         </p>
@@ -114,39 +117,26 @@ export default function ContactConfirmPage() {
           </span>
         </label>
 
-        {/* ★ ボタン：プライバシーの下 & Footerの上 */}
+        {/* ボタン */}
         <div className="grid grid-cols-2 gap-4 pt-4">
-          {/* 書き直す */}
           <button
             onClick={() => router.back()}
-            className="
-      h-12 rounded-xl
-      bg-white
-      outline outline-1 outline-slate-300
-      flex items-center justify-center gap-2
-      text-sm text-Brand-Dark-1
-    "
+            className="h-12 rounded-xl bg-white outline outline-1 outline-slate-300 text-sm"
           >
             書き直す ✎
           </button>
 
-          {/* 送信 */}
           <button
             disabled={!agreed || sending}
             onClick={submit}
-            className={`
-      h-12 rounded-xl
-      bg-white
-      outline outline-1 outline-slate-300
-      flex items-center justify-center gap-2
-      text-sm text-Brand-Dark-1
-      ${!agreed || sending ? "opacity-40" : ""}
-    `}
+            className={`h-12 rounded-xl bg-white outline outline-1 outline-slate-300 text-sm ${!agreed || sending ? "opacity-40" : ""
+              }`}
           >
             {sending ? "送信中…" : "送信 ✈"}
           </button>
         </div>
       </div>
+
       <Footer />
     </div>
   )

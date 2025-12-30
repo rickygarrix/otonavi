@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import { supabase } from "@/lib/supabase"
 
@@ -17,6 +17,7 @@ type StoreImage = {
 export default function StoreImageCarousel({ storeId, storeName }: Props) {
   const [images, setImages] = useState<StoreImage[]>([])
   const [current, setCurrent] = useState(0)
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (!storeId) return
@@ -34,9 +35,23 @@ export default function StoreImageCarousel({ storeId, storeName }: Props) {
       ? images
       : [{ id: "default", image_url: "/noshop.svg" }]
 
+  const scrollToIndex = (index: number) => {
+    const el = containerRef.current
+    if (!el) return
+
+    el.scrollTo({
+      left: index * el.clientWidth,
+      behavior: "smooth",
+    })
+
+    setCurrent(index)
+  }
+
   return (
     <div className="relative h-72 overflow-hidden">
+      {/* カルーセル */}
       <div
+        ref={containerRef}
         className="flex overflow-x-scroll snap-x snap-mandatory scrollbar-none"
         onScroll={(e) => {
           const el = e.currentTarget
@@ -44,10 +59,7 @@ export default function StoreImageCarousel({ storeId, storeName }: Props) {
         }}
       >
         {mainImages.map((img) => (
-          <div
-            key={img.id}
-            className="min-w-full relative h-72"
-          >
+          <div key={img.id} className="min-w-full relative h-72 snap-start">
             <Image
               src={img.image_url}
               alt={storeName}
@@ -60,12 +72,15 @@ export default function StoreImageCarousel({ storeId, storeName }: Props) {
         ))}
       </div>
 
+      {/* ドット（クリック対応） */}
       <div className="absolute bottom-3 inset-x-0 flex justify-center gap-2">
         {mainImages.map((_, i) => (
-          <span
+          <button
             key={i}
-            className={`w-2 h-2 rounded-full ${i === current ? "bg-white" : "bg-white/40"
+            onClick={() => scrollToIndex(i)}
+            className={`w-2 h-2 rounded-full transition ${i === current ? "bg-white" : "bg-white/40"
               }`}
+            aria-label={`画像 ${i + 1}`}
           />
         ))}
       </div>

@@ -18,7 +18,7 @@ export function useHomeStoreFilters(
 
   const [customerKeys, setCustomerKeys] = useState<string[]>([])
   const [atmosphereKeys, setAtmosphereKeys] = useState<string[]>([])
-  const [environmentKeys, setEnvironmentKeys] = useState<string[]>([]) // ★ 追加
+  const [environmentKeys, setEnvironmentKeys] = useState<string[]>([])
   const [sizeKeys, setSizeKeys] = useState<string[]>([])
 
   const [drinkKeys, setDrinkKeys] = useState<string[]>([])
@@ -78,10 +78,10 @@ export function useHomeStoreFilters(
       const checks: [string[], string[]][] = [
         [customerKeys, s.customer_keys ?? []],
         [atmosphereKeys, s.atmosphere_keys ?? []],
-        [environmentKeys, s.environment_keys ?? []], // ★ 追加
+        [environmentKeys, s.environment_keys ?? []],
         [sizeKeys, s.size_key ? [s.size_key] : []],
         [drinkKeys, s.drink_keys ?? []],
-        [priceRangeKeys, s.price_range_id ? [s.price_range_id] : []],
+        [priceRangeKeys, s.price_range_key ? [s.price_range_key] : []],
         [paymentMethodKeys, s.payment_method_keys ?? []],
         [eventTrendKeys, s.event_trend_keys ?? []],
         [baggageKeys, s.baggage_keys ?? []],

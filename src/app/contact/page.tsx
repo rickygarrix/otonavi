@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import HomeButton from "@/components/ui/HomeButton"
 import Footer from "@/components/Footer"
@@ -20,6 +20,18 @@ export default function ContactPage() {
     email: "",
     message: "",
   })
+
+  // ★ confirm から戻ったとき用：値を復元
+  useEffect(() => {
+    const stored = sessionStorage.getItem("contactForm")
+    if (stored) {
+      try {
+        setForm(JSON.parse(stored))
+      } catch {
+        // JSON壊れてたら無視
+      }
+    }
+  }, [])
 
   const isValid = Boolean(form.name && form.email && form.message)
 
@@ -127,7 +139,6 @@ export default function ContactPage() {
         </div>
       </div>
 
-      {/* ===== Footer ===== */}
       <Footer />
     </div>
   )

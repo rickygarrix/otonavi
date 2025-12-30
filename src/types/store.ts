@@ -31,7 +31,7 @@ export type HomeStore = {
   store_type_id: string | null
   type_label: string | null
 
-  price_range_id: string | null
+  price_range_key: string | null
   price_range_label: string | null
 
   payment_method_keys: string[]

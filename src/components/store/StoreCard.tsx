@@ -23,7 +23,7 @@ export default function StoreCard({ store, query }: Props) {
   const imageUrl =
     store.image_url && store.image_url.trim() !== ""
       ? store.image_url
-      : "/defaultshop.svg"
+      : "/noshop.svg"
 
   const locationLabel =
     store.prefecture_label === "東京都" && store.area_label
@@ -33,38 +33,28 @@ export default function StoreCard({ store, query }: Props) {
   return (
     <button
       onClick={handleClick}
-      className="
-        w-full bg-white rounded-2xl
-        border border-black/10
-        shadow-sm hover:shadow-md transition
-        text-left overflow-hidden
-      "
+      className="w-full bg-white text-left"
     >
-      <div className="relative w-full h-[140px] bg-gray-200">
+      {/* 正方形画像 */}
+      <div className="relative w-full aspect-square bg-gray-200 rounded-2xl overflow-hidden">
         <Image
           src={imageUrl}
           alt={store.name}
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
-          className="object-contain"
+          className="object-cover"
         />
       </div>
 
-      <div className="px-3 py-2 flex flex-col gap-1">
-        <div className="px-1">
-          <p className="text-slate-900 text-sm font-bold leading-5 line-clamp-1">
-            {store.name}
-          </p>
-        </div>
+      {/* テキスト */}
+      <div className="px-1 py-2">
+        <p className="text-slate-900 text-sm font-bold leading-5 line-clamp-1">
+          {store.name}
+        </p>
 
-        <div className="px-1 flex items-center gap-1 text-xs text-slate-600 leading-4">
-          <span>{locationLabel}</span>
-          {store.type_label && (
-            <>
-              <span>・</span>
-              <span className="line-clamp-1">{store.type_label}</span>
-            </>
-          )}
+        <div className="mt-0.5 text-xs text-slate-600 leading-4 line-clamp-1">
+          {locationLabel}
+          {store.type_label && ` ・ ${store.type_label}`}
         </div>
       </div>
     </button>

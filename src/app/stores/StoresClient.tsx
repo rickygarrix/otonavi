@@ -34,14 +34,18 @@ export default function StoresClient() {
           iconSize={26}
         />
 
-        <div className="text-slate-900 font-bold text-lg tracking-widest leading-none">
+        {/* 件数 */}
+        <div className="text-slate-900 font-bold text-lg tracking-widest leading-none shrink-0">
           {filteredStores.length}
           <span className="text-[10px] ml-1">件</span>
         </div>
 
-        <div className="flex-1 text-blue-800 text-xs line-clamp-2">
-          {selectedFilters.join(", ")}
-        </div>
+        {/* 選択条件（項目のみ列挙） */}
+        {selectedFilters.length > 0 && (
+          <div className="flex-1 text-blue-700 text-sm leading-snug line-clamp-2">
+            {selectedFilters.join(", ")}
+          </div>
+        )}
       </div>
 
       {/* 店舗一覧 */}
