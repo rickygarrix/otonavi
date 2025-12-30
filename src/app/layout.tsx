@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[url(/background-pc.png)] bg-cover bg-fixed flex justify-center items-start`}>
-        <div className="sp-frame max-w-105 w-full bg-white mx-auto">
+        <div className="sp-frame max-w-105 w-full bg-light-1 mx-auto">
           {children}
         </div>
       </body>
