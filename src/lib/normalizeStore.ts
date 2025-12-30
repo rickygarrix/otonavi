@@ -78,6 +78,8 @@ export function normalizeStore(raw: StoreRow): HomeStore {
     year: asNumber(m.year),
   }))
 
+  const drink = extractM2M(raw.store_drinks, "drink_definitions")
+
   return {
     id: raw.id,
     name: raw.name,
@@ -156,7 +158,10 @@ export function normalizeStore(raw: StoreRow): HomeStore {
     other_labels: extractM2M(raw.store_other, "other_definitions").labels,
 
     customer_keys: extractM2M(raw.store_customers, "customer_definitions").keys,
-    customer_labels: extractM2M(raw.store_customers, "customer_definitions").labels,
+    customer_labels: extractM2M(
+      raw.store_customers,
+      "customer_definitions"
+    ).labels,
 
     atmosphere_keys: extractM2M(
       raw.store_atmospheres,
@@ -167,8 +172,9 @@ export function normalizeStore(raw: StoreRow): HomeStore {
       "atmosphere_definitions"
     ).labels,
 
-    drink_keys: [],
-    drink_labels: [],
+    // ✅ ここが今回ちゃんと入る
+    drink_keys: drink.keys,
+    drink_labels: drink.labels,
 
     size_key: raw.size_definitions?.key ?? null,
     size_label: raw.size_definitions?.label ?? null,

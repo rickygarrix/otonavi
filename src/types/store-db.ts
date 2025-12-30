@@ -46,6 +46,7 @@ export type StoreRow = {
   store_payment_methods: M2MRow<"payment_method_definitions">[]
   store_customers: M2MRow<"customer_definitions">[]
   store_atmospheres: M2MRow<"atmosphere_definitions">[]
+  store_drinks: M2MRow<"drink_definitions">[]
 
   store_images: StoreImageRow[]
 
