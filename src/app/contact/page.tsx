@@ -45,9 +45,9 @@ export default function ContactPage() {
     wrapper: "flex flex-col gap-2",
     label: "flex gap-1 text-sm",
     input:
-      "h-12 px-4 bg-light-1 rounded-3xl outline outline-1 outline-offset-[-1px] outline-Brand-Light-4 text-base",
+      "h-12 px-4 bg-light-1 rounded-3xl outline outline-1 outline-offset-[-1px] outline-light-4 text-base",
     textarea:
-      "min-h-40 px-4 py-3 bg-light-1 rounded-3xl outline outline-1 outline-offset-[-1px] outline-Brand-Light-4 text-base resize-none",
+      "min-h-40 px-4 py-3 bg-light-1 rounded-3xl outline outline-1 outline-offset-[-1px] outline-light-4 text-base resize-none",
   }
 
   return (
@@ -60,17 +60,17 @@ export default function ContactPage() {
       {/* ===== Stepper ===== */}
       <div className="relative h-20 pl-24 pr-4 flex items-center justify-between">
         <div className={styles.step}>
-          <div className="w-10 h-10 outline-4 outline-blue-200 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
+          <div className="w-10 h-10 outline-4 outline-blue-2 rounded-full bg-blue-4 text-light-1 flex items-center justify-center text-xs font-bold">
             入力
           </div>
         </div>
         <div className={styles.step}>
-          <div className="w-4 h-4 rounded-full bg-red-500" />
+          <div className="w-4 h-4 rounded-full bg-light-5" />
         </div>
         <div className={styles.step}>
-          <div className="w-4 h-4 rounded-full bg-red-500" />
+          <div className="w-4 h-4 rounded-full bg-light-5" />
         </div>
-        <div className="absolute left-32 right-12 h-[2px] bg-gradient-to-r from-blue-600 to-red-500" />
+        <div className="absolute left-32 right-12 h-[2px] bg-gradient-to-r from-blue-3 to-light-5" />
       </div>
 
       {/* ===== Main Content ===== */}
@@ -134,17 +134,22 @@ export default function ContactPage() {
 
           {/* お問い合わせ内容 */}
           <div className={styles.wrapper}>
-            <label htmlFor="message" className={styles.label}>
-              <span>お問い合わせ内容</span>
-              <span className="text-red-4" aria-hidden>
-                *
-              </span>
-              <span className="sr-only">必須</span>
-            </label>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="message" className={styles.label}>
+                <span>お問い合わせ内容</span>
+                <span className="text-red-4" aria-hidden>
+                  *
+                </span>
+                <span className="sr-only">必須</span>
+              </label>
 
-            <p id="message-help" className="text-xs text-gray-4 leading-[1.5]">
-              わかる範囲で概要をご記入ください。
-            </p>
+              <p
+                id="message-help"
+                className="text-xs text-gray-4 leading-[1.5]"
+              >
+                わかる範囲で概要をご記入ください。
+              </p>
+            </div>
 
             <textarea
               id="message"
