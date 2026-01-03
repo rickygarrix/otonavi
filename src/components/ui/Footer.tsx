@@ -5,23 +5,37 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-dark-5 text-light-3 px-4 pt-8 pb-10">
+    <footer className="bg-dark-5 text-light-3 flex flex-col gap-6 px-4 pt-8 pb-10">
       {/* ロゴ */}
       <Link href="/" className="ml-2 flex h-10 items-center">
         <Image src="/logo-white.svg" alt="オトナビ" width={133} height={40} />
       </Link>
 
       {/* メニュー */}
-      <nav className="flex flex-col">
-        <FooterLink href="/lp">オトナビとは？</FooterLink>
-        <FooterLink href="/contact">お問い合わせ</FooterLink>
-        <FooterLink href="/terms">利用規約</FooterLink>
-        <FooterLink href="/privacy">プライバシーポリシー</FooterLink>
-        <FooterLink href="/tokusho">特定商取引法に基づく表記</FooterLink>
+      <nav>
+        <ul>
+          <li>
+            <FooterLink href="/lp">オトナビとは？</FooterLink>
+          </li>
+          <li>
+            <FooterLink href="/contact">お問い合わせ</FooterLink>
+          </li>
+          <li>
+            <FooterLink href="/terms">利用規約</FooterLink>
+          </li>
+          <li>
+            <FooterLink href="/privacy">プライバシーポリシー</FooterLink>
+          </li>
+          <li>
+            <FooterLink href="/tokusho">特定商取引法に基づく表記</FooterLink>
+          </li>
+        </ul>
       </nav>
 
       {/* コピーライト */}
-      <p className="mt-10 text-xs text-white/60">© Otonavi</p>
+      <p className="text-light-5 mx-2 text-xs">
+        <small>© {new Date().getFullYear()} Otonavi</small>
+      </p>
     </footer>
   );
 }
@@ -30,7 +44,7 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
   return (
     <Link
       href={href}
-      className="flex h-12 items-center px-4 text-xs text-white/90 hover:opacity-70"
+      className="text-light-3 flex h-12 items-center px-4 text-xs transition-all duration-200 ease-out active:opacity-70"
     >
       {children}
     </Link>
