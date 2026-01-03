@@ -68,7 +68,9 @@ export default function HomePage() {
   return (
     <>
       {/* ===== Hero ===== */}
-      <div className="relative flex h-160 w-full flex-col items-center overflow-hidden bg-[url('/background-sp@2x.png')] bg-cover bg-center px-4 pt-20 text-white">
+      <div className="text-light-3 relative flex h-160 flex-col items-center gap-10 overflow-hidden bg-[url('/background-sp@2x.png')] bg-cover bg-center px-4 pt-20">
+        <p className="text-[10px] tracking-widest">夜の音楽をもっと楽しむための音箱ナビ</p>
+
         <Image
           src="/logo-white.svg"
           alt="オトナビ"
@@ -77,11 +79,7 @@ export default function HomePage() {
           className="drop-shadow-lg"
         />
 
-        {!loading && (
-          <div className="mt-10">
-            <HomeLatestStores stores={stores} />
-          </div>
-        )}
+        {!loading && <HomeLatestStores stores={stores} />}
 
         <CommentSlider />
       </div>
