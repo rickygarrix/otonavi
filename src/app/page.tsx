@@ -119,7 +119,6 @@ export default function HomePage() {
       />
 
       <Footer hasFixedBottom />
-      <div className="h-[50px]" />
     </>
   );
 }
