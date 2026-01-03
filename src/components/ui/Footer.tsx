@@ -27,7 +27,7 @@ export default function Footer() {
             <FooterLink href="/privacy">プライバシーポリシー</FooterLink>
           </li>
           <li>
-            <FooterLink href="/tokusho">特定商取引法に基づく表記</FooterLink>
+            <FooterLink href="/disclosure">特定商取引法に基づく表記</FooterLink>
           </li>
         </ul>
       </nav>
