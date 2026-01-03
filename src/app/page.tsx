@@ -1,78 +1,74 @@
-"use client"
+'use client';
 
-import { useMemo, useRef, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-import LogoHero from "@/components/home/LogoHero"
-import CommentSlider from "@/components/home/CommentSlider"
-import HomeLatestStores from "@/components/home/HomeLatestStores"
+import LogoHero from '@/components/home/LogoHero';
+import CommentSlider from '@/components/home/CommentSlider';
+import HomeLatestStores from '@/components/home/HomeLatestStores';
 
-import StoreTypeFilter from "@/components/filters/StoreTypeFilter"
-import SearchFilterStickyWrapper from "@/components/filters/layouts/SearchFilterStickyWrapper"
-import SearchBar from "@/components/home/SearchBar"
-import Footer from "@/components/Footer"
-import HomeFilterSections from "@/components/home/HomeFilterSections"
+import StoreTypeFilter from '@/components/filters/StoreTypeFilter';
+import SearchFilterStickyWrapper from '@/components/filters/layouts/SearchFilterStickyWrapper';
+import SearchBar from '@/components/home/SearchBar';
+import Footer from '@/components/ui/Footer';
+import HomeFilterSections from '@/components/home/HomeFilterSections';
 
-import { useHomeStores } from "@/hooks/useHomeStores"
-import { useHomeMasters } from "@/hooks/useHomeMasters"
-import { useHomeStoreFilters } from "@/hooks/useStoreFilters"
-import type { GenericMaster } from "@/types/master"
+import { useHomeStores } from '@/hooks/useHomeStores';
+import { useHomeMasters } from '@/hooks/useHomeMasters';
+import { useHomeStoreFilters } from '@/hooks/useStoreFilters';
+import type { GenericMaster } from '@/types/master';
 
 export default function HomePage() {
-  const router = useRouter()
+  const router = useRouter();
 
-  const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
-  const [storeTypeId, setStoreTypeId] = useState<string | null>(null)
-  const [clearKey, setClearKey] = useState(0)
+  const [storeTypeId, setStoreTypeId] = useState<string | null>(null);
+  const [clearKey, setClearKey] = useState(0);
 
-  const { stores, loading } = useHomeStores()
-  const masters = useHomeMasters()
+  const { stores, loading } = useHomeStores();
+  const masters = useHomeMasters();
 
   const storeTypes = useMemo<GenericMaster[]>(() => {
-    return Array.from(masters.genericMasters.values()).filter(
-      (m) => m.table === "store_types"
-    )
-  }, [masters.genericMasters])
+    return Array.from(masters.genericMasters.values()).filter((m) => m.table === 'store_types');
+  }, [masters.genericMasters]);
 
   const filter = useHomeStoreFilters(stores, masters.externalLabelMap, {
     storeTypeId,
-  })
+  });
 
-  const { filteredStores, selectedFilters, count, handleClear, ...setters } =
-    filter
+  const { filteredStores, selectedFilters, count, handleClear, ...setters } = filter;
 
   const handleClearAll = () => {
-    handleClear()
-    setClearKey((v) => v + 1)
-    setStoreTypeId(null)
-  }
+    handleClear();
+    setClearKey((v) => v + 1);
+    setStoreTypeId(null);
+  };
 
   const handleGoToStores = () => {
-    const params = new URLSearchParams()
+    const params = new URLSearchParams();
 
-    if (storeTypeId) params.set("store_type_id", storeTypeId)
-    selectedFilters.forEach((f) => params.append("filters", f))
-    filteredStores.forEach((s) => params.append("ids", s.id))
+    if (storeTypeId) params.set('store_type_id', storeTypeId);
+    selectedFilters.forEach((f) => params.append('filters', f));
+    filteredStores.forEach((s) => params.append('ids', s.id));
 
-    router.push(`/stores?${params.toString()}`)
-  }
+    router.push(`/stores?${params.toString()}`);
+  };
 
   const handleClickFilter = (label: string) => {
-    const section = masters.labelToSectionMap.get(label)
-    if (!section) return
+    const section = masters.labelToSectionMap.get(label);
+    if (!section) return;
 
     sectionRefs.current[section]?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    })
-  }
+      behavior: 'smooth',
+      block: 'start',
+    });
+  };
 
   return (
     <>
       {/* ===== Hero ===== */}
-      <div className="relative w-full h-160 flex flex-col items-center text-white overflow-hidden bg-[url('/background-sp@2x.png')] bg-cover bg-center px-4 pt-20">
-
+      <div className="relative flex h-160 w-full flex-col items-center overflow-hidden bg-[url('/background-sp@2x.png')] bg-cover bg-center px-4 pt-20 text-white">
         <LogoHero />
 
         {!loading && (
@@ -82,7 +78,6 @@ export default function HomePage() {
         )}
 
         <CommentSlider />
-
       </div>
 
       {/* ===== Store Type ===== */}
@@ -123,8 +118,8 @@ export default function HomePage() {
         onClickFilter={handleClickFilter}
       />
 
-      <Footer />
+      <Footer hasFixedBottom />
       <div className="h-[50px]" />
     </>
-  )
+  );
 }

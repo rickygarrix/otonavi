@@ -3,9 +3,18 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-export default function Footer() {
+type FooterProps = {
+  hasFixedBottom?: boolean;
+};
+
+export default function Footer({ hasFixedBottom }: FooterProps) {
   return (
-    <footer className="bg-dark-5 text-light-3 flex flex-col gap-6 px-4 pt-8 pb-10">
+    <footer
+      className={[
+        'bg-dark-5 text-light-3 flex flex-col gap-6 px-4 pt-8',
+        hasFixedBottom ? 'pb-26' : 'pb-10',
+      ].join(' ')}
+    >
       {/* ロゴ */}
       <Link href="/" className="ml-2 flex h-10 items-center">
         <Image src="/logo-white.svg" alt="オトナビ" width={133} height={40} />
