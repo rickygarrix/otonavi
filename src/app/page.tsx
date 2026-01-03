@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import LogoHero from '@/components/home/LogoHero';
+import Image from 'next/image';
 import CommentSlider from '@/components/home/CommentSlider';
 import HomeLatestStores from '@/components/home/HomeLatestStores';
 
@@ -69,7 +69,13 @@ export default function HomePage() {
     <>
       {/* ===== Hero ===== */}
       <div className="relative flex h-160 w-full flex-col items-center overflow-hidden bg-[url('/background-sp@2x.png')] bg-cover bg-center px-4 pt-20 text-white">
-        <LogoHero />
+        <Image
+          src="/logo-white.svg"
+          alt="オトナビ"
+          width={200}
+          height={60}
+          className="drop-shadow-lg"
+        />
 
         {!loading && (
           <div className="mt-10">
