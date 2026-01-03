@@ -1,5 +1,5 @@
-@config "../../tailwind.config.ts";
-@import "tailwindcss";
+@config '../../tailwind.config.ts';
+@import 'tailwindcss';
 
 /* ================================
    Tailwind theme bridge
@@ -23,26 +23,6 @@
 }
 
 /* ================================
-   Global Reset
-================================ */
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-* {
-  margin: 0;
-  /*padding: 0;*/
-}
-
-html,
-body {
-  height: 100%;
-}
-
-/* ================================
    Body / Typography
 ================================ */
 
@@ -55,7 +35,9 @@ body {
 }
 
 .sp-frame {
-  box-shadow: 0 0 80px 0 rgba(0, 0, 0, 0.10), 0 0 16px 0 rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 0 80px 0 rgba(0, 0, 0, 0.1),
+    0 0 16px 0 rgba(0, 0, 0, 0.15);
 }
 
 /* ================================
@@ -72,8 +54,6 @@ body {
 
 img,
 video {
-  max-width: 100%;
-  height: auto;
   object-fit: cover;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
@@ -88,7 +68,9 @@ video {
 }
 
 .swiper-slide {
-  transition: transform 0.35s ease, opacity 0.35s ease;
+  transition:
+    transform 0.35s ease,
+    opacity 0.35s ease;
 }
 
 .swiper-slide img {
