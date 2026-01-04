@@ -8,7 +8,6 @@ import CommentSlider from '@/components/home/CommentSlider';
 import HomeLatestStores from '@/components/home/HomeLatestStores';
 
 import StoreTypeFilter from '@/components/filters/selectors/StoreTypeFilter';
-import SearchFilterStickyWrapper from '@/components/filters/layouts/SearchFilterStickyWrapper';
 import SearchBar from '@/components/home/SearchBar';
 import Footer from '@/components/ui/Footer';
 import HomeFilterSections from '@/components/home/HomeFilterSections';
