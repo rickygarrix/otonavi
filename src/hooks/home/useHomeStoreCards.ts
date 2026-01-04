@@ -5,11 +5,6 @@ import { supabase } from "@/lib/supabase"
 import type { HomeStoreLite } from "@/types/store"
 import { normalizeHomeStore } from "@/lib/normalize/normalizeHomeStore"
 
-/**
- * Home の「最新店舗カード」専用
- * - 表示に必要な最小限のみ取得
- * - フィルター・検索には使わない
- */
 export function useHomeStoreCards(limit = 12) {
   const [stores, setStores] = useState<HomeStoreLite[]>([])
   const [loading, setLoading] = useState(true)

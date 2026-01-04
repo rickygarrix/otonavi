@@ -13,27 +13,13 @@ import { useHomeMasters } from "@/hooks/home";
 export default function StoresClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  // ============================
-  // ① 店舗一覧取得（検索用）
-  // ============================
   const { stores, loading } = useStoresForSearch();
-
-  // ============================
-  // ② マスター（label 変換用）
-  // ============================
   const masters = useHomeMasters();
   const labelMap = masters.externalLabelMap;
 
-  // ============================
-  // ③ URL から検索条件を読む
-  // ============================
-  const selectedFilters = searchParams.getAll("filters"); // key
-  const storeTypeId = searchParams.get("store_type_id"); // id
+  const selectedFilters = searchParams.getAll("filters");
+  const storeTypeId = searchParams.get("store_type_id");
 
-  // ============================
-  // ④ フィルタリング
-  // ============================
   const { filteredStores } = useStoreFilters(stores, {
     filters: selectedFilters,
     storeTypeId,
@@ -41,16 +27,10 @@ export default function StoresClient() {
 
   const params = searchParams.toString();
 
-  // ============================
-  // ⑤ Loading
-  // ============================
   if (loading) {
     return <div className="pt-20 text-center">Loading...</div>;
   }
 
-  // ============================
-  // ⑥ 表示用ラベル生成（★修正版）
-  // ============================
   const displayLabels: string[] = [];
 
   // storeTypeId（id → label）
@@ -72,9 +52,6 @@ export default function StoresClient() {
     if (label) displayLabels.push(label);
   });
 
-  // ============================
-  // ⑦ View
-  // ============================
   return (
     <div className="text-dark-5 flex min-h-screen flex-col bg-white pt-20">
       {/* ===== Header ===== */}
