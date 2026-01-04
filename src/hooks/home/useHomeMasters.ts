@@ -39,7 +39,6 @@ async function loadGenericMasters(): Promise<Map<string, GenericMaster>> {
         .order("display_order", { ascending: true })
 
       if (error) {
-        console.error(`loadGenericMasters error (${table}):`, error)
         return
       }
 

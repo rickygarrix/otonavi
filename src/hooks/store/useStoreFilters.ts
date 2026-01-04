@@ -31,9 +31,6 @@ export function useStoreFilters(
 
       if (options?.filters?.length) {
 
-        // 🔥 ここに入れる
-        console.log("filters", options.filters)
-
         const storeKeys = [
           store.prefecture_id,
           store.area_id,
@@ -50,9 +47,6 @@ export function useStoreFilters(
           ...store.toilet_keys,
           ...store.other_keys,
         ].filter(Boolean)
-
-        // 🔥 ここも
-        console.log("storeKeys", storeKeys)
 
         const hit = options.filters.some((f) =>
           storeKeys.includes(f)

@@ -50,7 +50,6 @@ export function useStoresForSearch() {
       if (!mounted) return;
 
       if (error || !data) {
-        console.error("useStoresForSearch error:", error);
         setStores([]);
         setLoading(false);
         return;

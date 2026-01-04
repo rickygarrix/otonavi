@@ -62,7 +62,6 @@ export default function StoreDetailPage() {
         .single()
 
       if (error || !data) {
-        console.error("店舗取得エラー:", error)
         setStore(null)
         setLoading(false)
         return

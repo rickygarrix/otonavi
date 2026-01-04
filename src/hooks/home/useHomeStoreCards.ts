@@ -44,7 +44,6 @@ export function useHomeStoreCards(limit = 12) {
       if (!mounted) return
 
       if (error || !data) {
-        console.error("useHomeStoreCards error:", error)
         setError(error ?? new Error("Failed to load home store cards"))
         setStores([])
         setLoading(false)

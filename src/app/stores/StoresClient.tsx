@@ -8,6 +8,7 @@ import HomeButton from "@/components/ui/HomeButton";
 import BackToHomeButton from "@/components/ui/BackToHomeButton";
 
 import { useStoresForSearch, useStoreFilters } from "@/hooks/store";
+import { useHomeMasters } from "@/hooks/home";
 
 export default function StoresClient() {
   const router = useRouter();
@@ -19,30 +20,60 @@ export default function StoresClient() {
   const { stores, loading } = useStoresForSearch();
 
   // ============================
-  // ② URL から検索条件を読む
+  // ② マスター（label 変換用）
   // ============================
-  const selectedFilters = searchParams.getAll("filters"); // keys
-  const storeTypeId = searchParams.get("store_type_id"); // ← ★重要
+  const masters = useHomeMasters();
+  const labelMap = masters.externalLabelMap;
 
   // ============================
-  // ③ フィルタリング
+  // ③ URL から検索条件を読む
+  // ============================
+  const selectedFilters = searchParams.getAll("filters"); // key
+  const storeTypeId = searchParams.get("store_type_id"); // id
+
+  // ============================
+  // ④ フィルタリング
   // ============================
   const { filteredStores } = useStoreFilters(stores, {
     filters: selectedFilters,
-    storeTypeId, // ← ★Homeから渡された店舗タイプ
+    storeTypeId,
   });
 
   const params = searchParams.toString();
 
   // ============================
-  // ④ Loading
+  // ⑤ Loading
   // ============================
   if (loading) {
     return <div className="pt-20 text-center">Loading...</div>;
   }
 
   // ============================
-  // ⑤ View
+  // ⑥ 表示用ラベル生成（★修正版）
+  // ============================
+  const displayLabels: string[] = [];
+
+  // storeTypeId（id → label）
+  if (storeTypeId) {
+    const storeTypeLabel = Array.from(
+      masters.genericMasters.values()
+    ).find(
+      (m) => m.table === "store_types" && m.id === storeTypeId
+    )?.label;
+
+    if (storeTypeLabel) {
+      displayLabels.push(storeTypeLabel);
+    }
+  }
+
+  // filters（key → label）
+  selectedFilters.forEach((key) => {
+    const label = labelMap.get(key);
+    if (label) displayLabels.push(label);
+  });
+
+  // ============================
+  // ⑦ View
   // ============================
   return (
     <div className="text-dark-5 flex min-h-screen flex-col bg-white pt-20">
@@ -51,14 +82,16 @@ export default function StoresClient() {
         <header className="m-auto flex h-20 w-full max-w-105 items-center gap-4 bg-white/80 px-4 backdrop-blur-lg">
           <HomeButton />
 
+          {/* 件数 */}
           <div className="shrink-0 text-lg font-bold tracking-widest">
             {filteredStores.length}
             <span className="ml-1 text-[10px]">件</span>
           </div>
 
-          {(storeTypeId || selectedFilters.length > 0) && (
+          {/* 検索条件（label 表示） */}
+          {displayLabels.length > 0 && (
             <div className="line-clamp-2 flex-1 text-xs text-blue-700">
-              {[storeTypeId, ...selectedFilters].filter(Boolean).join(", ")}
+              {displayLabels.join(", ")}
             </div>
           )}
         </header>
