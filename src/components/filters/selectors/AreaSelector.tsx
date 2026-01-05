@@ -148,7 +148,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
                 <button
                   key={p.id}
                   onClick={() => selectPrefecture(p)}
-                  className={`flex h-12 w-full items-center gap-2 px-2 text-start ${isSelected ? 'text-dark-5' : 'text-gray-4'}`}
+                  className={`active:bg-light-1 flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start ${isSelected ? 'text-dark-5' : 'text-gray-4'}`}
                 >
                   <Check
                     className={`h-4 w-4 shrink-0 ${isSelected ? 'opacity-100' : 'opacity-0'}`}
@@ -199,7 +199,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
                     <button
                       key={a.id}
                       onClick={() => selectArea(a)}
-                      className={`flex h-12 w-full items-center gap-2 px-2 text-start ${isSelected ? 'text-dark-5' : 'text-gray-4'}`}
+                      className={`active:bg-light-1 flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start ${isSelected ? 'text-dark-5' : 'text-gray-4'}`}
                     >
                       <Check
                         className={`h-4 w-4 shrink-0 ${isSelected ? 'opacity-100' : 'opacity-0'}`}
@@ -224,7 +224,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
                     <button
                       key={a.id}
                       onClick={() => selectArea(a)}
-                      className={`flex h-12 w-full items-center gap-2 px-2 text-start ${isSelected ? 'text-dark-5' : 'text-gray-4'}`}
+                      className={`active:bg-light-1 flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start ${isSelected ? 'text-dark-5' : 'text-gray-4'}`}
                     >
                       <Check
                         className={`h-4 w-4 shrink-0 ${isSelected ? 'opacity-100' : 'opacity-0'}`}
