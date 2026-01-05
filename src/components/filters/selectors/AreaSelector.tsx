@@ -115,9 +115,15 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
   // ============================
   return (
     <div className="relative flex w-full text-sm">
-      {/* 都道府県 */}
+      {/* 都道府県セレクター */}
       <div className="relative flex-1">
-        <button onClick={() => setOpenPref((v) => !v)} className="h-12 w-full p-1">
+        <button
+          onClick={() => {
+            setOpenArea(false);
+            setOpenPref((v) => !v);
+          }}
+          className="h-12 w-full p-1"
+        >
           <div
             className={`h-full overflow-hidden rounded-full p-px ${selectedPrefecture ? outerSelected : outerUnselected}`}
           >
@@ -132,6 +138,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
           </div>
         </button>
 
+        {/* 都道府県メニュー */}
         {openPref && (
           <div className="border-gray-1 absolute z-50 mt-2 h-100 w-50 overflow-y-auto rounded-2xl border bg-white/60 p-2 shadow-lg backdrop-blur-lg">
             {prefectures.map((p) => {
@@ -155,12 +162,18 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
         )}
       </div>
 
-      {/* 東京エリア */}
+      {/* 市区町村セレクター */}
       <div
         className={`relative flex-1 ${isTokyo ? 'visible' : 'invisible'}`}
         aria-hidden={!isTokyo}
       >
-        <button onClick={() => setOpenArea((v) => !v)} className="h-12 w-full p-1">
+        <button
+          onClick={() => {
+            setOpenPref(false);
+            setOpenArea((v) => !v);
+          }}
+          className="h-12 w-full p-1"
+        >
           <div
             className={`h-full overflow-hidden rounded-full p-px ${selectedArea ? outerSelected : outerUnselected}`}
           >
@@ -173,6 +186,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
           </div>
         </button>
 
+        {/* 市区町村メニュー */}
         {openArea && (
           <div className="text-gray-4 border-gray-1 absolute z-50 mt-2 h-100 w-50 overflow-y-auto rounded-2xl border bg-white/60 p-2 shadow-lg backdrop-blur-lg">
             {wards.length > 0 && (
