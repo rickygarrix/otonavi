@@ -22,15 +22,8 @@ export default function HomePage() {
 
   const [storeTypeId, setStoreTypeId] = useState<string | null>(null)
   const [clearKey, setClearKey] = useState(0)
-
-  // ============================
-  // ① Home表示用：最新カード（軽量）
-  // ============================
   const { stores: cardStores, loading } = useHomeStoreCards(12)
 
-  // ============================
-  // ② マスター（UI・ラベル用）
-  // ============================
   const masters = useHomeMasters()
 
   const storeTypes = useMemo<GenericMaster[]>(() => {
@@ -39,15 +32,9 @@ export default function HomePage() {
     )
   }, [masters.genericMasters])
 
-  // ============================
-  // ③ Home専用フィルター状態
-  // ============================
   const filter = useHomeFilterState(masters.externalLabelMap, { storeTypeId })
   const { selectedKeys, selectedLabels, handleClear, ...setters } = filter
 
-  // ============================
-  // ④ 検索用：全店舗（件数計算専用）
-  // ============================
   const { stores: searchStores } = useStoresForSearch()
 
   const { filteredStores } = useStoreFilters(searchStores, {
@@ -55,9 +42,6 @@ export default function HomePage() {
     storeTypeId,
   })
 
-  // ============================
-  // ⑤ handlers
-  // ============================
   const handleClearAll = () => {
     handleClear()
     setClearKey((v) => v + 1)
@@ -83,9 +67,6 @@ export default function HomePage() {
     })
   }
 
-  // ============================
-  // ⑥ View（fv UI）
-  // ============================
   return (
     <>
       {/* ===== Hero ===== */}
@@ -144,7 +125,7 @@ export default function HomePage() {
         selectedFilters={selectedLabels}
         onClear={handleClearAll}
         onSearch={handleGoToStores}
-        count={filteredStores.length} // ★ Homeでも該当件数が即わかる
+        count={filteredStores.length}
         onClickFilter={handleClickFilter}
       />
 

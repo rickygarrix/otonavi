@@ -1,7 +1,9 @@
 import type { HomeStoreLite } from "@/types/store"
-import type { HomeStoreRow } from "@/types/store-db-home"
+import type { StoreRow } from "@/types/store-db"
 
-function selectImage(store_images: HomeStoreRow["store_images"]): string {
+function selectImage(
+  store_images: StoreRow["store_images"]
+): string {
   if (!store_images?.length) return "/noshop.svg"
 
   const main = store_images.find((i) => i.is_main)
@@ -14,23 +16,21 @@ function selectImage(store_images: HomeStoreRow["store_images"]): string {
   return sorted[0]?.image_url ?? "/noshop.svg"
 }
 
-export function normalizeHomeStore(raw: HomeStoreRow): HomeStoreLite {
-  const prefecture = raw.prefectures
-  const area = raw.areas
-  const storeType = raw.store_types
-
+export function normalizeHomeStore(
+  raw: StoreRow
+): HomeStoreLite {
   return {
     id: raw.id,
     name: raw.name,
 
-    prefecture_id: prefecture?.id ?? null,
-    prefecture_label: prefecture?.name_ja ?? null,
+    prefecture_id: raw.prefectures?.id ?? null,
+    prefecture_label: raw.prefectures?.name_ja ?? null,
 
-    area_id: area?.id ?? null,
-    area_label: area?.name ?? null,
+    area_id: raw.areas?.id ?? null,
+    area_label: raw.areas?.name ?? null,
 
-    store_type_id: storeType?.id ?? null,
-    type_label: storeType?.label ?? null,
+    store_type_id: raw.store_types?.id ?? null,
+    type_label: raw.store_types?.label ?? null,
 
     image_url: selectImage(raw.store_images),
     updated_at: raw.updated_at,
