@@ -1,6 +1,6 @@
-// lib/normalizeStore.ts
-import type { HomeStore } from "@/types/store"
+// lib/normalize/normalizeStoreDetail.ts
 import type { StoreRow } from "@/types/store-db"
+import type { HomeStore } from "@/types/store"
 
 const asString = (v: unknown): string | null =>
   typeof v === "string" ? v : null
@@ -38,7 +38,6 @@ function extractM2MOrdered(
         typeof d?.key === "string" &&
         typeof d?.label === "string"
     )
-    // ★ display_order 小 → 大
     .sort(
       (a, b) =>
         (a.display_order ?? 0) - (b.display_order ?? 0)
@@ -50,7 +49,9 @@ function extractM2MOrdered(
   }
 }
 
-function selectImage(store_images: StoreRow["store_images"]): string {
+function selectImage(
+  store_images: StoreRow["store_images"]
+): string {
   if (!store_images?.length) return "/noshop.svg"
 
   const main = store_images.find((i) => i.is_main)
@@ -63,14 +64,26 @@ function selectImage(store_images: StoreRow["store_images"]): string {
   return sorted[0]?.image_url ?? "/default_shop.svg"
 }
 
-export function normalizeStore(raw: StoreRow): HomeStore {
-  const store_awards = asArray<{
-    id?: unknown
-    title?: unknown
-    organization?: unknown
-    year?: unknown
-    url?: unknown
-  }>(raw.store_awards).map((a) => ({
+type StoreAwardRow = {
+  id?: unknown
+  title?: unknown
+  organization?: unknown
+  year?: unknown
+  url?: unknown
+}
+
+type StoreMediaRow = {
+  id?: unknown
+  media_name?: unknown
+  year?: unknown
+}
+
+export function normalizeStoreDetail(
+  raw: StoreRow
+): HomeStore {
+  const store_awards = asArray<StoreAwardRow>(
+    raw.store_awards
+  ).map((a) => ({
     id: String(a.id ?? ""),
     title: String(a.title ?? ""),
     organization: asString(a.organization),
@@ -78,11 +91,9 @@ export function normalizeStore(raw: StoreRow): HomeStore {
     url: asString(a.url),
   }))
 
-  const store_media_mentions = asArray<{
-    id?: unknown
-    media_name?: unknown
-    year?: unknown
-  }>(raw.store_media_mentions).map((m) => ({
+  const store_media_mentions = asArray<StoreMediaRow>(
+    raw.store_media_mentions
+  ).map((m) => ({
     id: String(m.id ?? ""),
     media_name: String(m.media_name ?? ""),
     year: asNumber(m.year),

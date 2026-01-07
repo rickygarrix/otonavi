@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter, useParams, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
-import { normalizeStore } from "@/lib/normalizeStore"
+import { normalizeStoreDetail } from "@/lib/normalize/normalizeStoreDetail"
 import type { HomeStore } from "@/types/store"
 import StoreDetailView from "@/components/store/StoreDetailView"
 import HomeButton from "@/components/ui/HomeButton"
@@ -62,13 +62,12 @@ export default function StoreDetailPage() {
         .single()
 
       if (error || !data) {
-        console.error("店舗取得エラー:", error)
         setStore(null)
         setLoading(false)
         return
       }
 
-      const mapped = normalizeStore(data)
+      const mapped = normalizeStoreDetail(data)
       setStore(mapped)
       setLoading(false)
     }

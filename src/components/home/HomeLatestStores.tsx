@@ -1,49 +1,43 @@
-"use client"
+'use client';
 
-import { useRouter } from "next/navigation"
-import HomeStoreCard from "../home/HomeStoreCard"
-import type { HomeStore } from "@/types/store"
+import { useRouter } from 'next/navigation';
+import HomeStoreCard from '../home/HomeStoreCard';
+import type { HomeStoreLite } from '@/types/store';
 
 type Props = {
-  stores: HomeStore[]
-}
+  stores: HomeStoreLite[];
+};
 
 export default function HomeLatestStores({ stores }: Props) {
-  const router = useRouter()
+  const router = useRouter();
 
   const latestStores = [...stores]
     .sort(
       (a, b) =>
-        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+        new Date(b.updated_at).getTime() -
+        new Date(a.updated_at).getTime()
     )
-    .slice(0, 3)
+    .slice(0, 3);
 
-  if (latestStores.length === 0) return null
+  if (latestStores.length === 0) return null;
 
   return (
-    <div className="w-full px-6 mt-10">
-      <h2 className="text-white text-lg font-bold mb-4 text-center">
+    <div className="flex w-full flex-col gap-2 rounded-3xl border border-white/10 bg-black/5 px-2 pt-4 pb-2 backdrop-blur-lg">
+      <h2 className="text-center text-sm tracking-widest">
         最近更新された音箱
       </h2>
 
-      <div className="grid grid-cols-3 gap-3 items-start">
+      <ul className="flex items-start">
         {latestStores.map((store) => (
-          <div
+          <li
             key={store.id}
             onClick={() => router.push(`/stores/${store.id}`)}
-            className="
-              cursor-pointer
-              active:scale-95
-              transition-transform
-              max-w-[110px]
-              w-full
-              mx-auto
-            "
+            className="flex-1 cursor-pointer"
           >
             <HomeStoreCard store={store} />
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
-  )
+  );
 }

@@ -1,79 +1,91 @@
-'use client';
+"use client"
 
-import { useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useMemo, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
 
-import LogoHero from '@/components/home/LogoHero';
-import CommentSlider from '@/components/home/CommentSlider';
-import HomeLatestStores from '@/components/home/HomeLatestStores';
-
-import StoreTypeFilter from '@/components/filters/selectors/StoreTypeFilter';
-import SearchFilterStickyWrapper from '@/components/filters/layouts/SearchFilterStickyWrapper';
+import CommentSlider from "@/components/home/CommentSlider"
+import HomeLatestStores from "@/components/home/HomeLatestStores"
+import StoreTypeFilter from '@/components/selectors/StoreTypeFilter';
 import SearchBar from '@/components/home/SearchBar';
 import Footer from '@/components/ui/Footer';
 import HomeFilterSections from '@/components/home/HomeFilterSections';
 
-import { useHomeStores } from '@/hooks/useHomeStores';
-import { useHomeMasters } from '@/hooks/useHomeMasters';
-import { useHomeStoreFilters } from '@/hooks/useStoreFilters';
-import type { GenericMaster } from '@/types/master';
+import {useHomeStoreCards,useHomeMasters,useHomeFilterState,} from "@/hooks/home"
+
+import { useStoresForSearch, useStoreFilters } from "@/hooks/store"
+import type { GenericMaster } from "@/types/master"
 
 export default function HomePage() {
-  const router = useRouter();
+  const router = useRouter()
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
 
-  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  const [storeTypeId, setStoreTypeId] = useState<string | null>(null)
+  const [clearKey, setClearKey] = useState(0)
+  const { stores: cardStores, loading } = useHomeStoreCards(12)
 
-  const [storeTypeId, setStoreTypeId] = useState<string | null>(null);
-  const [clearKey, setClearKey] = useState(0);
-
-  const { stores, loading } = useHomeStores();
-  const masters = useHomeMasters();
+  const masters = useHomeMasters()
 
   const storeTypes = useMemo<GenericMaster[]>(() => {
-    return Array.from(masters.genericMasters.values()).filter((m) => m.table === 'store_types');
-  }, [masters.genericMasters]);
+    return Array.from(masters.genericMasters.values()).filter(
+      (m) => m.table === "store_types"
+    )
+  }, [masters.genericMasters])
 
-  const filter = useHomeStoreFilters(stores, masters.externalLabelMap, {
+  const filter = useHomeFilterState(masters.externalLabelMap, { storeTypeId })
+  const { selectedKeys, selectedLabels, handleClear, ...setters } = filter
+
+  const { stores: searchStores } = useStoresForSearch()
+
+  const { filteredStores } = useStoreFilters(searchStores, {
+    filters: selectedKeys,
     storeTypeId,
-  });
-
-  const { filteredStores, selectedFilters, count, handleClear, ...setters } = filter;
+  })
 
   const handleClearAll = () => {
-    handleClear();
-    setClearKey((v) => v + 1);
-    setStoreTypeId(null);
-  };
+    handleClear()
+    setClearKey((v) => v + 1)
+    setStoreTypeId(null)
+  }
 
   const handleGoToStores = () => {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams()
 
-    if (storeTypeId) params.set('store_type_id', storeTypeId);
-    selectedFilters.forEach((f) => params.append('filters', f));
-    filteredStores.forEach((s) => params.append('ids', s.id));
+    if (storeTypeId) params.set("store_type_id", storeTypeId)
+    selectedKeys.forEach((k) => params.append("filters", k))
 
-    router.push(`/stores?${params.toString()}`);
-  };
+    router.push(`/stores?${params.toString()}`)
+  }
 
   const handleClickFilter = (label: string) => {
-    const section = masters.labelToSectionMap.get(label);
-    if (!section) return;
+    const section = masters.labelToSectionMap.get(label)
+    if (!section) return
 
     sectionRefs.current[section]?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    });
-  };
+      behavior: "smooth",
+      block: "start",
+    })
+  }
 
   return (
     <>
       {/* ===== Hero ===== */}
-      <div className="relative flex h-160 w-full flex-col items-center overflow-hidden bg-[url('/background-sp@2x.png')] bg-cover bg-center px-4 pt-20 text-white">
-        <LogoHero />
+      <div className="text-light-3 relative flex h-146 flex-col items-center gap-10 overflow-hidden bg-[url('/background-sp@2x.png')] bg-cover bg-center px-4 pt-20">
+        <p className="text-[10px] tracking-widest">
+          夜の音楽をもっと楽しむための音箱ナビ
+        </p>
+
+        <Image
+          src="/logo-white.svg"
+          alt="オトナビ"
+          width={200}
+          height={60}
+          className="drop-shadow-lg"
+        />
 
         {!loading && (
           <div className="mt-10">
-            <HomeLatestStores stores={stores} />
+            <HomeLatestStores stores={cardStores} />
           </div>
         )}
 
@@ -81,13 +93,12 @@ export default function HomePage() {
       </div>
 
       {/* ===== Store Type ===== */}
-      <SearchFilterStickyWrapper>
-        <StoreTypeFilter
-          storeTypes={storeTypes} // ★ 必須
-          activeTypeId={storeTypeId}
-          onChange={setStoreTypeId}
-        />
-      </SearchFilterStickyWrapper>
+
+      <StoreTypeFilter
+        storeTypes={storeTypes} // ★ 必須
+        activeTypeId={storeTypeId}
+        onChange={setStoreTypeId}
+      />
 
       {/* ===== Filters ===== */}
       <HomeFilterSections
@@ -111,14 +122,14 @@ export default function HomePage() {
 
       {/* ===== Fixed Search Bar ===== */}
       <SearchBar
-        selectedFilters={selectedFilters}
+        selectedFilters={selectedLabels}
         onClear={handleClearAll}
         onSearch={handleGoToStores}
-        count={count}
+        count={filteredStores.length}
         onClickFilter={handleClickFilter}
       />
 
       <Footer hasFixedBottom />
     </>
-  );
+  )
 }

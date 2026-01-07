@@ -90,3 +90,52 @@ export type HomeStore = {
 
   updated_at: string
 }
+export type HomeStoreLite = {
+  id: string
+  name: string
+
+  prefecture_id: string | null
+  prefecture_label: string | null
+
+  area_id: string | null
+  area_label: string | null
+
+  store_type_id: string | null
+  type_label: string | null
+
+  image_url: string
+  updated_at: string
+}
+export type SearchStore = {
+  id: string
+  name: string
+  name_kana: string | null
+
+  prefecture_id: string | null
+  prefecture_label: string | null
+
+  area_id: string | null
+  area_label: string | null
+
+  store_type_id: string | null
+  type_label: string | null
+
+  image_url: string
+
+  /* 検索・絞り込み用 */
+  price_range_key: string | null
+  size_key: string | null
+
+  customer_keys: string[]
+  atmosphere_keys: string[]
+  environment_keys: string[]
+  drink_keys: string[]
+  payment_method_keys: string[]
+  event_trend_keys: string[]
+  baggage_keys: string[]
+  smoking_keys: string[]
+  toilet_keys: string[]
+  other_keys: string[]
+
+  updated_at: string
+}

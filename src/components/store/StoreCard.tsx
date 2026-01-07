@@ -2,10 +2,10 @@
 
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import type { HomeStore } from "@/types/store"
+import type { SearchStore } from "@/types/store"
 
 type Props = {
-  store: HomeStore
+  store: SearchStore
   query?: string
 }
 
@@ -31,11 +31,8 @@ export default function StoreCard({ store, query }: Props) {
       : store.prefecture_label ?? ""
 
   return (
-    <button
-      onClick={handleClick}
-      className="w-full bg-white text-left"
-    >
-      {/* 正方形画像 */}
+    <button onClick={handleClick} className="w-full bg-white text-left">
+      {/* 画像 */}
       <div className="relative w-full aspect-square bg-gray-200 rounded-2xl overflow-hidden">
         <Image
           src={imageUrl}
