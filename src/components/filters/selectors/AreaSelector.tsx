@@ -125,7 +125,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
         <button
           type="button"
           aria-label="メニューを閉じる"
-          className="fixed inset-0 z-40 cursor-default bg-black/10 backdrop-blur-[1px]"
+          className="fixed inset-0 z-40 cursor-default bg-black/10"
           onClick={() => {
             setOpenPref(false);
             setOpenArea(false);
@@ -158,7 +158,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
 
         {/* 都道府県メニュー */}
         {openPref && (
-          <div className="border-gray-1 absolute z-50 mt-2 h-100 w-50 overflow-y-auto rounded-2xl border bg-white/60 p-2 shadow-lg backdrop-blur-lg">
+          <div className="border-gray-1 absolute top-12 left-0 z-50 h-100 w-full overflow-y-auto rounded-2xl border bg-white/40 p-2 shadow-lg backdrop-blur-lg">
             {prefectures.map((p) => {
               const isSelected = selectedPrefecture?.id === p.id;
 
@@ -166,11 +166,11 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
                 <button
                   key={p.id}
                   onClick={() => selectPrefecture(p)}
-                  className={`active:bg-light-1 flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start ${isSelected ? 'text-dark-5' : 'text-gray-4'}`}
+                  className={`flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start active:bg-black/3 ${isSelected ? 'text-dark-5 bg-black/5 font-semibold' : 'text-gray-4'}`}
                 >
                   <Check
                     className={`h-4 w-4 shrink-0 ${isSelected ? 'opacity-100' : 'opacity-0'}`}
-                    strokeWidth={1.4}
+                    strokeWidth={2.0}
                   />
                   <span className="min-w-0 flex-1 truncate">{p.name_ja}</span>
                 </button>
@@ -206,7 +206,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
 
         {/* 市区町村メニュー */}
         {openArea && (
-          <div className="text-gray-4 border-gray-1 absolute z-50 mt-2 h-100 w-50 overflow-y-auto rounded-2xl border bg-white/60 p-2 shadow-lg backdrop-blur-lg">
+          <div className="text-gray-4 border-gray-1 absolute top-12 left-0 z-50 h-100 w-full overflow-y-auto rounded-2xl border bg-white/40 p-2 shadow-lg backdrop-blur-lg">
             {wards.length > 0 && (
               <>
                 <div className="p-2 text-xs font-semibold">東京23区</div>
@@ -217,11 +217,11 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
                     <button
                       key={a.id}
                       onClick={() => selectArea(a)}
-                      className={`active:bg-light-1 flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start ${isSelected ? 'text-dark-5' : 'text-gray-4'}`}
+                      className={`flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start active:bg-black/3 ${isSelected ? 'text-dark-5 bg-black/5 font-semibold' : 'text-gray-4'}`}
                     >
                       <Check
                         className={`h-4 w-4 shrink-0 ${isSelected ? 'opacity-100' : 'opacity-0'}`}
-                        strokeWidth={1.4}
+                        strokeWidth={2.0}
                       />
                       <span className="min-w-0 flex-1 truncate">{a.name}</span>
                     </button>
@@ -242,11 +242,11 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
                     <button
                       key={a.id}
                       onClick={() => selectArea(a)}
-                      className={`active:bg-light-1 flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start ${isSelected ? 'text-dark-5' : 'text-gray-4'}`}
+                      className={`flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start active:bg-black/3 ${isSelected ? 'text-dark-5 bg-black/5 font-semibold' : 'text-gray-4'}`}
                     >
                       <Check
                         className={`h-4 w-4 shrink-0 ${isSelected ? 'opacity-100' : 'opacity-0'}`}
-                        strokeWidth={1.4}
+                        strokeWidth={2.0}
                       />
                       <span className="min-w-0 flex-1 truncate">{a.name}</span>
                     </button>
