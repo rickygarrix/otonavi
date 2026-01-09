@@ -78,6 +78,9 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
   // ============================
   const isAnyOpen = openPref || openArea;
 
+  const prefMenuId = 'pref-menu';
+  const areaMenuId = 'area-menu';
+
   // ============================
   // clear
   // ============================
@@ -136,6 +139,8 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
       {/* 都道府県セレクター */}
       <div className="relative flex-1">
         <button
+          aria-expanded={openPref}
+          aria-controls={prefMenuId}
           onClick={() => {
             setOpenArea(false);
             setOpenPref((v) => !v);
@@ -158,7 +163,12 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
 
         {/* 都道府県メニュー */}
         {openPref && (
-          <div className="border-gray-1 absolute top-12 left-0 z-50 h-100 w-full overflow-y-auto rounded-2xl border bg-white/40 p-2 shadow-lg backdrop-blur-lg">
+          <div
+            id={prefMenuId}
+            role="listbox"
+            aria-label="都道府県"
+            className="border-gray-1 absolute top-12 left-0 z-50 h-100 w-full overflow-y-auto rounded-2xl border bg-white/40 p-2 shadow-lg backdrop-blur-lg"
+          >
             {prefectures.map((p) => {
               const isSelected = selectedPrefecture?.id === p.id;
 
@@ -186,6 +196,8 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
         aria-hidden={!isTokyo}
       >
         <button
+          aria-expanded={openArea}
+          aria-controls={areaMenuId}
           onClick={() => {
             setOpenPref(false);
             setOpenArea((v) => !v);
@@ -206,7 +218,12 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
 
         {/* 市区町村メニュー */}
         {openArea && (
-          <div className="text-gray-4 border-gray-1 absolute top-12 left-0 z-50 h-100 w-full overflow-y-auto rounded-2xl border bg-white/40 p-2 shadow-lg backdrop-blur-lg">
+          <div
+            id={areaMenuId}
+            role="listbox"
+            aria-label="市区町村"
+            className="text-gray-4 border-gray-1 absolute top-12 left-0 z-50 h-100 w-full overflow-y-auto rounded-2xl border bg-white/40 p-2 shadow-lg backdrop-blur-lg"
+          >
             {wards.length > 0 && (
               <>
                 <div className="p-2 text-xs font-semibold">東京23区</div>

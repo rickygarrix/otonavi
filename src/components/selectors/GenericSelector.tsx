@@ -43,9 +43,9 @@ export default function GenericSelector({
     const load = async () => {
       const { data, error } = await supabase
         .from(table)
-        .select("id, key, label, display_order")
-        .eq("is_active", true)
-        .order("display_order", { ascending: true })
+        .select('id, key, label, display_order')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
 
       if (error) {
         console.error(`GenericSelector load error (${table}):`, error);
@@ -94,21 +94,20 @@ export default function GenericSelector({
     selection === 'single' ? selected === key : Array.isArray(selected) && selected.includes(key);
 
   return (
-    <div className="w-full px-6 py-6">
-      <div ref={sectionRef ?? null} className="scroll-mt-[90px]" />
+    <>
+      <h3 className="text-md text-dark-5 leading-[1.5] font-bold tracking-widest">{title}</h3>
 
-      <h2 className="mb-6 text-lg font-bold text-slate-900">{title}</h2>
-
-      <div className={`grid gap-3 ${columns === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+      <ul className={`grid ${columns === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
         {items.map((item) => (
-          <Chip
-            key={item.key}
-            label={item.label}
-            selected={isSelected(item.key)}
-            onChange={() => toggle(item.key)}
-          />
+          <li key={item.key}>
+            <Chip
+              label={item.label}
+              selected={isSelected(item.key)}
+              onChange={() => toggle(item.key)}
+            />
+          </li>
         ))}
-      </div>
-    </div>
+      </ul>
+    </>
   );
 }

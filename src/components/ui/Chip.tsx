@@ -18,7 +18,7 @@ export default function Chip({ label, selected, onChange, className }: Props) {
   const innerSelected = 'bg-blue-1 active:opacity-90 text-blue-4';
 
   return (
-    <label className={`inline-block h-12 cursor-pointer p-1 ${className || ''}`}>
+    <label className={`inline-block h-12 w-full cursor-pointer p-1 ${className || ''}`}>
       <input
         onChange={(e) => onChange(e.target.checked)}
         checked={isSelected}
