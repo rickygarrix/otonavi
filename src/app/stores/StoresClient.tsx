@@ -82,7 +82,10 @@ export default function StoresClient() {
       </ul>
 
       {/* ===== Footer ===== */}
-      <BackToHomeButton onClick={() => router.push('/')} className="p-10" />
+      <div className="p-10">
+        <BackToHomeButton onClick={() => router.push('/')} />
+      </div>
+
       <Footer />
     </div>
   );
