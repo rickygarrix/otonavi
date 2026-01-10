@@ -14,7 +14,7 @@ import StoreDetailSections from '@/components/store/StoreDetailSections';
 import StoreDetailMedia from './StoreDetailMedia';
 import { StoreDetailDivider } from './StoreDetailDivider';
 
-const join = (v?: string[]) => (v && v.length > 0 ? v.join('、') : null);
+const join = (v?: string[]) => (v && v.length > 0 ? v.join(', ') : null);
 
 const formatPaymentMethods = (labels?: string[], otherText?: string | null) => {
   if (!labels || labels.length === 0) return null;
@@ -22,10 +22,10 @@ const formatPaymentMethods = (labels?: string[], otherText?: string | null) => {
   const hasOther = labels.includes('その他');
   if (hasOther && otherText) {
     const filtered = labels.filter((l) => l !== 'その他');
-    return [...filtered, otherText].join('、');
+    return [...filtered, otherText].join(', ');
   }
 
-  return labels.join('、');
+  return labels.join(', ');
 };
 
 type Props = {
