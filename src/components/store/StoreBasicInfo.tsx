@@ -9,7 +9,7 @@ type Props = {
 
 export default function StoreBasicInfo({ store }: Props) {
   return (
-    <div className="mt-4 flex flex-col gap-4 p-4 text-center">
+    <div className="mt-8 flex flex-col gap-4 p-4 text-center">
       <div className="text-dark-2 flex justify-center gap-1 text-xs">
         <span>{store.prefecture_label}</span>
         <span>{store.area_label}</span>

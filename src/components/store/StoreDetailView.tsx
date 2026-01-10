@@ -12,6 +12,7 @@ import StoreAccess from '@/components/store/StoreAccess';
 import StoreOpenHours from '@/components/store/StoreOpenHours';
 import StoreDetailSections from '@/components/store/StoreDetailSections';
 import StoreDetailMedia from './StoreDetailMedia';
+import { StoreDetailDivider } from './StoreDetailDivider';
 
 const join = (v?: string[]) => (v && v.length > 0 ? v.join('、') : null);
 
@@ -62,25 +63,49 @@ export default function StoreDetailView({ store }: Props) {
 
   return (
     <div className="bg-white">
-      <StoreImageCarousel storeId={store.id} storeName={store.name} />
+      <main>
+        <StoreImageCarousel storeId={store.id} storeName={store.name} />
 
-      <StoreBasicInfo store={store} />
+        <StoreBasicInfo store={store} />
 
-      <StoreAccess store={store} />
+        {store.access && (
+          <>
+            <StoreDetailDivider />
+            <StoreAccess store={store} />
+          </>
+        )}
 
-      <StoreOpenHours businessHours={store.business_hours} />
+        {store.business_hours && (
+          <>
+            <StoreDetailDivider />
+            <StoreOpenHours businessHours={store.business_hours} />
+          </>
+        )}
 
-      <StoreDetailMedia awards={store.store_awards} mediaMentions={store.store_media_mentions} />
+        {(store.store_awards?.length > 0 || store.store_media_mentions?.length > 0) && (
+          <>
+            <StoreDetailDivider />
+            <StoreDetailMedia
+              awards={store.store_awards}
+              mediaMentions={store.store_media_mentions}
+            />
+          </>
+        )}
 
-      <StoreDetailSections items={detailItems} />
+        {detailItems.length > 0 && (
+          <>
+            <StoreDetailDivider />
+            <StoreDetailSections items={detailItems} />
+            <StoreDetailDivider />
+          </>
+        )}
+      </main>
 
-      <BackToHomeButton
-        onClick={() => router.push(query ? `/stores?${query}` : '/stores')}
-        className="mt-8 px-4"
-      />
+      <div className="p-10">
+        <BackToHomeButton onClick={() => router.push(query ? `/stores?${query}` : '/stores')} />
+      </div>
 
       <Footer />
-      <div className="h-12" />
     </div>
   );
 }
