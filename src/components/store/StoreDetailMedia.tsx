@@ -44,7 +44,7 @@ export default function StoreDetailMedia({ awards, mediaMentions }: Props) {
 
   return (
     <section className="text-dark-4 flex flex-col gap-4 p-4 text-sm">
-      <h2 className="text-dark-5 text-lg font-bold tracking-widest">受賞歴／メディア掲載</h2>
+      <h2 className="text-dark-5 py-0.5 text-lg font-bold tracking-widest">受賞歴／メディア掲載</h2>
 
       <div className="flex flex-col gap-6">
         {years.map((year) => (
