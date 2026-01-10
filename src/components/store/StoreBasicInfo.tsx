@@ -1,125 +1,73 @@
-"use client"
+'use client';
 
-import Image from "next/image"
-import type { HomeStore } from "@/types/store"
+import Image from 'next/image';
+import type { HomeStore } from '@/types/store';
 
 type Props = {
-  store: HomeStore
-}
+  store: HomeStore;
+};
 
 export default function StoreBasicInfo({ store }: Props) {
   return (
-    <div className="px-4 py-5">
-      <p className="text-sm text-slate-600">
-        {store.prefecture_label} {store.area_label}・{store.type_label}
-      </p>
+    <div className="mt-4 flex flex-col gap-4 p-4 text-center">
+      <div className="text-dark-2 flex justify-center gap-1 text-xs">
+        <span>{store.prefecture_label}</span>
+        <span>{store.area_label}</span>
+        <span>・</span>
+        <span>{store.type_label}</span>
+      </div>
 
-      {/* 店舗名 */}
-      <h1 className="text-2xl font-extrabold mt-1">
-        {store.name}
-      </h1>
+      <div className="flex flex-col gap-2 font-bold">
+        {/* 店舗名 */}
+        <h1 className="text-2xl leading-[1.5]">{store.name}</h1>
 
-      {/* 読み仮名 */}
-      {store.name_kana && (
-        <p className="mt-1 text-sm text-slate-500 tracking-wide">
-          {store.name_kana}
-        </p>
-      )}
+        {/* 読み仮名 */}
+        {store.name_kana && (
+          <p className="text-dark-3 text-[10px] leading-[1.5] tracking-widest">{store.name_kana}</p>
+        )}
+      </div>
 
       {/* 説明文 */}
       {store.description && (
-        <p className="mt-4 whitespace-pre-line text-slate-700">
-          {store.description}
-        </p>
+        <p className="text-dark-2 text-xs whitespace-pre-line">{store.description}</p>
       )}
 
-      {/* SNS / Web */}
-      <div className="flex gap-5 mt-6 items-center">
-        {/* ① 公式サイト */}
+      {/* シェアボタン */}
+      <div className="flex items-center justify-center gap-2 py-2">
         {store.official_site_url && (
-          <IconLink
-            href={store.official_site_url}
-            off="/WebOff.svg"
-            on="/WebOn.svg"
-            alt="Official Site"
-          />
+          <ShareButton href={store.official_site_url} image="/web@2x.png" alt="公式サイトを開く" />
         )}
 
-        {/* ② Instagram */}
         {store.instagram_url && (
-          <IconLink
+          <ShareButton
             href={store.instagram_url}
-            off="/InstagramOff.svg"
-            on="/InstagramOn.svg"
-            alt="Instagram"
+            image="/instagram@2x.png"
+            alt="公式Instagramを開く"
           />
         )}
 
-        {/* ③ X */}
-        {store.x_url && (
-          <IconLink
-            href={store.x_url}
-            off="/XOff.svg"
-            on="/XOn.svg"
-            alt="X"
-          />
-        )}
+        {store.x_url && <ShareButton href={store.x_url} image="/x@2x.png" alt="公式Xを開く" />}
 
-        {/* ④ Facebook */}
         {store.facebook_url && (
-          <IconLink
+          <ShareButton
             href={store.facebook_url}
-            off="/FacebookOff.svg"
-            on="/FacebookOn.svg"
-            alt="Facebook"
+            image="/facebook@2x.png"
+            alt="公式Facebookを開く"
           />
         )}
 
-        {/* ⑤ TikTok */}
         {store.tiktok_url && (
-          <IconLink
-            href={store.tiktok_url}
-            off="/TikTokOff.svg"
-            on="/TikTokOn.svg"
-            alt="TikTok"
-          />
+          <ShareButton href={store.tiktok_url} image="/tiktok@2x.png" alt="公式TikTokを開く" />
         )}
       </div>
     </div>
-  )
+  );
 }
 
-function IconLink({
-  href,
-  off,
-  on,
-  alt,
-}: {
-  href: string
-  off: string
-  on: string
-  alt: string
-}) {
+function ShareButton({ href, image, alt }: { href: string; image: string; alt: string }) {
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={alt}
-      className="relative w-[26px] h-[26px] transition-transform hover:scale-110"
-    >
-      <Image
-        src={off}
-        alt={alt}
-        fill
-        className="object-contain transition-opacity duration-200 hover:opacity-0"
-      />
-      <Image
-        src={on}
-        alt={alt}
-        fill
-        className="object-contain opacity-0 transition-opacity duration-200 hover:opacity-100"
-      />
+    <a href={href} target="_blank" rel="noopener noreferrer" className="relative h-14 w-14">
+      <Image src={image} alt={alt} fill className="object-contain" />
     </a>
-  )
+  );
 }
