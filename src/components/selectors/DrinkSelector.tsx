@@ -64,9 +64,8 @@ export default function DrinkSelector({ title, onChange, clearKey }: Props) {
         {normalDrinks.length > 0 && (
           <ul className="grid grid-cols-3">
             {normalDrinks.map((item) => (
-              <li>
+              <li key={item.key}>
                 <Chip
-                  key={item.key}
                   label={item.label}
                   selected={selectedKeys.includes(item.key)}
                   onChange={() => toggle(item.key)}
