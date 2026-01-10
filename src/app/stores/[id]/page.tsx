@@ -1,32 +1,33 @@
-"use client"
+'use client';
 
-import { useEffect, useState } from "react"
-import { useRouter, useParams, useSearchParams } from "next/navigation"
-import { supabase } from "@/lib/supabase"
-import { normalizeStoreDetail } from "@/lib/normalize/normalizeStoreDetail"
-import type { HomeStore } from "@/types/store"
-import StoreDetailView from "@/components/store/StoreDetailView"
-import HomeButton from "@/components/ui/HomeButton"
+import { useEffect, useState } from 'react';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import { normalizeStoreDetail } from '@/lib/normalize/normalizeStoreDetail';
+import type { HomeStore } from '@/types/store';
+import StoreDetailView from '@/components/store/StoreDetailView';
+import HomeButton from '@/components/ui/HomeButton';
 
 export default function StoreDetailPage() {
-  const router = useRouter()
-  const params = useParams()
-  const searchParams = useSearchParams()
-  const query = searchParams.toString()
+  const router = useRouter();
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const query = searchParams.toString();
 
-  const storeId = params?.id as string
-  const [store, setStore] = useState<HomeStore | null>(null)
-  const [loading, setLoading] = useState(true)
+  const storeId = params?.id as string;
+  const [store, setStore] = useState<HomeStore | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!storeId) return
+    if (!storeId) return;
 
     const load = async () => {
-      setLoading(true)
+      setLoading(true);
 
       const { data, error } = await supabase
-        .from("stores")
-        .select(`
+        .from('stores')
+        .select(
+          `
           *,
           prefectures:prefecture_id(*),
           areas:area_id(*),
@@ -57,52 +58,41 @@ export default function StoreDetailPage() {
           store_payment_methods(payment_method_definitions(*)),
           store_awards(*),
           store_media_mentions(*)
-        `)
-        .eq("id", storeId)
-        .single()
+        `,
+        )
+        .eq('id', storeId)
+        .single();
 
       if (error || !data) {
-        setStore(null)
-        setLoading(false)
-        return
+        setStore(null);
+        setLoading(false);
+        return;
       }
 
-      const mapped = normalizeStoreDetail(data)
-      setStore(mapped)
-      setLoading(false)
-    }
+      const mapped = normalizeStoreDetail(data);
+      setStore(mapped);
+      setLoading(false);
+    };
 
-    load()
-  }, [storeId])
+    load();
+  }, [storeId]);
 
   if (loading || !store) {
-    return <div className="p-10 text-center">読み込み中...</div>
+    return <div className="p-10 text-center">読み込み中...</div>;
   }
 
   return (
     <div className="relative min-h-screen bg-white">
-
-      {/* 上部ヘッダー */}
-      <div className="fixed top-0 left-0 right-0 z-[90]
-                      flex items-center gap-3 px-4 py-4
-                      pt-[calc(env(safe-area-inset-top)+8px)]
-                      bg-black/40 text-white backdrop-blur">
-        <HomeButton
-          onHome={() => {
-            if (query) router.push(`/`)
-            else router.push("/")
-          }}
-          size={48}
-          iconSize={24}
-        />
-
-        <div className="font-semibold text-lg truncate">{store.name}</div>
-      </div>
+      {/* ===== Header ===== */}
+      <header className="sticky top-0 z-100 flex h-20 w-full max-w-105 items-center gap-4 px-4 mix-blend-difference">
+        <HomeButton />
+        <span className="truncate text-xs font-bold text-white">{store.name}</span>
+      </header>
 
       {/* コンテンツ */}
       <div className="pt-[90px]">
         <StoreDetailView store={store} />
       </div>
     </div>
-  )
+  );
 }
