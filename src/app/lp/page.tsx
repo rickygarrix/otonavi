@@ -13,48 +13,46 @@ export const metadata = {
 export default function LPPage() {
   return (
     <main className="w-full bg-[#F6F6F6] text-zinc-900">
+      {/* Hero */}
+      <div className="relative h-[600px] overflow-hidden bg-[url('/background-sp@2x.png')] bg-cover bg-center text-light-3">
+        <div className="absolute inset-0 bg-black/40" />
 
-{/* Hero */}
-<div className="relative h-[600px] overflow-hidden bg-[url('/background-sp@2x.png')] bg-cover bg-center text-light-3">
-  <div className="absolute inset-0 bg-black/40" />
+        <div className="relative z-10 mx-auto flex h-full w-full max-w-[600px] flex-col items-start justify-center gap-6 px-8">
+          {/* ロゴ */}
+          <Image
+            src="/logo-white.svg"
+            alt="オトナビ"
+            width={133}
+            height={40}
+            priority
+          />
 
-  <div className="relative z-10 mx-auto flex h-full w-full max-w-[600px] flex-col items-start justify-center gap-6 px-8">
-{/* ロゴ */}
-<Image
-  src="/logo-white.svg"
-  alt="オトナビ"
-  width={133}
-  height={40}
-  priority
-/>
-    {/* テキスト */}
-    <div className="flex w-full flex-col items-start gap-6 px-1">
-      <h1 className="w-full text-3xl font-light leading-[48px] tracking-[3.20px] text-Brand-Light-1 font-['Zen_Maru_Gothic'] [text-shadow:_0px_0px_24px_rgb(0_0_0_/_0.90)]">
-        小さな非日常は、<br />
-        いつもの帰り道に。
-      </h1>
+          {/* テキスト */}
+          <div className="flex w-full flex-col items-start gap-6 px-1">
+            <h1 className="w-full text-3xl font-light leading-[48px] tracking-[3.20px] text-Brand-Light-1 font-['Zen_Maru_Gothic'] [text-shadow:_0px_0px_24px_rgb(0_0_0_/_0.90)]">
+              小さな非日常は、
+              <br />
+              いつもの帰り道に。
+            </h1>
 
-      <p className="w-full text-base font-light leading-6 tracking-wider text-Brand-Light-1 font-['Zen_Maru_Gothic'] [text-shadow:_0px_0px_16px_rgb(0_0_0_/_0.80)]">
-        クラブもミュージックバーも<br />
-        夜の音楽がもっと身近になるサイト
-      </p>
-    </div>
+            <p className="w-full text-base font-light leading-6 tracking-wider text-Brand-Light-1 font-['Zen_Maru_Gothic'] [text-shadow:_0px_0px_16px_rgb(0_0_0_/_0.80)]">
+              クラブもミュージックバーも
+              <br />
+              夜の音楽がもっと身近になるサイト
+            </p>
+          </div>
 
-    {/* 下の誘導 */}
-    <div className="mt-6 flex flex-col items-center gap-4 self-center">
-      <a
-        href="#concept"
-        className="text-center text-sm font-normal leading-6 text-Brand-Light-1 font-['Zen_Kaku_Gothic_New'] [text-shadow:_0px_0px_16px_rgb(0_0_0_/_0.80)]"
-      >
-        オトナビを知る
-      </a>
+          <div className="mt-6 flex flex-col items-center gap-4 self-center">
+            <a
+              href="#concept"
+              className="text-center text-sm font-normal leading-6 text-Brand-Light-1 font-['Zen_Kaku_Gothic_New'] [text-shadow:_0px_0px_16px_rgb(0_0_0_/_0.80)]"
+            >
+              オトナビを知る
+            </a>
+          </div>
+        </div>
+      </div>
 
-      {/* 白丸 */}
-      <div className="h-2 w-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] animate-bounce" />
-    </div>
-
-  </div>
-</div>
       {/* Concept */}
       <section id="concept" className="mx-auto max-w-md px-6 py-20 text-left">
         <div className="mb-4 text-xs font-normal leading-4 tracking-wide text-Brand-Dark-5">
@@ -62,7 +60,8 @@ export default function LPPage() {
         </div>
 
         <h2 className="mb-10 text-3xl font-bold leading-[48px] tracking-[3.2px] text-Brand-Dark-5">
-          夜の音楽体験を<br />
+          夜の音楽体験を
+          <br />
           もっと身近に
         </h2>
 
@@ -90,13 +89,16 @@ export default function LPPage() {
 
         <div className="mb-12 flex flex-col gap-8 px-2">
           <p className="text-base font-normal leading-8 text-Brand-Dark-5">
-            「クラブってなんか怖い」<br />
+            「クラブってなんか怖い」
+            <br />
             「バーって敷居が高そう」
           </p>
 
           <p className="text-base font-normal leading-8 text-Brand-Dark-5">
-            だけど本当はちょっとだけ憧れてる。<br />
-            そんなあなたが初めて踏み出す一歩を<br />
+            だけど本当はちょっとだけ憧れてる。
+            <br />
+            そんなあなたが初めて踏み出す一歩を
+            <br />
             オトナビがそっとナビゲートします。
           </p>
 
@@ -118,7 +120,7 @@ export default function LPPage() {
         </div>
       </section>
 
-      {/* How to use（カーブなし・フラット） */}
+      {/* How to use */}
       <section className="self-stretch bg-Brand-Light-1">
         <div className="mx-auto flex w-full max-w-[600px] flex-col items-center gap-10 bg-Brand-Light-2 px-4 py-10">
           <div className="flex w-full flex-col items-start gap-8">
@@ -139,7 +141,11 @@ export default function LPPage() {
                   01
                 </div>
                 <div className="text-center text-base font-bold leading-6 tracking-wider text-Brand-Light-1 font-['Zen_Kaku_Gothic_New']">
-                  さ<br />が<br />す
+                  さ
+                  <br />
+                  が
+                  <br />
+                  す
                 </div>
               </div>
 
@@ -161,7 +167,13 @@ export default function LPPage() {
                   02
                 </div>
                 <div className="text-center text-base font-bold leading-6 tracking-wider text-Brand-Light-1 font-['Zen_Kaku_Gothic_New']">
-                  チ<br />ェ<br />ッ<br />ク
+                  チ
+                  <br />
+                  ェ
+                  <br />
+                  ッ
+                  <br />
+                  ク
                 </div>
               </div>
 
@@ -184,7 +196,9 @@ export default function LPPage() {
                   03
                 </div>
                 <div className="text-center text-base font-bold leading-6 tracking-wider text-Brand-Light-1 font-['Zen_Kaku_Gothic_New']">
-                  来<br />店
+                  来
+                  <br />
+                  店
                 </div>
               </div>
 
@@ -207,7 +221,9 @@ export default function LPPage() {
                   04
                 </div>
                 <div className="text-center text-base font-bold leading-6 tracking-wider text-Brand-Light-1 font-['Zen_Kaku_Gothic_New']">
-                  投<br />稿
+                  投
+                  <br />
+                  稿
                 </div>
               </div>
 
@@ -235,7 +251,8 @@ export default function LPPage() {
           </div>
 
           <p className="self-stretch text-left text-sm font-normal leading-6 text-light-3 font-['Zen_Kaku_Gothic_New']">
-            開発の舞台裏をぜんぶ見せます。<br />
+            開発の舞台裏をぜんぶ見せます。
+            <br />
             アイデアが形になっていく過程や、サービス設計のリアルな悩みと工夫を共有しながら、
             一緒にプロダクトづくりの面白さを楽しみましょう！
           </p>
