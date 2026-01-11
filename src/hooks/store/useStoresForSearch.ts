@@ -43,7 +43,7 @@ export function useStoresForSearch() {
           store_event_trends ( event_trend_definitions ( key, label ) ),
           store_payment_methods ( payment_method_definitions ( key, label ) ),
 
-          store_images ( image_url, is_main, order_num )
+          store_images ( image_url, order_num )
         `)
         .order("updated_at", { ascending: false });
 

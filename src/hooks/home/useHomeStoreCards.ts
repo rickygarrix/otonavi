@@ -30,7 +30,6 @@ export function useHomeStoreCards(limit = 12) {
 
           store_images (
             image_url,
-            is_main,
             order_num
           )
         `)

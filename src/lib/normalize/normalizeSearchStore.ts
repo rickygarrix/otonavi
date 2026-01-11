@@ -23,9 +23,6 @@ function selectImage(
 ): string {
   if (!store_images?.length) return "/noshop.svg"
 
-  const main = store_images.find((i) => i.is_main)
-  if (main?.image_url) return main.image_url
-
   const sorted = [...store_images].sort(
     (a, b) => (a.order_num ?? 999) - (b.order_num ?? 999)
   )
@@ -50,6 +47,7 @@ export function normalizeSearchStore(
     store_type_id: raw.store_types?.id ?? null,
     type_label: raw.store_types?.label ?? null,
 
+    // ★ サムネは order_num 最小
     image_url: selectImage(raw.store_images),
 
     price_range_key: raw.price_range_definitions?.key ?? null,
