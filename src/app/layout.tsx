@@ -23,11 +23,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja">
+    <html
+      lang="ja"
+      className="bg-dark-5 flex items-start justify-center bg-[url(/background-pc.png)] bg-cover bg-fixed bg-center"
+    >
       <body
-        className={`${geistSans.variable} ${geistMono.variable} flex items-start justify-center bg-[url(/background-pc.png)] bg-cover bg-fixed antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} bg-light-1 mx-auto w-full max-w-105 antialiased`}
       >
-        <div className="sp-frame bg-light-1 mx-auto w-full max-w-105">{children}</div>
+        {children}
       </body>
     </html>
   );
