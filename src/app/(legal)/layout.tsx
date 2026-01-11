@@ -1,11 +1,21 @@
 import type { ReactNode } from 'react';
+import HomeButton from '@/components/ui/HomeButton';
+import Footer from '@/components/ui/Footer';
 
 export default function LegalLayout({ children }: { children: ReactNode }) {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
-      <article className="text-sm leading-relaxed text-neutral-800 [&_h1]:mb-6 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:mt-10 [&_h2]:mb-4 [&_h2]:text-lg [&_h2]:font-semibold [&_hr]:my-8 [&_li]:mb-2 [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-6">
-        {children}
-      </article>
-    </main>
+    <>
+      <header className="sticky inset-x-0 top-0 flex h-20 items-center gap-4 px-4">
+        <HomeButton />
+      </header>
+
+      <main>
+        <article className="text-dark-5 flex flex-col gap-4 px-6 py-10 text-sm [&_h1]:text-xl [&_h1]:leading-[1.5] [&_h1]:font-bold [&_h1]:tracking-widest [&_h2]:py-2 [&_h2]:text-lg [&_h2]:leading-[1.5] [&_h2]:font-bold [&_h2]:tracking-widest [&_li]:leading-[1.8] [&_ol]:flex [&_ol]:list-decimal [&_ol]:flex-col [&_ol]:gap-2 [&_ol]:py-2 [&_ol]:pl-5 [&_p]:py-2 [&_p]:leading-[1.8] [&_ul]:flex [&_ul]:list-disc [&_ul]:flex-col [&_ul]:gap-2 [&_ul]:py-2 [&_ul]:pl-5">
+          {children}
+        </article>
+      </main>
+
+      <Footer />
+    </>
   );
 }
