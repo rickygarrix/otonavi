@@ -26,6 +26,17 @@
    Body / Typography
 ================================ */
 
+html::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url('/background-pc.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+
 body {
   color: var(--dark-1);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
