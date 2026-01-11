@@ -138,7 +138,7 @@ export function normalizeStoreDetail(
     official_site_url: raw.official_site_url,
 
     access: raw.access,
-    google_map_url: raw.google_map_url,
+    google_place_id: raw.google_place_id,
     address: raw.address,
     postcode: raw.postcode,
     business_hours: raw.business_hours,

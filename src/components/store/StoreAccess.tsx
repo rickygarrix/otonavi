@@ -4,28 +4,26 @@ import type { HomeStore } from '@/types/store';
 
 /**
  * Google Maps Embed
- * - place モードで「店舗名 + 住所」から正確なピン表示
- * - 拡大しても「35°39'...」のような座標表示を回避
- * - スマホ対応
+ * ルール:
+ * - 表示は常に google_place_id のみを使用
+ * - URL / 緯度経度 / 店舗名検索は一切使わない
  */
 function GoogleMapEmbed({ store }: { store: HomeStore }) {
-  if (!store?.name) return null;
-
-  // 店舗名 + 住所で検索（最も安定）
-  const query = `${store.name} ${store.address ?? ''}`.trim();
-
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
   if (!apiKey) {
     console.warn('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY が設定されていません');
     return null;
   }
 
-  /**
-   * place → 店舗ピンあり（推奨）
-   * view  → 中心点表示のみ（ピンなし）
-   */
+  if (!store.google_place_id) {
+    // Place ID が無い店舗は地図を出さない
+    return null;
+  }
+
+  const q = `place_id:${store.google_place_id}`;
   const embedUrl = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(
-    query
+    q
   )}`;
 
   return (
@@ -46,8 +44,14 @@ type Props = {
   store: HomeStore;
 };
 
+/**
+ * 店舗アクセス情報 + Google Map
+ */
 export default function StoreAccess({ store }: Props) {
-  if (!store.access && !store.address && !store.google_map_url) return null;
+  // 地図も住所もアクセスも何も無ければ非表示
+  if (!store.access && !store.address && !store.google_place_id) {
+    return null;
+  }
 
   return (
     <section className="text-dark-4 flex flex-col gap-4 p-4 text-sm">
@@ -57,7 +61,7 @@ export default function StoreAccess({ store }: Props) {
 
       {store.access && <p className="whitespace-pre-line">{store.access}</p>}
 
-      {/* 地図 */}
+      {/* 地図（Place ID のみ） */}
       <GoogleMapEmbed store={store} />
 
       <div>

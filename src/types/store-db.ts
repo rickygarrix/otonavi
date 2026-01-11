@@ -36,7 +36,7 @@ export type StoreRow = {
   // ===== Text / Info =====
   description: string | null
   access: string | null
-  google_map_url: string | null
+  google_place_id : string | null
   address: string | null
   postcode: string | null
   business_hours: string | null
