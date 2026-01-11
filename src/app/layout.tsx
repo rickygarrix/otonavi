@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'オトナビ',
-  description: '音箱・クラブ・バーを探す大人のための音楽スポット検索',
+  title: 'オトナビ｜音箱検索サイト',
+  description:
+    '夜の音楽体験をもっと身近にする音箱検索サイト。エリアやこだわり条件で絞って、お気に入りのクラブ・バー・ライブハウスを探せます。',
 };
 
 export default function RootLayout({
