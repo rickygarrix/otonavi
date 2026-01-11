@@ -2,17 +2,31 @@
 
 import type { HomeStore } from '@/types/store';
 
-function GoogleMapEmbed({ url }: { url: string }) {
-  const match = url.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+/**
+ * Google Maps Embed
+ * - place モードで「店舗名 + 住所」から正確なピン表示
+ * - 拡大しても「35°39'...」のような座標表示を回避
+ * - スマホ対応
+ */
+function GoogleMapEmbed({ store }: { store: HomeStore }) {
+  if (!store?.name) return null;
 
-  if (!match) {
+  // 店舗名 + 住所で検索（最も安定）
+  const query = `${store.name} ${store.address ?? ''}`.trim();
+
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  if (!apiKey) {
+    console.warn('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY が設定されていません');
     return null;
   }
 
-  const lat = match[1];
-  const lng = match[2];
-
-  const embedUrl = `https://www.google.com/maps?q=${lat},${lng}&z=16&output=embed`;
+  /**
+   * place → 店舗ピンあり（推奨）
+   * view  → 中心点表示のみ（ピンなし）
+   */
+  const embedUrl = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(
+    query
+  )}`;
 
   return (
     <div className="my-2 overflow-hidden rounded-lg shadow-sm">
@@ -21,6 +35,8 @@ function GoogleMapEmbed({ url }: { url: string }) {
         className="h-112 w-full"
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
+        allowFullScreen
+        title="Google Map"
       />
     </div>
   );
@@ -35,19 +51,20 @@ export default function StoreAccess({ store }: Props) {
 
   return (
     <section className="text-dark-4 flex flex-col gap-4 p-4 text-sm">
-      <h2 className="text-dark-5 py-0.5 text-lg font-bold tracking-widest">アクセス</h2>
+      <h2 className="text-dark-5 py-0.5 text-lg font-bold tracking-widest">
+        アクセス
+      </h2>
 
       {store.access && <p className="whitespace-pre-line">{store.access}</p>}
 
       {/* 地図 */}
-      {store.google_map_url && <GoogleMapEmbed url={store.google_map_url} />}
+      <GoogleMapEmbed store={store} />
 
       <div>
-        {/* 郵便番号 */}
         {store.postcode && <p>〒{store.postcode}</p>}
-
-        {/* 所在地 */}
-        {store.address && <p className="whitespace-pre-line">{store.address}</p>}
+        {store.address && (
+          <p className="whitespace-pre-line">{store.address}</p>
+        )}
       </div>
     </section>
   );
