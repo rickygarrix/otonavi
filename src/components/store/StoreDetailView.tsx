@@ -96,10 +96,11 @@ export default function StoreDetailView({ store }: Props) {
           <>
             <StoreDetailDivider />
             <StoreDetailSections items={detailItems} />
-            <StoreDetailDivider />
           </>
         )}
       </main>
+
+      <StoreDetailDivider />
 
       <div className="p-10">
         <BackToHomeButton onClick={() => router.push(query ? `/stores?${query}` : '/stores')} />

@@ -52,20 +52,14 @@ export default function Footer({ hasFixedBottom }: FooterProps) {
       </nav>
 
       {/* コピーライト */}
-      <p className="text-light-5 mx-2 text-xs">
+      <p className="text-light-5 mx-4 text-xs">
         <small>© {new Date().getFullYear()} Otonavi</small>
       </p>
     </footer>
   );
 }
 
-function FooterLink({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
+function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <Link
       href={href}

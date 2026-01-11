@@ -78,14 +78,12 @@ export default function StoreDetailPage() {
   }
 
   return (
-    <div className="relative -mt-20 min-h-screen bg-white">
-      {/* ===== Header ===== */}
-      <header className="sticky top-0 z-100 flex h-20 w-full max-w-105 items-center gap-4 px-4 mix-blend-difference">
+    <div className="relative -mt-20 bg-white">
+      <header className="sticky top-0 z-100 flex h-20 w-full items-center gap-4 px-4">
         <HomeButton />
-        <span className="truncate text-xs font-bold text-white">{store.name}</span>
+        <span className="text-dark-5 truncate text-xs font-bold">{store.name}</span>
       </header>
 
-      {/* コンテンツ */}
       <StoreDetailView store={store} />
     </div>
   );

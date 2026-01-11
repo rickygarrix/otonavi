@@ -51,26 +51,24 @@ export default function StoresClient() {
   });
 
   return (
-    <div className="text-dark-5 bg-white pt-20">
+    <div className="text-dark-5 bg-white">
       {/* ===== Header ===== */}
-      <div className="fixed top-0 left-0 z-100 flex w-full justify-center">
-        <header className="m-auto flex h-20 w-full max-w-105 items-center gap-4 bg-white/80 px-4 backdrop-blur-lg">
-          <HomeButton />
+      <header className="sticky inset-x-0 top-0 z-100 flex h-20 items-center gap-4 bg-white/90 px-4 backdrop-blur-lg">
+        <HomeButton />
 
-          {/* 件数 */}
-          <div className="shrink-0 text-lg font-bold tracking-widest">
-            {filteredStores.length}
-            <span className="ml-1 text-[10px]">件</span>
+        {/* 件数 */}
+        <div className="shrink-0 text-lg font-bold tracking-widest">
+          {filteredStores.length}
+          <span className="ml-1 text-[10px]">件</span>
+        </div>
+
+        {/* 検索条件（label 表示） */}
+        {displayLabels.length > 0 && (
+          <div className="line-clamp-2 flex-1 text-xs text-blue-700">
+            {displayLabels.join(', ')}
           </div>
-
-          {/* 検索条件（label 表示） */}
-          {displayLabels.length > 0 && (
-            <div className="line-clamp-2 flex-1 text-xs text-blue-700">
-              {displayLabels.join(', ')}
-            </div>
-          )}
-        </header>
-      </div>
+        )}
+      </header>
 
       {/* ===== Store List ===== */}
       <ul className="grid grid-cols-2">
