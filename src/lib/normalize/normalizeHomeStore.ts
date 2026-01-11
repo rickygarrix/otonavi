@@ -6,9 +6,6 @@ function selectImage(
 ): string {
   if (!store_images?.length) return "/noshop.svg"
 
-  const main = store_images.find((i) => i.is_main)
-  if (main?.image_url) return main.image_url
-
   const sorted = [...store_images].sort(
     (a, b) => (a.order_num ?? 999) - (b.order_num ?? 999)
   )
