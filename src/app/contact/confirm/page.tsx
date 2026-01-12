@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+
+import { Check } from 'lucide-react';
+
 import HomeButton from '@/components/ui/HomeButton';
 import Footer from '@/components/ui/Footer';
 
@@ -49,94 +52,134 @@ export default function ContactConfirmPage() {
 
   if (!form) return null;
 
-  return (
-    <div className="bg-Brand-Light-2 min-h-screen">
-      <div className="fixed top-0 left-0 z-100 flex w-full justify-center">
-        <header className="m-auto flex h-20 w-full max-w-105 items-center gap-4 px-4">
-          <HomeButton />
-        </header>
-      </div>
+  const styles = {
+    step: 'flex items-center justify-center w-16 h-16 z-10',
+    wrapper: 'flex flex-col gap-2',
+    label: 'flex gap-1 text-sm',
+    inputDisabled:
+      'px-4 py-3 bg-dark-5/10 rounded-3xl outline outline-1 outline-offset-[-1px] text-dark-5/50 outline-dark-5/10 text-md',
+    textareaDisabled:
+      'min-h-40 px-4 py-3 bg-dark-5/10 rounded-3xl outline outline-1 outline-offset-[-1px] outline-dark-5/10 text-dark-5/50 text-md',
+  };
 
-      {/* 固定ヘッダー */}
-      <div className="fixed top-0 right-0 left-0 z-50 flex h-20 items-center gap-4 bg-white/70 px-4 backdrop-blur">
-        <HomeButton onHome={() => router.push('/')} />
-        <div className="flex items-center gap-3">
-          <div className="h-3 w-3 rounded-full bg-slate-300" />
-          <div className="h-[2px] w-16 bg-slate-200" />
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+  return (
+    <div className="bg-light-1 text-dark-5 -mt-20">
+      <header className="sticky top-0 z-100 flex h-20 w-full items-center gap-4 px-4">
+        <HomeButton />
+      </header>
+
+      {/* ===== Stepper ===== */}
+      <div className="relative flex h-20 items-center justify-between pr-4 pl-24">
+        <div className={styles.step}>
+          <div className="bg-light-5 h-4 w-4 rounded-full" />
+        </div>
+        <div className={styles.step}>
+          <div className="outline-blue-2 bg-blue-4 text-light-1 flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold outline-4">
             確認
           </div>
-          <div className="h-[2px] w-16 bg-blue-400" />
-          <div className="h-3 w-3 rounded-full bg-slate-300" />
         </div>
+        <div className={styles.step}>
+          <div className="bg-light-5 h-4 w-4 rounded-full" />
+        </div>
+        <div className="via-blue-3 from-light-5 to-light-5 absolute right-12 left-32 h-[2px] bg-gradient-to-r" />
       </div>
-
-      <div className="h-20" />
 
       {/* 本文 */}
-      <div className="flex flex-col gap-6 px-6 py-10">
-        <h1 className="text-Brand-Dark-1 text-xl font-bold tracking-widest">
-          お問い合わせ内容の確認
-        </h1>
+      <main>
+        {/* Intro */}
+        <section className="px-6 py-10">
+          <h1 className="text-xl leading-[1.5] font-bold tracking-widest">
+            お問い合わせ内容の確認
+          </h1>
 
-        <p className="text-Brand-Dark-1 text-sm">入力した内容に間違いがないかご確認ください。</p>
+          <p className="text-justify text-sm leading-[1.8]">
+            入力した内容に間違いがないかご確認ください。
+          </p>
+        </section>
 
-        {/* 名前 */}
-        <div>
-          <label className="text-sm">お名前 *</label>
-          <div className="flex h-12 items-center rounded-3xl bg-slate-200 px-4">{form.name}</div>
-        </div>
+        {/* Form */}
+        <div className="bg-light-2 flex flex-col gap-4 px-6 pt-10 pb-20">
+          {/* お名前 */}
+          <div className={styles.wrapper}>
+            <div className={styles.label}>
+              <span>お名前</span>
+              <span className="text-red-4" aria-hidden>
+                *
+              </span>
+              <span className="sr-only">必須</span>
+            </div>
 
-        {/* メール */}
-        <div>
-          <label className="text-sm">メールアドレス *</label>
-          <div className="flex h-12 items-center rounded-3xl bg-slate-200 px-4">{form.email}</div>
-        </div>
+            <div className={styles.inputDisabled}>{form.name}</div>
+          </div>
 
-        {/* 内容 */}
-        <div>
-          <label className="text-sm">お問い合わせ内容 *</label>
-          <div className="min-h-[160px] rounded-2xl bg-slate-200 px-4 py-3 whitespace-pre-wrap">
-            {form.message}
+          {/* メールアドレス */}
+          <div className={styles.wrapper}>
+            <div className={styles.label}>
+              <span>メールアドレス</span>
+              <span className="text-red-4" aria-hidden>
+                *
+              </span>
+              <span className="sr-only">必須</span>
+            </div>
+
+            <div className={styles.inputDisabled}>{form.email}</div>
+          </div>
+
+          {/* お問い合わせ内容 */}
+          <div className={styles.wrapper}>
+            <div className={styles.label}>
+              <span>お問い合わせ内容</span>
+              <span className="text-red-4" aria-hidden>
+                *
+              </span>
+              <span className="sr-only">必須</span>
+            </div>
+
+            <div className={styles.textareaDisabled}>{form.message}</div>
+          </div>
+
+          {/* プライバシーポリシー */}
+          <label className="outline-light-5 flex items-center gap-4 rounded-xl p-4 text-sm outline outline-1">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              className="peer sr-only"
+            />
+
+            <span className="border-dark-1 peer-checked:border-blue-5 peer-checked:bg-blue-4 flex h-5 w-5 items-center justify-center rounded-sm border bg-white transition">
+              <Check className="h-4 w-4 text-white" strokeWidth={3.0} />
+            </span>
+
+            <span>
+              <a href="/privacy" className="text-blue-4 underline">
+                プライバシーポリシー
+              </a>
+              に同意します。
+            </span>
+          </label>
+
+          {/* ボタン */}
+          <div className="grid grid-cols-2 gap-4 pt-4">
+            <button
+              onClick={() => router.back()}
+              className="h-12 rounded-xl bg-white text-sm outline outline-1 outline-slate-300"
+            >
+              書き直す ✎
+            </button>
+
+            <button
+              disabled={!agreed || sending}
+              onClick={submit}
+              className={`h-12 rounded-xl bg-white text-sm outline outline-1 outline-slate-300 ${
+                !agreed || sending ? 'opacity-40' : ''
+              }`}
+            >
+              {sending ? '送信中…' : '送信 ✈'}
+            </button>
           </div>
         </div>
-
-        {/* 同意 */}
-        <label className="flex items-center gap-3 rounded-xl bg-white px-4 py-3 text-sm outline outline-1 outline-slate-300">
-          <input
-            type="checkbox"
-            checked={agreed}
-            onChange={(e) => setAgreed(e.target.checked)}
-            className="h-5 w-5"
-          />
-          <span>
-            <a href="/privacy" className="text-blue-600 underline">
-              プライバシーポリシー
-            </a>
-            に同意します。
-          </span>
-        </label>
-
-        {/* ボタン */}
-        <div className="grid grid-cols-2 gap-4 pt-4">
-          <button
-            onClick={() => router.back()}
-            className="h-12 rounded-xl bg-white text-sm outline outline-1 outline-slate-300"
-          >
-            書き直す ✎
-          </button>
-
-          <button
-            disabled={!agreed || sending}
-            onClick={submit}
-            className={`h-12 rounded-xl bg-white text-sm outline outline-1 outline-slate-300 ${
-              !agreed || sending ? 'opacity-40' : ''
-            }`}
-          >
-            {sending ? '送信中…' : '送信 ✈'}
-          </button>
-        </div>
-      </div>
+      </main>
 
       <Footer />
     </div>
