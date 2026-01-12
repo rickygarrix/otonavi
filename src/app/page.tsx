@@ -31,10 +31,8 @@ export default function HomePage() {
   const [storeTypeId, setStoreTypeId] = useState<string | null>(null);
   const [clearKey, setClearKey] = useState(0);
 
-  // ===== Home 表示用カード =====
   const { stores: cardStores, loading } = useHomeStoreCards(12);
 
-  // ===== マスタ =====
   const masters = useHomeMasters();
 
   const storeTypes = useMemo<GenericMaster[]>(() => {
@@ -43,7 +41,6 @@ export default function HomePage() {
     );
   }, [masters.genericMasters]);
 
-  // ===== フィルター状態 =====
   const filter = useHomeFilterState(masters.externalLabelMap, { storeTypeId });
   const {
     selectedKeys,
@@ -54,28 +51,24 @@ export default function HomePage() {
     ...setters
   } = filter;
 
-  // ===== 件数表示用（通常の検索フック） =====
   const { stores: searchStores } = useStoresForSearch();
   const { filteredStores } = useStoreFilters(searchStores, {
     filters: selectedKeys,
     storeTypeId,
   });
 
-  // ===== グローバル検索ストア（事前取得用） =====
   const {
     setStores,
     setLoading: setPrefetchLoading,
     loading: prefetchLoading,
   } = useSearchStore();
 
-  // ===== クリア =====
   const handleClearAll = () => {
     handleClear();
     setClearKey((v) => v + 1);
     setStoreTypeId(null);
   };
 
-  // ===== ★ 事前取得 → クルクル → URL切替 =====
   const handleGoToStores = async () => {
     const params = new URLSearchParams();
 
@@ -86,11 +79,9 @@ export default function HomePage() {
       (k) => !prefectureIds.includes(k) && !areaIds.includes(k)
     );
 
-    // ① クルクル開始
     setPrefetchLoading(true);
 
     try {
-      // ② 先に検索データ取得
       const result = await fetchStoresForSearch({
         filters: apiFilters,
         storeTypeId,
@@ -98,23 +89,18 @@ export default function HomePage() {
         areaIds,
       });
 
-      // ③ グローバルストアに保存
       setStores(result);
 
-      // ★ ④ 先に画面遷移（まだクルクルは消さない）
       router.push(`/stores?${params.toString()}`);
     } catch (err) {
       console.error('Failed to prefetch stores:', err);
     } finally {
-      // ★ ⑤ クルクル停止は遷移後
-      // （遷移中も表示させておく）
       setTimeout(() => {
         setPrefetchLoading(false);
       }, 200);
     }
   };
 
-  // ===== フィルターラベル → セクションスクロール =====
   const handleClickFilter = (label: string) => {
     const section = masters.labelToSectionMap.get(label);
     if (!section) return;
@@ -127,10 +113,8 @@ export default function HomePage() {
 
   return (
     <>
-      {/* ===== クルクル===== */}
       {prefetchLoading && <LoadingOverlay />}
 
-      {/* ===== Hero ===== */}
       <div className="text-light-3 relative flex h-146 flex-col items-center gap-10 overflow-hidden bg-[url('/background-sp@2x.png')] bg-cover bg-center px-4 pt-20">
         <p className="text-[10px] tracking-widest">
           夜の音楽をもっと楽しむための音箱ナビ
@@ -149,14 +133,12 @@ export default function HomePage() {
         <CommentSlider />
       </div>
 
-      {/* ===== Store Type ===== */}
       <StoreTypeFilter
         storeTypes={storeTypes}
         activeTypeId={storeTypeId}
         onChange={setStoreTypeId}
       />
 
-      {/* ===== Filters ===== */}
       <HomeFilterSections
         clearKey={clearKey}
         sectionRefs={sectionRefs}
@@ -176,7 +158,6 @@ export default function HomePage() {
         setOtherKeys={setters.setOtherKeys}
       />
 
-      {/* ===== Fixed Search Bar ===== */}
       <SearchBar
         selectedFilters={selectedLabels}
         onClear={handleClearAll}

@@ -120,9 +120,6 @@ export function useHomeMasters() {
     }
   }, [])
 
-  /**
-   * external key / id → 表示ラベル
-   */
   const externalLabelMap = useMemo(() => {
     const map = new Map<string, string>()
 
@@ -134,9 +131,6 @@ export function useHomeMasters() {
     return map
   }, [prefectures, areas, drinkMasters, genericMasters])
 
-  /**
-   * ラベル → セクション
-   */
   const labelToSectionMap = useMemo(() => {
     const map = new Map<string, string>()
 
@@ -152,18 +146,12 @@ export function useHomeMasters() {
     return map
   }, [genericMasters, prefectures, areas, drinkMasters])
 
-  /**
-   * 都道府県 → 地域
-   */
   const prefectureRegionMap = useMemo(() => {
     const map = new Map<string, RegionKey>()
     prefectures.forEach((p) => map.set(p.name_ja, p.region))
     return map
   }, [prefectures])
 
-  /**
-   * エリア名 → Area オブジェクト
-   */
   const areaMap = useMemo(() => {
     const map = new Map<string, Area>()
     areas.forEach((a) => map.set(a.name, a))
@@ -171,7 +159,7 @@ export function useHomeMasters() {
   }, [areas])
 
   return {
-    loading,                 // ★ 追加：マスタ読み込み中フラグ
+    loading,
     externalLabelMap,
     labelToSectionMap,
     prefectureRegionMap,

@@ -65,7 +65,6 @@ export default function StoreDetailView({ store, onMainImageLoaded }: Props) {
   return (
     <div className="bg-white">
       <main>
-        {/* ★ 画像ロード完了を受け取る */}
         <StoreImageCarousel
           storeId={store.id}
           storeName={store.name}

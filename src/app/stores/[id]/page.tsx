@@ -67,7 +67,6 @@ export default function StoreDetailPage() {
     load();
   }, [storeId]);
 
-  // データ取得失敗時（無限防止）
   if (!dataLoading && !store) {
     return (
       <div className="p-10 text-center text-sm text-gray-500">
@@ -78,7 +77,7 @@ export default function StoreDetailPage() {
 
   return (
     <div className="relative -mt-20 bg-white">
-      {/* ★ ローディングは「上に被せるだけ」 */}
+
       {(dataLoading || !imageLoaded) && <LoadingOverlay />}
 
       {store && (

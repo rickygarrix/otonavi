@@ -13,12 +13,10 @@ type Options = {
 export function useStoresForSearch(options?: Options) {
   const enabled = options?.enabled ?? true;
 
-  // ★ 初期値を enabled に合わせる
   const [stores, setStores] = useState<SearchStore[]>([]);
   const [loading, setLoading] = useState(enabled);
 
   useEffect(() => {
-    // ★ 事前取得済み（enabled=false）の場合は即終了
     if (!enabled) {
       setLoading(false);
       return;

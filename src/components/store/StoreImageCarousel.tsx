@@ -35,7 +35,7 @@ export default function StoreImageCarousel({
       .then(({ data, error }) => {
         if (error) {
           console.error('store_images load error', error);
-          onMainImageLoaded?.(); // ★ 失敗時も完了扱い
+          onMainImageLoaded?.();
           return;
         }
 
