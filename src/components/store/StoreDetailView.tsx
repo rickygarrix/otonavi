@@ -30,9 +30,10 @@ const formatPaymentMethods = (labels?: string[], otherText?: string | null) => {
 
 type Props = {
   store: HomeStore;
+  onMainImageLoaded?: () => void; // ★ 追加
 };
 
-export default function StoreDetailView({ store }: Props) {
+export default function StoreDetailView({ store, onMainImageLoaded }: Props) {
   const router = useRouter();
   const query = useSearchParams().toString();
 
@@ -64,7 +65,12 @@ export default function StoreDetailView({ store }: Props) {
   return (
     <div className="bg-white">
       <main>
-        <StoreImageCarousel storeId={store.id} storeName={store.name} />
+        {/* ★ 画像ロード完了を受け取る */}
+        <StoreImageCarousel
+          storeId={store.id}
+          storeName={store.name}
+          onMainImageLoaded={onMainImageLoaded}
+        />
 
         <StoreBasicInfo store={store} />
 

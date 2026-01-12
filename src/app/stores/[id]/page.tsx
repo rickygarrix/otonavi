@@ -7,18 +7,22 @@ import { normalizeStoreDetail } from '@/lib/normalize/normalizeStoreDetail';
 import type { HomeStore } from '@/types/store';
 import StoreDetailView from '@/components/store/StoreDetailView';
 import HomeButton from '@/components/ui/HomeButton';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
 export default function StoreDetailPage() {
   const params = useParams();
-  const storeId = params?.id as string;
+  const storeId = params?.id as string | undefined;
+
   const [store, setStore] = useState<HomeStore | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
     if (!storeId) return;
 
     const load = async () => {
-      setLoading(true);
+      setDataLoading(true);
+      setImageLoaded(false);
 
       const { data, error } = await supabase
         .from('stores')
@@ -31,60 +35,67 @@ export default function StoreDetailPage() {
           price_range_definitions:price_range_id(*),
           size_definitions:size(*),
 
-          store_drinks(
-            id,
-            drink_definitions:drink_id(*)
-          ),
-          store_customers(
-            id,
-            customer_definitions:customer_id(*)
-          ),
-          store_atmospheres(
-            id,
-            atmosphere_definitions:atmosphere_id(*)
-          ),
-
+          store_drinks(id, drink_definitions:drink_id(*)),
+          store_customers(id, customer_definitions:customer_id(*)),
+          store_atmospheres(id, atmosphere_definitions:atmosphere_id(*)),
           store_event_trends(event_trend_definitions(*)),
           store_baggage(baggage_definitions(*)),
           store_toilet(toilet_definitions(*)),
-
           store_smoking(smoking_definitions(*)),
           store_environment(environment_definitions(*)),
           store_other(other_definitions(*)),
           store_payment_methods(payment_method_definitions(*)),
           store_awards(*),
           store_media_mentions(*)
-        `,
+        `
         )
         .eq('id', storeId)
         .single();
 
       if (error || !data) {
+        console.error('store load failed', error);
         setStore(null);
-        setLoading(false);
+        setDataLoading(false);
         return;
       }
 
       const mapped = normalizeStoreDetail(data);
       setStore(mapped);
-      setLoading(false);
+      setDataLoading(false);
     };
 
     load();
   }, [storeId]);
 
-  if (loading || !store) {
-    return <div className="p-10 text-center">読み込み中...</div>;
+  // データ取得失敗時（無限防止）
+  if (!dataLoading && !store) {
+    return (
+      <div className="p-10 text-center text-sm text-gray-500">
+        店舗情報の読み込みに失敗しました
+      </div>
+    );
   }
 
   return (
     <div className="relative -mt-20 bg-white">
-      <header className="sticky top-0 z-100 flex h-20 w-full items-center gap-4 px-4">
-        <HomeButton />
-        <span className="text-dark-5 truncate text-xs font-bold">{store.name}</span>
-      </header>
+      {/* ★ ローディングは「上に被せるだけ」 */}
+      {(dataLoading || !imageLoaded) && <LoadingOverlay />}
 
-      <StoreDetailView store={store} />
+      {store && (
+        <>
+          <header className="sticky top-0 z-100 flex h-20 w-full items-center gap-4 px-4">
+            <HomeButton />
+            <span className="text-dark-5 truncate text-xs font-bold">
+              {store.name}
+            </span>
+          </header>
+
+          <StoreDetailView
+            store={store}
+            onMainImageLoaded={() => setImageLoaded(true)}
+          />
+        </>
+      )}
     </div>
   );
 }

@@ -10,10 +10,18 @@ import StoreTypeFilter from '@/components/selectors/StoreTypeFilter';
 import SearchBar from '@/components/home/SearchBar';
 import Footer from '@/components/ui/Footer';
 import HomeFilterSections from '@/components/home/HomeFilterSections';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
-import { useHomeStoreCards, useHomeMasters, useHomeFilterState } from '@/hooks/home';
-
+import {
+  useHomeStoreCards,
+  useHomeMasters,
+  useHomeFilterState,
+} from '@/hooks/home';
 import { useStoresForSearch, useStoreFilters } from '@/hooks/store';
+
+import { fetchStoresForSearch } from '@/lib/fetchStores';
+import { useSearchStore } from '@/stores/searchStore';
+
 import type { GenericMaster } from '@/types/master';
 
 export default function HomePage() {
@@ -22,39 +30,91 @@ export default function HomePage() {
 
   const [storeTypeId, setStoreTypeId] = useState<string | null>(null);
   const [clearKey, setClearKey] = useState(0);
+
+  // ===== Home 表示用カード =====
   const { stores: cardStores, loading } = useHomeStoreCards(12);
 
+  // ===== マスタ =====
   const masters = useHomeMasters();
 
   const storeTypes = useMemo<GenericMaster[]>(() => {
-    return Array.from(masters.genericMasters.values()).filter((m) => m.table === 'store_types');
+    return Array.from(masters.genericMasters.values()).filter(
+      (m) => m.table === 'store_types'
+    );
   }, [masters.genericMasters]);
 
+  // ===== フィルター状態 =====
   const filter = useHomeFilterState(masters.externalLabelMap, { storeTypeId });
-  const { selectedKeys, selectedLabels, handleClear, ...setters } = filter;
+  const {
+    selectedKeys,
+    selectedLabels,
+    handleClear,
+    prefectureIds,
+    areaIds,
+    ...setters
+  } = filter;
 
+  // ===== 件数表示用（通常の検索フック） =====
   const { stores: searchStores } = useStoresForSearch();
-
   const { filteredStores } = useStoreFilters(searchStores, {
     filters: selectedKeys,
     storeTypeId,
   });
 
+  // ===== グローバル検索ストア（事前取得用） =====
+  const {
+    setStores,
+    setLoading: setPrefetchLoading,
+    loading: prefetchLoading,
+  } = useSearchStore();
+
+  // ===== クリア =====
   const handleClearAll = () => {
     handleClear();
     setClearKey((v) => v + 1);
     setStoreTypeId(null);
   };
 
-  const handleGoToStores = () => {
+  // ===== ★ 事前取得 → クルクル → URL切替 =====
+  const handleGoToStores = async () => {
     const params = new URLSearchParams();
 
     if (storeTypeId) params.set('store_type_id', storeTypeId);
     selectedKeys.forEach((k) => params.append('filters', k));
 
-    router.push(`/stores?${params.toString()}`);
+    const apiFilters = selectedKeys.filter(
+      (k) => !prefectureIds.includes(k) && !areaIds.includes(k)
+    );
+
+    // ① クルクル開始
+    setPrefetchLoading(true);
+
+    try {
+      // ② 先に検索データ取得
+      const result = await fetchStoresForSearch({
+        filters: apiFilters,
+        storeTypeId,
+        prefectureId: prefectureIds[0] ?? null,
+        areaIds,
+      });
+
+      // ③ グローバルストアに保存
+      setStores(result);
+
+      // ★ ④ 先に画面遷移（まだクルクルは消さない）
+      router.push(`/stores?${params.toString()}`);
+    } catch (err) {
+      console.error('Failed to prefetch stores:', err);
+    } finally {
+      // ★ ⑤ クルクル停止は遷移後
+      // （遷移中も表示させておく）
+      setTimeout(() => {
+        setPrefetchLoading(false);
+      }, 200);
+    }
   };
 
+  // ===== フィルターラベル → セクションスクロール =====
   const handleClickFilter = (label: string) => {
     const section = masters.labelToSectionMap.get(label);
     if (!section) return;
@@ -67,9 +127,14 @@ export default function HomePage() {
 
   return (
     <>
+      {/* ===== クルクル===== */}
+      {prefetchLoading && <LoadingOverlay />}
+
       {/* ===== Hero ===== */}
       <div className="text-light-3 relative flex h-146 flex-col items-center gap-10 overflow-hidden bg-[url('/background-sp@2x.png')] bg-cover bg-center px-4 pt-20">
-        <p className="text-[10px] tracking-widest">夜の音楽をもっと楽しむための音箱ナビ</p>
+        <p className="text-[10px] tracking-widest">
+          夜の音楽をもっと楽しむための音箱ナビ
+        </p>
 
         <Image
           src="/logo-white.svg"
@@ -85,9 +150,8 @@ export default function HomePage() {
       </div>
 
       {/* ===== Store Type ===== */}
-
       <StoreTypeFilter
-        storeTypes={storeTypes} // ★ 必須
+        storeTypes={storeTypes}
         activeTypeId={storeTypeId}
         onChange={setStoreTypeId}
       />

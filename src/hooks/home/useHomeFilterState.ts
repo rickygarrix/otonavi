@@ -6,11 +6,6 @@ type Options = {
   storeTypeId?: string | null
 }
 
-/**
- * Home 専用フィルター状態管理
- * - Home では検索しない
- * - ただし「URLに渡す用の keys」と「表示用 labels」は分けて持つ
- */
 export function useHomeFilterState(
   externalLabelMap?: Map<string, string>,
   options?: Options
@@ -35,11 +30,6 @@ export function useHomeFilterState(
   const [toiletKeys, setToiletKeys] = useState<string[]>([])
   const [otherKeys, setOtherKeys] = useState<string[]>([])
 
-  /**
-   * ✅ URL に渡す “生キー” 一覧
-   * - prefectureIds / areaIds は id のまま
-   * - 各 *_keys は key のまま
-   */
   const selectedKeys = useMemo(() => {
     return [
       ...prefectureIds,

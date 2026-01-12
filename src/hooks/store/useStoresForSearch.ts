@@ -6,16 +6,24 @@ import { supabase } from "@/lib/supabase";
 import type { SearchStore } from "@/types/store";
 import { normalizeSearchStore } from "@/lib/normalize/normalizeSearchStore";
 
-/**
- * 店舗一覧・検索用
- * - Home では使わない
- * - /stores 専用
- */
-export function useStoresForSearch() {
+type Options = {
+  enabled?: boolean;
+};
+
+export function useStoresForSearch(options?: Options) {
+  const enabled = options?.enabled ?? true;
+
+  // ★ 初期値を enabled に合わせる
   const [stores, setStores] = useState<SearchStore[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
 
   useEffect(() => {
+    // ★ 事前取得済み（enabled=false）の場合は即終了
+    if (!enabled) {
+      setLoading(false);
+      return;
+    }
+
     let mounted = true;
 
     const load = async () => {
@@ -63,7 +71,7 @@ export function useStoresForSearch() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [enabled]);
 
   return {
     stores,
