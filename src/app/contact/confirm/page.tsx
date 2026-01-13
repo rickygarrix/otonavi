@@ -103,7 +103,7 @@ export default function ContactConfirmPage() {
         </section>
 
         {/* Form */}
-        <div className="bg-light-2 flex flex-col gap-4 px-6 pt-10 pb-20">
+        <form className="bg-light-2 flex flex-col gap-4 px-6 pt-10 pb-20">
           {/* お名前 */}
           <div className={styles.wrapper}>
             <div className={styles.label}>
@@ -187,7 +187,7 @@ export default function ContactConfirmPage() {
               <Send className="h-4 w-4" strokeWidth={1.2} />
             </button>
           </div>
-        </div>
+        </form>
       </main>
 
       <Footer />

@@ -3,6 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { ArrowRight } from 'lucide-react';
+
 import HomeButton from '@/components/ui/HomeButton';
 import Footer from '@/components/ui/Footer';
 
@@ -158,16 +160,18 @@ export default function ContactPage() {
           </div>
 
           {/* 確認ボタン */}
-          <button
-            type="button"
-            disabled={!isValid}
-            onClick={handleConfirm}
-            className={`text-Brand-Light-1 from-Brand-Dark-4 to-Brand-Dark-3 flex h-12 items-center justify-center gap-1 rounded-lg bg-gradient-to-b px-4 text-sm outline outline-1 outline-offset-[-1px] outline-slate-300/50 transition ${
-              !isValid ? 'opacity-40' : ''
-            }`}
-          >
-            内容確認へ →
-          </button>
+
+          <div className="mt-4 flex gap-4">
+            <button
+              type="button"
+              disabled={!isValid}
+              onClick={handleConfirm}
+              className={`from-dark-3 border-dark-4 to-dark-2 text-light-1 shadow-dark-3/50 flex h-12 flex-2 items-center justify-center gap-2 rounded-lg border bg-linear-to-t text-sm shadow-xs transition active:scale-102 active:shadow-md ${!isValid ? 'opacity-40' : ''}`}
+            >
+              内容確認へ
+              <ArrowRight className="h-4 w-4" strokeWidth={1.2} />
+            </button>
+          </div>
         </div>
       </main>
 
