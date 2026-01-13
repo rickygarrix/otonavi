@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { Check } from 'lucide-react';
+import { Check, Eraser, Send } from 'lucide-react';
 
 import HomeButton from '@/components/ui/HomeButton';
 import Footer from '@/components/ui/Footer';
@@ -139,7 +139,7 @@ export default function ContactConfirmPage() {
           </div>
 
           {/* プライバシーポリシー */}
-          <label className="outline-light-5 flex items-center gap-4 rounded-xl p-4 text-sm outline outline-1">
+          <label className="outline-light-5 flex items-center gap-4 rounded-lg p-4 text-sm outline outline-1">
             <input
               type="checkbox"
               checked={agreed}
@@ -160,22 +160,26 @@ export default function ContactConfirmPage() {
           </label>
 
           {/* ボタン */}
-          <div className="grid grid-cols-2 gap-4 pt-4">
+          <div className="mt-4 flex gap-4">
             <button
               onClick={() => router.back()}
-              className="h-12 rounded-xl bg-white text-sm outline outline-1 outline-slate-300"
+              className="from-light-2 to-light-1 border-light-4 text-dark-4 active:shadow-dark-1/20 flex h-12 flex-1 items-center justify-center gap-2 rounded-lg border bg-linear-to-t text-sm transition active:scale-102 active:shadow-sm"
             >
-              書き直す ✎
+              書き直す
+              <Eraser className="h-4 w-4" strokeWidth={1.2} />
             </button>
 
             <button
               disabled={!agreed || sending}
               onClick={submit}
-              className={`h-12 rounded-xl bg-white text-sm outline outline-1 outline-slate-300 ${
-                !agreed || sending ? 'opacity-40' : ''
+              className={`from-dark-3 border-dark-4 to-dark-2 text-light-1 shadow-dark-3/50 flex h-12 flex-1 items-center justify-center gap-2 rounded-lg border bg-linear-to-t text-sm shadow-xs transition ${
+                !agreed || sending
+                  ? 'cursor-not-allowed opacity-40 backdrop-blur-lg'
+                  : 'active:scale-102 active:shadow-md'
               }`}
             >
-              {sending ? '送信中…' : '送信 ✈'}
+              {sending ? '送信中…' : '送信'}
+              <Send className="h-4 w-4" strokeWidth={1.2} />
             </button>
           </div>
         </div>
