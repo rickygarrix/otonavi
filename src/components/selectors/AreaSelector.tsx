@@ -13,8 +13,6 @@ type Props = {
 type OpenMenu = 'pref' | 'city' | null;
 const MENU_ID = { pref: 'pref-menu', city: 'city-menu' } as const;
 
-const TOKYO_NAME = '東京都';
-
 export default function AreaSelector({ clearKey, onChange }: Props) {
   const [prefectures, setPrefectures] = useState<Prefecture[]>([]);
   const [cities, setCities] = useState<City[]>([]);
@@ -49,7 +47,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
     loadPrefectures();
   }, []);
 
-  const isTokyo = selectedPrefecture?.name_ja === TOKYO_NAME;
+  const isTokyo = selectedPrefecture?.name_ja === '東京都';
 
   // ============================
   // 市区町村（display_order）
@@ -94,10 +92,23 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
     onChange([p.id], []);
   };
 
-  const selectCity = (a: City) => {
-    setSelectedCity(a);
+  const selectCity = (c: City) => {
+    setSelectedCity(c);
     setOpenMenu(null);
-    onChange(selectedPrefecture ? [selectedPrefecture.id] : [], [a.id]);
+    onChange(selectedPrefecture ? [selectedPrefecture.id] : [], [c.id]);
+  };
+
+  const clearPrefecture = () => {
+    setSelectedPrefecture(null);
+    setSelectedCity(null);
+    setOpenMenu(null);
+    onChange([], []);
+  };
+
+  const clearCity = () => {
+    setSelectedCity(null);
+    setOpenMenu(null);
+    onChange(selectedPrefecture ? [selectedPrefecture.id] : [], []);
   };
 
   // ============================
@@ -158,6 +169,17 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
             aria-label="都道府県"
             className="border-gray-1 absolute top-12 left-0 z-20 h-100 w-full overflow-y-auto rounded-2xl border bg-white/40 p-2 shadow-lg backdrop-blur-lg"
           >
+            <button
+              onClick={clearPrefecture}
+              className="text-gray-4 flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start active:bg-black/3"
+            >
+              <Check
+                className={`h-4 w-4 shrink-0 ${selectedPrefecture === null ? 'opacity-100' : 'opacity-0'}`}
+                strokeWidth={2.0}
+              />
+              <span className="min-w-0 flex-1 truncate">都道府県を選択</span>
+            </button>
+
             {prefectures.map((p) => {
               const isSelected = selectedPrefecture?.id === p.id;
 
@@ -214,23 +236,34 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
             aria-label="市区町村"
             className="text-gray-4 border-gray-1 absolute top-12 left-0 z-20 h-100 w-full overflow-y-auto rounded-2xl border bg-white/40 p-2 shadow-lg backdrop-blur-lg"
           >
+            <button
+              onClick={clearCity}
+              className="text-gray-4 flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start active:bg-black/3"
+            >
+              <Check
+                className={`h-4 w-4 shrink-0 ${selectedCity === null ? 'opacity-100' : 'opacity-0'}`}
+                strokeWidth={2.0}
+              />
+              <span className="min-w-0 flex-1 truncate">市区町村を選択</span>
+            </button>
+
             {wards.length > 0 && (
               <>
                 <div className="p-2 text-xs font-semibold">東京23区</div>
-                {wards.map((a) => {
-                  const isSelected = selectedCity?.id === a.id;
+                {wards.map((c) => {
+                  const isSelected = selectedCity?.id === c.id;
 
                   return (
                     <button
-                      key={a.id}
-                      onClick={() => selectCity(a)}
+                      key={c.id}
+                      onClick={() => selectCity(c)}
                       className={`flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start active:bg-black/3 ${isSelected ? 'text-dark-5 bg-black/5 font-semibold' : 'text-gray-4'}`}
                     >
                       <Check
                         className={`h-4 w-4 shrink-0 ${isSelected ? 'opacity-100' : 'opacity-0'}`}
                         strokeWidth={2.0}
                       />
-                      <span className="min-w-0 flex-1 truncate">{a.name}</span>
+                      <span className="min-w-0 flex-1 truncate">{c.name}</span>
                     </button>
                   );
                 })}
@@ -242,20 +275,20 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
                 <div className="border-gray-1 mt-2 border-t px-2 pt-6 pb-2 text-xs font-semibold">
                   その他
                 </div>
-                {others.map((a) => {
-                  const isSelected = selectedCity?.id === a.id;
+                {others.map((c) => {
+                  const isSelected = selectedCity?.id === c.id;
 
                   return (
                     <button
-                      key={a.id}
-                      onClick={() => selectCity(a)}
+                      key={c.id}
+                      onClick={() => selectCity(c)}
                       className={`flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start active:bg-black/3 ${isSelected ? 'text-dark-5 bg-black/5 font-semibold' : 'text-gray-4'}`}
                     >
                       <Check
                         className={`h-4 w-4 shrink-0 ${isSelected ? 'opacity-100' : 'opacity-0'}`}
                         strokeWidth={2.0}
                       />
-                      <span className="min-w-0 flex-1 truncate">{a.name}</span>
+                      <span className="min-w-0 flex-1 truncate">{c.name}</span>
                     </button>
                   );
                 })}
