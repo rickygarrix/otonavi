@@ -16,10 +16,10 @@ export default function ContactCompletePage() {
   const [form, setForm] = useState<ContactForm | null>(null);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem('contactForm');
+    const stored = sessionStorage.getItem('contactFormSubmitted');
     if (stored) {
       setForm(JSON.parse(stored));
-      sessionStorage.removeItem('contactForm');
+      sessionStorage.removeItem('contactFormSubmitted');
     }
   }, []);
 

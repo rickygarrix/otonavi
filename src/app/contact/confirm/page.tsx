@@ -32,21 +32,26 @@ export default function ContactConfirmPage() {
   const submit = async () => {
     if (!form || !agreed || sending) return;
 
+    setSending(true);
     try {
-      setSending(true);
-
-      await fetch('/api/contact', {
+      const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
 
-      // ★ 完了時にクリア（重要）
-      sessionStorage.removeItem('contactForm');
+      if (!res.ok) {
+        // 必要なら res.json() してメッセージ表示
+        throw new Error('送信に失敗しました');
+      }
+
+      sessionStorage.setItem('contactFormSubmitted', JSON.stringify(form));
+      sessionStorage.removeItem('contactForm'); // 入力用は消す
 
       router.push('/contact/complete');
-    } finally {
+    } catch (e) {
       setSending(false);
+      alert('送信に失敗しました。時間をおいて再度お試しください。');
     }
   };
 
