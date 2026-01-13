@@ -75,7 +75,7 @@ export default function ContactPage() {
       {/* ===== Main Content ===== */}
       <main>
         {/* Intro */}
-        <section className="px-6 py-10">
+        <section className="flex flex-col gap-6 px-6 py-10">
           <h1 className="text-xl leading-[1.5] font-bold tracking-widest">お問い合わせ</h1>
 
           <p className="text-justify text-sm leading-[1.8]">

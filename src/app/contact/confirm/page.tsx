@@ -87,7 +87,7 @@ export default function ContactConfirmPage() {
       {/* 本文 */}
       <main>
         {/* Intro */}
-        <section className="px-6 py-10">
+        <section className="flex flex-col gap-6 px-6 py-10">
           <h1 className="text-xl leading-[1.5] font-bold tracking-widest">
             お問い合わせ内容の確認
           </h1>
