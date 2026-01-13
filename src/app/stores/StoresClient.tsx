@@ -3,9 +3,9 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo } from 'react';
 
-import StoreCard from '@/components/store/StoreCard';
+import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
-import HomeButton from '@/components/ui/HomeButton';
+import StoreCard from '@/components/store/StoreCard';
 import BackToHomeButton from '@/components/ui/BackToHomeButton';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
@@ -42,7 +42,7 @@ export default function StoresClient() {
 
     if (storeTypeId) {
       const storeTypeLabel = Array.from(masters.genericMasters.values()).find(
-        (m) => m.table === 'store_types' && m.id === storeTypeId
+        (m) => m.table === 'store_types' && m.id === storeTypeId,
       )?.label;
       if (storeTypeLabel) labels.push(storeTypeLabel);
     }
@@ -53,17 +53,9 @@ export default function StoresClient() {
     });
 
     return labels;
-  }, [
-    mastersLoading,
-    storeTypeId,
-    selectedFilters,
-    labelMap,
-    masters.genericMasters,
-  ]);
+  }, [mastersLoading, storeTypeId, selectedFilters, labelMap, masters.genericMasters]);
 
-  const isReady =
-    prefetchedStores.length > 0 ||
-    (!mastersLoading && !storesLoading);
+  const isReady = prefetchedStores.length > 0 || (!mastersLoading && !storesLoading);
 
   if (!isReady) {
     return <LoadingOverlay />;
@@ -71,20 +63,7 @@ export default function StoresClient() {
 
   return (
     <div className="text-dark-5 bg-white">
-      <header className="sticky inset-x-0 top-0 z-100 flex h-20 items-center gap-4 bg-white/90 px-4 backdrop-blur-lg">
-        <HomeButton />
-
-        <div className="shrink-0 text-lg font-bold tracking-widest">
-          {displayStores.length}
-          <span className="ml-1 text-[10px]">件</span>
-        </div>
-
-        {displayLabels.length > 0 && (
-          <div className="line-clamp-2 flex-1 text-xs text-blue-700">
-            {displayLabels.join(', ')}
-          </div>
-        )}
-      </header>
+      <Header variant="result" count={displayStores.length} labels={displayLabels.join(', ')} />
 
       <ul className="grid grid-cols-2">
         {displayStores.map((store) => (

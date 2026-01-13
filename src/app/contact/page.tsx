@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 
 import { ArrowRight } from 'lucide-react';
 
+import Header from '@/components/ui/Header';
 import HomeButton from '@/components/ui/HomeButton';
 import Footer from '@/components/ui/Footer';
 
@@ -54,9 +55,7 @@ export default function ContactPage() {
 
   return (
     <div className="bg-light-1 text-dark-5 -mt-20">
-      <header className="sticky top-0 z-100 flex h-20 w-full items-center gap-4 px-4">
-        <HomeButton />
-      </header>
+      <Header />
 
       {/* ===== Stepper ===== */}
       <div className="relative flex h-20 items-center justify-between pr-4 pl-24">
