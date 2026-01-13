@@ -12,23 +12,21 @@ export default function HomeStoreCard({ store }: Props) {
   // 画像
   // =========================
   const imageUrl =
-    store.image_url && store.image_url.trim() !== ''
-      ? store.image_url
-      : '/noshop.svg';
+    store.image_url && store.image_url.trim() !== '' ? store.image_url : '/noshop.svg';
 
   // =========================
   // 表示ラベル（所在地のみ）
-  // ・東京：area があれば「東京 + area」
-  // ・東京：area がなければ「東京」
+  // ・東京：city があれば「東京 + city」
+  // ・東京：city がなければ「東京」
   // ・東京以外：都道府県のみ
   // =========================
   const isTokyo = store.prefecture_label === '東京都';
 
   const locationLabel = isTokyo
-    ? store.area_label
-      ? `東京 ${store.area_label}`
+    ? store.city_label
+      ? `東京 ${store.city_label}`
       : '東京'
-    : store.prefecture_label ?? '';
+    : (store.prefecture_label ?? '');
 
   return (
     <div className="flex w-full flex-col items-center gap-2 p-2 text-center">
@@ -51,16 +49,10 @@ export default function HomeStoreCard({ store }: Props) {
       ========================= */}
       <div className="flex w-full flex-col gap-1 px-2 py-1">
         <div className="flex h-7 items-center justify-center">
-          <p className="line-clamp-2 text-xs leading-[1.2]">
-            {store.name}
-          </p>
+          <p className="line-clamp-2 text-xs leading-[1.2]">{store.name}</p>
         </div>
 
-        {locationLabel && (
-          <p className="text-light-5 line-clamp-1 text-[10px]">
-            {locationLabel}
-          </p>
-        )}
+        {locationLabel && <p className="text-light-5 line-clamp-1 text-[10px]">{locationLabel}</p>}
       </div>
     </div>
   );

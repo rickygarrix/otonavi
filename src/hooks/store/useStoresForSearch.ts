@@ -1,10 +1,10 @@
 // src/hooks/store/useStoresForSearch.ts
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import type { SearchStore } from "@/types/store";
-import { normalizeSearchStore } from "@/lib/normalize/normalizeSearchStore";
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import type { SearchStore } from '@/types/store';
+import { normalizeSearchStore } from '@/lib/normalize/normalizeSearchStore';
 
 type Options = {
   enabled?: boolean;
@@ -28,11 +28,12 @@ export function useStoresForSearch(options?: Options) {
       setLoading(true);
 
       const { data, error } = await supabase
-        .from("stores")
-        .select(`
+        .from('stores')
+        .select(
+          `
           *,
           prefectures ( id, name_ja ),
-          areas ( id, name ),
+          cities ( id, name ),
           store_types ( id, label ),
 
           price_range_definitions ( key, label ),
@@ -50,8 +51,9 @@ export function useStoresForSearch(options?: Options) {
           store_payment_methods ( payment_method_definitions ( key, label ) ),
 
           store_images ( image_url, order_num )
-        `)
-        .order("updated_at", { ascending: false });
+        `,
+        )
+        .order('updated_at', { ascending: false });
 
       if (!mounted) return;
 

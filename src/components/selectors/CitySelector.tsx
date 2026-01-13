@@ -2,25 +2,25 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { Prefecture, Area } from '@/types/location';
+import type { Prefecture, City } from '@/types/location';
 import { ChevronsUpDown, Check } from 'lucide-react';
 
 type Props = {
   clearKey: number;
-  onChange: (prefectureIds: string[], areaIds: string[]) => void;
+  onChange: (prefectureIds: string[], cityIds: string[]) => void;
 };
 
 const TOKYO_NAME = '東京都';
 
-export default function AreaSelector({ clearKey, onChange }: Props) {
+export default function CitySelector({ clearKey, onChange }: Props) {
   const [prefectures, setPrefectures] = useState<Prefecture[]>([]);
-  const [areas, setAreas] = useState<Area[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
 
   const [selectedPrefecture, setSelectedPrefecture] = useState<Prefecture | null>(null);
-  const [selectedArea, setSelectedArea] = useState<Area | null>(null);
+  const [selectedCity, setSelectedCity] = useState<City | null>(null);
 
   const [openPref, setOpenPref] = useState(false);
-  const [openArea, setOpenArea] = useState(false);
+  const [openCity, setOpenCity] = useState(false);
 
   // ============================
   // 都道府県（display_order）
@@ -50,64 +50,64 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
   // ============================
   useEffect(() => {
     if (!isTokyo || !selectedPrefecture) {
-      setAreas([]);
-      setSelectedArea(null);
+      setCities([]);
+      setSelectedCity(null);
       return;
     }
 
-    const loadAreas = async () => {
+    const loadCities = async () => {
       const { data, error } = await supabase
-        .from('areas')
+        .from('cities')
         .select('id, name, is_23ward, display_order')
         .eq('prefecture_id', selectedPrefecture.id)
         .order('display_order', { ascending: true });
 
       if (error) {
-        console.error('areas load error:', error);
+        console.error('cities load error:', error);
         return;
       }
 
-      setAreas((data ?? []) as Area[]);
+      setCities((data ?? []) as City[]);
     };
 
-    loadAreas();
+    loadCities();
   }, [isTokyo, selectedPrefecture]);
 
   // ============================
   // メニュー外タップで閉じる
   // ============================
-  const isAnyOpen = openPref || openArea;
+  const isAnyOpen = openPref || openCity;
 
   const prefMenuId = 'pref-menu';
-  const areaMenuId = 'area-menu';
+  const cityMenuId = 'city-menu';
 
   // ============================
   // clear
   // ============================
   useEffect(() => {
     setSelectedPrefecture(null);
-    setSelectedArea(null);
+    setSelectedCity(null);
     onChange([], []);
   }, [clearKey, onChange]);
 
   const selectPrefecture = (p: Prefecture) => {
     setSelectedPrefecture(p);
-    setSelectedArea(null);
+    setSelectedCity(null);
     setOpenPref(false);
     onChange([p.id], []);
   };
 
-  const selectArea = (a: Area) => {
-    setSelectedArea(a);
-    setOpenArea(false);
+  const selectCity = (a: City) => {
+    setSelectedCity(a);
+    setOpenCity(false);
     onChange(selectedPrefecture ? [selectedPrefecture.id] : [], [a.id]);
   };
 
   // ============================
   // 分類（順序は DB に従う）
   // ============================
-  const wards = useMemo(() => areas.filter((a) => a.is_23ward), [areas]);
-  const others = useMemo(() => areas.filter((a) => !a.is_23ward), [areas]);
+  const wards = useMemo(() => cities.filter((a) => a.is_23ward), [cities]);
+  const others = useMemo(() => cities.filter((a) => !a.is_23ward), [cities]);
 
   // ============================
   // 状態ごとのクラス
@@ -131,7 +131,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
           className="fixed inset-0 z-10 cursor-default"
           onClick={() => {
             setOpenPref(false);
-            setOpenArea(false);
+            setOpenCity(false);
           }}
         />
       )}
@@ -142,7 +142,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
           aria-expanded={openPref}
           aria-controls={prefMenuId}
           onClick={() => {
-            setOpenArea(false);
+            setOpenCity(false);
             setOpenPref((v) => !v);
           }}
           className="h-12 w-full p-1"
@@ -196,30 +196,30 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
         aria-hidden={!isTokyo}
       >
         <button
-          aria-expanded={openArea}
-          aria-controls={areaMenuId}
+          aria-expanded={openCity}
+          aria-controls={cityMenuId}
           onClick={() => {
             setOpenPref(false);
-            setOpenArea((v) => !v);
+            setOpenCity((v) => !v);
           }}
           className="h-12 w-full p-1"
         >
           <div
-            className={`h-full overflow-hidden rounded-full p-px ${selectedArea ? outerSelected : outerUnselected}`}
+            className={`h-full overflow-hidden rounded-full p-px ${selectedCity ? outerSelected : outerUnselected}`}
           >
             <div
-              className={`flex h-full items-center gap-2 rounded-full px-4 ${selectedArea ? innerSelected : innerUnselected}`}
+              className={`flex h-full items-center gap-2 rounded-full px-4 ${selectedCity ? innerSelected : innerUnselected}`}
             >
-              <span className="w-full truncate text-start">{selectedArea?.name ?? 'エリア'}</span>
+              <span className="w-full truncate text-start">{selectedCity?.name ?? 'エリア'}</span>
               <ChevronsUpDown className="h-4 w-4" strokeWidth={1.2} />
             </div>
           </div>
         </button>
 
         {/* 市区町村メニュー */}
-        {openArea && (
+        {openCity && (
           <div
-            id={areaMenuId}
+            id={cityMenuId}
             role="listbox"
             aria-label="市区町村"
             className="text-gray-4 border-gray-1 absolute top-12 left-0 z-20 h-100 w-full overflow-y-auto rounded-2xl border bg-white/40 p-2 shadow-lg backdrop-blur-lg"
@@ -228,12 +228,12 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
               <>
                 <div className="p-2 text-xs font-semibold">東京23区</div>
                 {wards.map((a) => {
-                  const isSelected = selectedArea?.id === a.id;
+                  const isSelected = selectedCity?.id === a.id;
 
                   return (
                     <button
                       key={a.id}
-                      onClick={() => selectArea(a)}
+                      onClick={() => selectCity(a)}
                       className={`flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start active:bg-black/3 ${isSelected ? 'text-dark-5 bg-black/5 font-semibold' : 'text-gray-4'}`}
                     >
                       <Check
@@ -253,12 +253,12 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
                   その他
                 </div>
                 {others.map((a) => {
-                  const isSelected = selectedArea?.id === a.id;
+                  const isSelected = selectedCity?.id === a.id;
 
                   return (
                     <button
                       key={a.id}
-                      onClick={() => selectArea(a)}
+                      onClick={() => selectCity(a)}
                       className={`flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start active:bg-black/3 ${isSelected ? 'text-dark-5 bg-black/5 font-semibold' : 'text-gray-4'}`}
                     >
                       <Check

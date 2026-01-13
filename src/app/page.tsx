@@ -36,7 +36,7 @@ export default function HomePage() {
   }, [masters.genericMasters]);
 
   const filter = useHomeFilterState(masters.externalLabelMap, { storeTypeId });
-  const { selectedKeys, selectedLabels, handleClear, prefectureIds, areaIds, ...setters } = filter;
+  const { selectedKeys, selectedLabels, handleClear, prefectureIds, cityIds, ...setters } = filter;
 
   const { stores: searchStores } = useStoresForSearch();
   const { filteredStores } = useStoreFilters(searchStores, {
@@ -59,7 +59,7 @@ export default function HomePage() {
     selectedKeys.forEach((k) => params.append('filters', k));
 
     const apiFilters = selectedKeys.filter(
-      (k) => !prefectureIds.includes(k) && !areaIds.includes(k),
+      (k) => !prefectureIds.includes(k) && !cityIds.includes(k),
     );
 
     setPrefetchLoading(true);
@@ -69,7 +69,7 @@ export default function HomePage() {
         filters: apiFilters,
         storeTypeId,
         prefectureId: prefectureIds[0] ?? null,
-        areaIds,
+        cityIds,
       });
 
       setStores(result);
@@ -124,7 +124,7 @@ export default function HomePage() {
         clearKey={clearKey}
         sectionRefs={sectionRefs}
         setPrefectureIds={setters.setPrefectureIds}
-        setAreaIds={setters.setAreaIds}
+        setCityIds={setters.setCityIds}
         setCustomerKeys={setters.setCustomerKeys}
         setAtmosphereKeys={setters.setAtmosphereKeys}
         setSizeKey={setters.setSizeKeys}

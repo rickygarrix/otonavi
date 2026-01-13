@@ -72,10 +72,10 @@ e9595228-d63f-419a-aae6-09b7869cc5c4	45	宮崎県	Miyazaki	九州・沖縄
 
 
 --
--- Data for Name: areas; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: cities; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.areas (id, prefecture_id, name, is_active, created_at, updated_at, is_23ward, display_order) FROM stdin;
+COPY public.cities (id, prefecture_id, name, is_active, created_at, updated_at, is_23ward, display_order) FROM stdin;
 e8c2af16-3f9e-4478-a5ca-748713fb71b8	9c386ac7-5bb0-4bd4-905d-9c2836fb148f	立川・八王子	t	2025-11-05 11:59:19.416632+00	2025-11-05 11:59:19.416632+00	f	24
 8145cf3e-b65c-4c6a-b82a-5298780bf3ad	9c386ac7-5bb0-4bd4-905d-9c2836fb148f	江戸川区	t	2025-11-05 11:59:19.416632+00	2025-11-05 11:59:19.416632+00	t	23
 6c123974-b43e-4602-a96f-d7885c7e72a2	9c386ac7-5bb0-4bd4-905d-9c2836fb148f	北区	t	2025-11-05 11:59:19.416632+00	2025-11-05 11:59:19.416632+00	t	19
@@ -315,7 +315,7 @@ COPY public.store_types (id, key, label, is_active, created_at, updated_at, disp
 -- Data for Name: stores; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.stores (id, name, description, access, address, google_map_url, instagram_url, official_site_url, prefecture_id, area_id, store_type_id, size, price_range_id, created_at, updated_at, name_kana, x_url, facebook_url, tiktok_url, business_hours, payment_method_other, postcode) FROM stdin;
+COPY public.stores (id, name, description, access, address, google_map_url, instagram_url, official_site_url, prefecture_id, city_id, store_type_id, size, price_range_id, created_at, updated_at, name_kana, x_url, facebook_url, tiktok_url, business_hours, payment_method_other, postcode) FROM stdin;
 8e159e07-ebc0-4eef-934a-023fa5e67d46	The Black Room	光と闇が交差するバー。	原宿駅徒歩6分。	東京都渋谷区1-4-5	https://www.google.com/maps/place/ATOM+TOKYO+-SHIBUYA-/@35.6583059,139.6928299,16z/data=!3m2!4b1!5s0x60188caa117a3065:0xdc6acc5817c580f5!4m6!3m5!1s0x60188caa122d0481:0x5261f787f67350d2!8m2!3d35.6583059!4d139.6954048!16s%2Fg%2F11b6_p_tjn?authuser=0&entry=ttu&g_ep=EgoyMDI1MTIwOS4wIKXMDSoKLDEwMDc5MjA2OUgBUAM%3D	https://instagram.com/blackroom	https://blackroom.jp	1982021a-8aea-438c-9591-9069ff64fe04	\N	432178e1-2a9d-4f3d-868e-daffa15a29ae	22be3dd1-113d-4700-ab21-25f36393b641	85fee28a-8fbc-460e-bb9a-ade30acbf31e	2025-12-04 08:20:52.17535	2025-12-30 03:38:40.093853	ぶらっく るーむ	https://emerald.jp	https://emerald.jp	https://emerald.jp	月曜 20:00~3:00\n火曜 20:00~3:00\n水曜 20:00~3:00\n木曜 20:00~3:00\n金曜 20:00~3:00 \n土曜 20:00~3:00 \n日曜 20:00~3:00 \n祝日 20:00~3:00	PayPay	111-1111
 05b4113d-6252-4d5f-9e85-e6440fe4b164	CLUB IKO	最新EDMが流れる大型クラブ。	渋谷駅から徒歩5分。	東京都渋谷区1-1-1	https://www.google.com/maps/place/ATOM+TOKYO+-SHIBUYA-/@35.6583059,139.6928299,16z/data=!3m2!4b1!5s0x60188caa117a3065:0xdc6acc5817c580f5!4m6!3m5!1s0x60188caa122d0481:0x5261f787f67350d2!8m2!3d35.6583059!4d139.6954048!16s%2Fg%2F11b6_p_tjn?authuser=0&entry=ttu&g_ep=EgoyMDI1MTIwOS4wIKXMDSoKLDEwMDc5MjA2OUgBUAM%3D	https://instagram.com/clubiko	https://clubiko.jp	5a128c36-479b-4d51-86d1-93e2f00113c3	\N	432178e1-2a9d-4f3d-868e-daffa15a29ae	e1eaf072-cd97-4dd4-b50e-9efd9e38f681	f0d35a5c-b1f1-48d3-af17-3d8900cd09f2	2025-12-04 08:20:52.17535	2025-12-30 03:38:49.380915	くらぶ いこ	https://emerald.jp	https://emerald.jp	https://emerald.jp	月曜 20:00~3:00\n火曜 20:00~3:00\n水曜 20:00~3:00\n木曜 20:00~3:00\n金曜 20:00~3:00 \n土曜 20:00~3:00 \n日曜 20:00~3:00 \n祝日 20:00~3:00	PayPay	111-1111
 cf181f4f-87c2-43ba-9a98-061341e1f7c4	CLUB ZENITH	音質にこだわるクラブ。	六本木駅徒歩3分。	東京都港区1-9-9	https://www.google.com/maps/place/ATOM+TOKYO+-SHIBUYA-/@35.6583059,139.6928299,16z/data=!3m2!4b1!5s0x60188caa117a3065:0xdc6acc5817c580f5!4m6!3m5!1s0x60188caa122d0481:0x5261f787f67350d2!8m2!3d35.6583059!4d139.6954048!16s%2Fg%2F11b6_p_tjn?authuser=0&entry=ttu&g_ep=EgoyMDI1MTIwOS4wIKXMDSoKLDEwMDc5MjA2OUgBUAM%3D	https://instagram.com/zenith	https://zenithclub.jp	1982021a-8aea-438c-9591-9069ff64fe04	\N	432178e1-2a9d-4f3d-868e-daffa15a29ae	e1eaf072-cd97-4dd4-b50e-9efd9e38f681	677ce313-d3df-4de7-998b-dcd99e6385c6	2025-12-04 08:20:52.17535	2025-12-30 03:39:04.907354	くらぶ ぜにす	https://emerald.jp	https://emerald.jp	https://emerald.jp	月曜 20:00~3:00\n火曜 20:00~3:00\n水曜 20:00~3:00\n木曜 20:00~3:00\n金曜 20:00~3:00 \n土曜 20:00~3:00 \n日曜 20:00~3:00 \n祝日 20:00~3:00	PayPay	111-1111

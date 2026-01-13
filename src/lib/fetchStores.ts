@@ -8,19 +8,19 @@ export type FetchStoresForSearchParams = {
 
   // ★追加
   prefectureId?: string | null;
-  areaIds?: string[];
+  cityIds?: string[];
 };
 
 export async function fetchStoresForSearch({
   filters,
   storeTypeId,
   prefectureId = null,
-  areaIds = [],
+  cityIds = [],
 }: FetchStoresForSearchParams): Promise<HomeStore[]> {
   return await searchStores({
     filters,
     storeTypeId,
     prefectureId,
-    areaIds,
+    cityIds,
   });
 }

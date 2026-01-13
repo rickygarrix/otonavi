@@ -24,8 +24,8 @@ export default function StoreCard({ store, query }: Props) {
     store.image_url && store.image_url.trim() !== '' ? store.image_url : '/noshop.svg';
 
   const locationLabel =
-    store.prefecture_label === '東京都' && store.area_label
-      ? `東京 ${store.area_label}`
+    store.prefecture_label === '東京都' && store.city_label
+      ? `東京 ${store.city_label}`
       : (store.prefecture_label ?? '');
 
   return (
@@ -44,7 +44,7 @@ export default function StoreCard({ store, query }: Props) {
             src={imageUrl}
             alt={store.name}
             fill
-            priority     // ★ ここが超重要
+            priority // ★ ここが超重要
             sizes="(max-width: 420px) 50vw, 210px"
             className="object-cover"
           />
@@ -53,9 +53,7 @@ export default function StoreCard({ store, query }: Props) {
 
       {/* テキスト */}
       <div className="flex flex-col gap-1 px-4 py-1">
-        <p className="line-clamp-1 text-sm leading-[1.5] font-bold">
-          {store.name}
-        </p>
+        <p className="line-clamp-1 text-sm leading-[1.5] font-bold">{store.name}</p>
 
         <div className="text-dark-4 line-clamp-1 text-xs leading-[1.5]">
           {locationLabel}

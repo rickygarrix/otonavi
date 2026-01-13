@@ -31,7 +31,7 @@ export default function StoreDetailPage() {
           `
           *,
           prefectures:prefecture_id(*),
-          areas:area_id(*),
+          cities:city_id(*),
           store_types:store_type_id(*),
           price_range_definitions:price_range_id(*),
           size_definitions:size(*),

@@ -120,10 +120,10 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: areas; Type: TABLE; Schema: public; Owner: postgres
+-- Name: cities; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.areas (
+CREATE TABLE public.cities (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     prefecture_id uuid,
     name text NOT NULL,
@@ -135,7 +135,7 @@ CREATE TABLE public.areas (
 );
 
 
-ALTER TABLE public.areas OWNER TO postgres;
+ALTER TABLE public.cities OWNER TO postgres;
 
 --
 -- Name: atmosphere_definitions; Type: TABLE; Schema: public; Owner: postgres
@@ -602,7 +602,7 @@ CREATE TABLE public.stores (
     instagram_url text,
     official_site_url text,
     prefecture_id uuid,
-    area_id uuid,
+    city_id uuid,
     store_type_id uuid,
     size uuid,
     price_range_id uuid,
@@ -615,7 +615,7 @@ CREATE TABLE public.stores (
     business_hours text,
     payment_method_other text,
     postcode character varying(8),
-    CONSTRAINT area_id_only_for_tokyo CHECK ((((prefecture_id = '9c386ac7-5bb0-4bd4-905d-9c2836fb148f'::uuid) AND (area_id IS NOT NULL)) OR ((prefecture_id <> '9c386ac7-5bb0-4bd4-905d-9c2836fb148f'::uuid) AND (area_id IS NULL))))
+    CONSTRAINT city_id_only_for_tokyo CHECK ((((prefecture_id = '9c386ac7-5bb0-4bd4-905d-9c2836fb148f'::uuid) AND (city_id IS NOT NULL)) OR ((prefecture_id <> '9c386ac7-5bb0-4bd4-905d-9c2836fb148f'::uuid) AND (city_id IS NULL))))
 );
 
 
@@ -639,11 +639,11 @@ CREATE TABLE public.toilet_definitions (
 ALTER TABLE public.toilet_definitions OWNER TO postgres;
 
 --
--- Name: areas areas_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: cities cities_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.areas
-    ADD CONSTRAINT areas_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.cities
+    ADD CONSTRAINT cities_pkey PRIMARY KEY (id);
 
 
 --
@@ -1021,11 +1021,11 @@ CREATE TRIGGER update_store_images_updated_at BEFORE UPDATE ON public.store_imag
 
 
 --
--- Name: areas areas_prefecture_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: cities cities_prefecture_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.areas
-    ADD CONSTRAINT areas_prefecture_id_fkey FOREIGN KEY (prefecture_id) REFERENCES public.prefectures(id) ON DELETE CASCADE;
+ALTER TABLE ONLY public.cities
+    ADD CONSTRAINT cities_prefecture_id_fkey FOREIGN KEY (prefecture_id) REFERENCES public.prefectures(id) ON DELETE CASCADE;
 
 
 --
@@ -1213,11 +1213,11 @@ ALTER TABLE ONLY public.store_toilet
 
 
 --
--- Name: stores stores_area_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: stores stores_city_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.stores
-    ADD CONSTRAINT stores_area_id_fkey FOREIGN KEY (area_id) REFERENCES public.areas(id);
+    ADD CONSTRAINT stores_city_id_fkey FOREIGN KEY (city_id) REFERENCES public.cities(id);
 
 
 --
@@ -1308,12 +1308,12 @@ GRANT ALL ON FUNCTION public.update_timestamp() TO service_role;
 
 
 --
--- Name: TABLE areas; Type: ACL; Schema: public; Owner: postgres
+-- Name: TABLE cities; Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT ALL ON TABLE public.areas TO anon;
-GRANT ALL ON TABLE public.areas TO authenticated;
-GRANT ALL ON TABLE public.areas TO service_role;
+GRANT ALL ON TABLE public.cities TO anon;
+GRANT ALL ON TABLE public.cities TO authenticated;
+GRANT ALL ON TABLE public.cities TO service_role;
 
 
 --

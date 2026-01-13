@@ -24,8 +24,8 @@ export type HomeStore = {
   prefecture_id: string | null;
   prefecture_label: string | null;
 
-  area_id: string | null;
-  area_label: string | null;
+  city_id: string | null;
+  city_label: string | null;
 
   store_type_id: string | null;
   type_label: string | null;
@@ -97,8 +97,8 @@ export type HomeStoreLite = {
   prefecture_id: string | null;
   prefecture_label: string | null;
 
-  area_id: string | null;
-  area_label: string | null;
+  city_id: string | null;
+  city_label: string | null;
 
   store_type_id: string | null;
   type_label: string | null;
@@ -115,8 +115,8 @@ export type SearchStore = {
   prefecture_id: string | null;
   prefecture_label: string | null;
 
-  area_id: string | null;
-  area_label: string | null;
+  city_id: string | null;
+  city_label: string | null;
 
   store_type_id: string | null;
   type_label: string | null;
