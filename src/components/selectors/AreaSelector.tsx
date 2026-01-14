@@ -34,6 +34,54 @@ function OptionRow({ label, selected, onClick }: OptionRowProps) {
   );
 }
 
+type SelectorProps = {
+  label: string;
+  selected: boolean;
+  menuId: string;
+  open: boolean;
+  onClick: () => void;
+  disabled?: boolean;
+  outerUnselected: string;
+  outerSelected: string;
+  innerUnselected: string;
+  innerSelected: string;
+};
+
+function Selector({
+  label,
+  selected,
+  menuId,
+  open,
+  onClick,
+  disabled,
+  outerUnselected,
+  outerSelected,
+  innerUnselected,
+  innerSelected,
+}: SelectorProps) {
+  return (
+    <button
+      type="button"
+      aria-expanded={open}
+      aria-controls={menuId}
+      onClick={onClick}
+      disabled={disabled}
+      className="h-12 w-full p-1"
+    >
+      <div
+        className={`h-full overflow-hidden rounded-full p-px ${selected ? outerSelected : outerUnselected}`}
+      >
+        <div
+          className={`flex h-full items-center gap-2 rounded-full px-4 ${selected ? innerSelected : innerUnselected}`}
+        >
+          <span className="w-full truncate text-start">{label}</span>
+          <ChevronsUpDown className="h-4 w-4" strokeWidth={1.2} />
+        </div>
+      </div>
+    </button>
+  );
+}
+
 export default function AreaSelector({ clearKey, onChange }: Props) {
   const [prefectures, setPrefectures] = useState<Prefecture[]>([]);
   const [cities, setCities] = useState<City[]>([]);
@@ -162,25 +210,14 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
 
       {/* 都道府県セレクター */}
       <div className="relative flex-1">
-        <button
-          aria-expanded={openPref}
-          aria-controls={MENU_ID.pref}
+        <Selector
+          label={selectedPrefecture?.name_ja ?? '都道府県'}
+          selected={selectedPrefecture !== null}
+          menuId={MENU_ID.pref}
+          open={openPref}
           onClick={() => setOpenMenu((current) => (current === 'pref' ? null : 'pref'))}
-          className="h-12 w-full p-1"
-        >
-          <div
-            className={`h-full overflow-hidden rounded-full p-px ${selectedPrefecture ? outerSelected : outerUnselected}`}
-          >
-            <div
-              className={`flex h-full items-center gap-2 rounded-full px-4 ${selectedPrefecture ? innerSelected : innerUnselected}`}
-            >
-              <span className="w-full truncate text-start">
-                {selectedPrefecture?.name_ja ?? '都道府県'}
-              </span>
-              <ChevronsUpDown className="h-4 w-4" strokeWidth={1.2} />
-            </div>
-          </div>
-        </button>
+          {...{ outerUnselected, outerSelected, innerUnselected, innerSelected }}
+        />
 
         {/* 都道府県メニュー */}
         {openPref && (
@@ -192,7 +229,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
           >
             <OptionRow
               label="都道府県を選択"
-              selected={selectPrefecture === null}
+              selected={selectedPrefecture === null}
               onClick={clearPrefecture}
             />
 
@@ -217,27 +254,15 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
         className={`relative flex-1 ${isTokyo ? 'visible' : 'invisible'}`}
         aria-hidden={!isTokyo}
       >
-        <button
-          aria-expanded={openCity}
-          aria-controls={MENU_ID.city}
-          onClick={() => {
-            if (!isTokyo) return;
-            setOpenMenu((current) => (current === 'city' ? null : 'city'));
-          }}
-          className="h-12 w-full p-1"
+        <Selector
+          label={selectedCity?.name ?? '市区町村'}
+          selected={selectedCity !== null}
+          menuId={MENU_ID.city}
+          open={openCity}
           disabled={!isTokyo}
-        >
-          <div
-            className={`h-full overflow-hidden rounded-full p-px ${selectedCity ? outerSelected : outerUnselected}`}
-          >
-            <div
-              className={`flex h-full items-center gap-2 rounded-full px-4 ${selectedCity ? innerSelected : innerUnselected}`}
-            >
-              <span className="w-full truncate text-start">{selectedCity?.name ?? '市区町村'}</span>
-              <ChevronsUpDown className="h-4 w-4" strokeWidth={1.2} />
-            </div>
-          </div>
-        </button>
+          onClick={() => setOpenMenu((current) => (current === 'city' ? null : 'city'))}
+          {...{ outerUnselected, outerSelected, innerUnselected, innerSelected }}
+        />
 
         {/* 市区町村メニュー */}
         {openCity && (
@@ -247,7 +272,11 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
             aria-label="市区町村"
             className="text-gray-4 border-gray-1 absolute top-12 left-0 z-20 h-100 w-full overflow-y-auto rounded-2xl border bg-white/40 p-2 shadow-lg backdrop-blur-lg"
           >
-            <OptionRow label="市区町村を選択" selected={selectCity === null} onClick={clearCity} />
+            <OptionRow
+              label="市区町村を選択"
+              selected={selectedCity === null}
+              onClick={clearCity}
+            />
 
             {wards.length > 0 && (
               <>
