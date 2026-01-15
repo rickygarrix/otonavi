@@ -10,7 +10,7 @@ type Props = {
   sectionRefs: React.MutableRefObject<Record<string, HTMLElement | null>>;
 
   setPrefectureIds: (v: string[]) => void;
-  setAreaIds: (v: string[]) => void;
+  setCityIds: (v: string[]) => void;
 
   setCustomerKeys?: (v: string[]) => void;
   setAtmosphereKeys?: (v: string[]) => void;
@@ -33,7 +33,7 @@ type Props = {
 type FilterConfig =
   | {
       key: string;
-      type: 'area';
+      type: 'city';
     }
   | {
       key: string;
@@ -54,7 +54,7 @@ export default function HomeFilterSections(props: Props) {
     sectionRefs,
 
     setPrefectureIds,
-    setAreaIds,
+    setCityIds,
 
     setCustomerKeys,
     setAtmosphereKeys,
@@ -70,16 +70,16 @@ export default function HomeFilterSections(props: Props) {
     setOtherKeys,
   } = props;
 
-  const handleAreaChange = useCallback(
-    (prefIds: string[], areaIds: string[]) => {
+  const handleCityChange = useCallback(
+    (prefIds: string[], cityIds: string[]) => {
       setPrefectureIds(prefIds);
-      setAreaIds(areaIds);
+      setCityIds(cityIds);
     },
-    [setPrefectureIds, setAreaIds],
+    [setPrefectureIds, setCityIds],
   );
 
   const FILTERS: FilterConfig[] = [
-    { key: 'エリア', type: 'area' },
+    { key: 'エリア', type: 'city' },
 
     {
       key: '客層',
@@ -165,12 +165,12 @@ export default function HomeFilterSections(props: Props) {
           }}
           className="flex flex-col gap-4 p-4"
         >
-          {filter.type === 'area' && (
+          {filter.type === 'city' && (
             <>
               <h3 className="text-md text-dark-5 leading-[1.5] font-bold tracking-widest">
                 エリア
               </h3>
-              <AreaSelector clearKey={clearKey} onChange={handleAreaChange} />
+              <AreaSelector clearKey={clearKey} onChange={handleCityChange} />
             </>
           )}
 

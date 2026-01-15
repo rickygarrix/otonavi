@@ -14,7 +14,7 @@ export default function StoreBasicInfo({ store }: Props) {
     >
       <div className="text-dark-2 flex justify-center gap-1 text-xs">
         <span>{store.prefecture_label}</span>
-        <span>{store.area_label}</span>
+        <span>{store.city_label}</span>
         <span>・</span>
         <span>{store.type_label}</span>
       </div>
