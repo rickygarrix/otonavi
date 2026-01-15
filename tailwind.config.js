@@ -28,8 +28,15 @@ module.exports = {
       },
 
       animation: {
-        'spin-slow': 'spin 1.2s linear infinite',
-        'pulse-soft': 'pulse 1.6s ease-in-out infinite',
+        'spin-slow': 'spin 1.6s linear infinite',
+        wave: 'wave 1.6s ease-in-out infinite',
+      },
+
+      keyframes: {
+        wave: {
+          '0%, 100%': { transform: 'translateY(0)', opacity: '0.6' },
+          '50%': { transform: 'translateY(-4px)', opacity: '1' },
+        },
       },
     },
   },

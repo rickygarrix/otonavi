@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import HomeButton from '@/components/ui/HomeButton';
+
+import { Check, Eraser, Send } from 'lucide-react';
+
+import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
 
 type ContactForm = {
@@ -29,114 +32,161 @@ export default function ContactConfirmPage() {
   const submit = async () => {
     if (!form || !agreed || sending) return;
 
+    setSending(true);
     try {
-      setSending(true);
-
-      await fetch('/api/contact', {
+      const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
 
-      // ★ 完了時にクリア（重要）
-      sessionStorage.removeItem('contactForm');
+      if (!res.ok) {
+        // 必要なら res.json() してメッセージ表示
+        throw new Error('送信に失敗しました');
+      }
+
+      sessionStorage.setItem('contactFormSubmitted', JSON.stringify(form));
+      sessionStorage.removeItem('contactForm'); // 入力用は消す
 
       router.push('/contact/complete');
-    } finally {
+    } catch (e) {
       setSending(false);
+      alert('送信に失敗しました。時間をおいて再度お試しください。');
     }
   };
 
   if (!form) return null;
 
-  return (
-    <div className="bg-Brand-Light-2 min-h-screen">
-      <div className="fixed top-0 left-0 z-100 flex w-full justify-center">
-        <header className="m-auto flex h-20 w-full max-w-105 items-center gap-4 px-4">
-          <HomeButton />
-        </header>
-      </div>
+  const styles = {
+    step: 'flex items-center justify-center w-16 h-16 z-10',
+    wrapper: 'flex flex-col gap-2',
+    label: 'flex gap-1 text-sm',
+    inputDisabled:
+      'px-4 py-3 bg-dark-5/10 rounded-3xl outline outline-1 outline-offset-[-1px] text-dark-5/50 outline-dark-5/10 text-md',
+    textareaDisabled:
+      'min-h-40 px-4 py-3 bg-dark-5/10 rounded-3xl outline outline-1 outline-offset-[-1px] outline-dark-5/10 text-dark-5/50 text-md',
+  };
 
-      {/* 固定ヘッダー */}
-      <div className="fixed top-0 right-0 left-0 z-50 flex h-20 items-center gap-4 bg-white/70 px-4 backdrop-blur">
-        <HomeButton onHome={() => router.push('/')} />
-        <div className="flex items-center gap-3">
-          <div className="h-3 w-3 rounded-full bg-slate-300" />
-          <div className="h-[2px] w-16 bg-slate-200" />
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+  return (
+    <div className="bg-light-1 text-dark-5 -mt-20">
+      <Header />
+
+      {/* ===== Stepper ===== */}
+      <div className="relative flex h-20 items-center justify-between pr-4 pl-24">
+        <div className={styles.step}>
+          <div className="bg-light-5 h-4 w-4 rounded-full" />
+        </div>
+        <div className={styles.step}>
+          <div className="outline-blue-2 bg-blue-4 text-light-1 flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold outline-4">
             確認
           </div>
-          <div className="h-[2px] w-16 bg-blue-400" />
-          <div className="h-3 w-3 rounded-full bg-slate-300" />
         </div>
+        <div className={styles.step}>
+          <div className="bg-light-5 h-4 w-4 rounded-full" />
+        </div>
+        <div className="via-blue-3 from-light-5 to-light-5 absolute right-12 left-32 h-[2px] bg-gradient-to-r" />
       </div>
-
-      <div className="h-20" />
 
       {/* 本文 */}
-      <div className="flex flex-col gap-6 px-6 py-10">
-        <h1 className="text-Brand-Dark-1 text-xl font-bold tracking-widest">
-          お問い合わせ内容の確認
-        </h1>
+      <main>
+        {/* Intro */}
+        <section className="flex flex-col gap-6 px-6 py-10">
+          <h1 className="text-xl leading-[1.5] font-bold tracking-widest">
+            お問い合わせ内容の確認
+          </h1>
 
-        <p className="text-Brand-Dark-1 text-sm">入力した内容に間違いがないかご確認ください。</p>
+          <p className="text-justify text-sm leading-[1.8]">
+            入力した内容に間違いがないかご確認ください。
+          </p>
+        </section>
 
-        {/* 名前 */}
-        <div>
-          <label className="text-sm">お名前 *</label>
-          <div className="flex h-12 items-center rounded-3xl bg-slate-200 px-4">{form.name}</div>
-        </div>
+        {/* Form */}
+        <form className="bg-light-2 flex flex-col gap-4 px-6 pt-10 pb-20">
+          {/* お名前 */}
+          <div className={styles.wrapper}>
+            <div className={styles.label}>
+              <span>お名前</span>
+              <span className="text-red-4" aria-hidden>
+                *
+              </span>
+              <span className="sr-only">必須</span>
+            </div>
 
-        {/* メール */}
-        <div>
-          <label className="text-sm">メールアドレス *</label>
-          <div className="flex h-12 items-center rounded-3xl bg-slate-200 px-4">{form.email}</div>
-        </div>
-
-        {/* 内容 */}
-        <div>
-          <label className="text-sm">お問い合わせ内容 *</label>
-          <div className="min-h-[160px] rounded-2xl bg-slate-200 px-4 py-3 whitespace-pre-wrap">
-            {form.message}
+            <div className={styles.inputDisabled}>{form.name}</div>
           </div>
-        </div>
 
-        {/* 同意 */}
-        <label className="flex items-center gap-3 rounded-xl bg-white px-4 py-3 text-sm outline outline-1 outline-slate-300">
-          <input
-            type="checkbox"
-            checked={agreed}
-            onChange={(e) => setAgreed(e.target.checked)}
-            className="h-5 w-5"
-          />
-          <span>
-            <a href="/privacy" className="text-blue-600 underline">
-              プライバシーポリシー
-            </a>
-            に同意します。
-          </span>
-        </label>
+          {/* メールアドレス */}
+          <div className={styles.wrapper}>
+            <div className={styles.label}>
+              <span>メールアドレス</span>
+              <span className="text-red-4" aria-hidden>
+                *
+              </span>
+              <span className="sr-only">必須</span>
+            </div>
 
-        {/* ボタン */}
-        <div className="grid grid-cols-2 gap-4 pt-4">
-          <button
-            onClick={() => router.back()}
-            className="h-12 rounded-xl bg-white text-sm outline outline-1 outline-slate-300"
-          >
-            書き直す ✎
-          </button>
+            <div className={styles.inputDisabled}>{form.email}</div>
+          </div>
 
-          <button
-            disabled={!agreed || sending}
-            onClick={submit}
-            className={`h-12 rounded-xl bg-white text-sm outline outline-1 outline-slate-300 ${
-              !agreed || sending ? 'opacity-40' : ''
-            }`}
-          >
-            {sending ? '送信中…' : '送信 ✈'}
-          </button>
-        </div>
-      </div>
+          {/* お問い合わせ内容 */}
+          <div className={styles.wrapper}>
+            <div className={styles.label}>
+              <span>お問い合わせ内容</span>
+              <span className="text-red-4" aria-hidden>
+                *
+              </span>
+              <span className="sr-only">必須</span>
+            </div>
+
+            <div className={styles.textareaDisabled}>{form.message}</div>
+          </div>
+
+          {/* プライバシーポリシー */}
+          <label className="outline-light-5 flex items-center gap-4 rounded-lg p-4 text-sm outline outline-1">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              className="peer sr-only"
+            />
+
+            <span className="border-dark-1 peer-checked:border-blue-5 peer-checked:bg-blue-4 flex h-5 w-5 items-center justify-center rounded-sm border bg-white transition">
+              <Check className="h-4 w-4 text-white" strokeWidth={3.0} />
+            </span>
+
+            <span>
+              <a href="/privacy" className="text-blue-4 underline">
+                プライバシーポリシー
+              </a>
+              に同意します。
+            </span>
+          </label>
+
+          {/* ボタン */}
+          <div className="mt-4 flex gap-4">
+            <button
+              onClick={() => router.back()}
+              className="from-light-2 to-light-1 border-light-4 text-dark-4 active:shadow-dark-1/20 flex h-12 flex-1 items-center justify-center gap-2 rounded-lg border bg-linear-to-t text-sm transition active:scale-102 active:shadow-sm"
+            >
+              書き直す
+              <Eraser className="h-4 w-4" strokeWidth={1.2} />
+            </button>
+
+            <button
+              disabled={!agreed || sending}
+              onClick={submit}
+              className={`from-dark-3 border-dark-4 to-dark-2 text-light-1 shadow-dark-3/50 flex h-12 flex-1 items-center justify-center gap-2 rounded-lg border bg-linear-to-t text-sm shadow-xs transition ${
+                !agreed || sending
+                  ? 'cursor-not-allowed opacity-40 backdrop-blur-lg'
+                  : 'active:scale-102 active:shadow-md'
+              }`}
+            >
+              {sending ? '送信中…' : '送信'}
+              <Send className="h-4 w-4" strokeWidth={1.2} />
+            </button>
+          </div>
+        </form>
+      </main>
 
       <Footer />
     </div>

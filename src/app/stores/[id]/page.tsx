@@ -6,7 +6,8 @@ import { supabase } from '@/lib/supabase';
 import { normalizeStoreDetail } from '@/lib/normalize/normalizeStoreDetail';
 import type { HomeStore } from '@/types/store';
 import StoreDetailView from '@/components/store/StoreDetailView';
-import HomeButton from '@/components/ui/HomeButton';
+
+import Header from '@/components/ui/Header';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
 export default function StoreDetailPage() {
@@ -47,7 +48,7 @@ export default function StoreDetailPage() {
           store_payment_methods(payment_method_definitions(*)),
           store_awards(*),
           store_media_mentions(*)
-        `
+        `,
         )
         .eq('id', storeId)
         .single();
@@ -69,30 +70,19 @@ export default function StoreDetailPage() {
 
   if (!dataLoading && !store) {
     return (
-      <div className="p-10 text-center text-sm text-gray-500">
-        店舗情報の読み込みに失敗しました
-      </div>
+      <div className="p-10 text-center text-sm text-gray-500">店舗情報の読み込みに失敗しました</div>
     );
   }
 
   return (
     <div className="relative -mt-20 bg-white">
-
       {(dataLoading || !imageLoaded) && <LoadingOverlay />}
 
       {store && (
         <>
-          <header className="sticky top-0 z-100 flex h-20 w-full items-center gap-4 px-4">
-            <HomeButton />
-            <span className="text-dark-5 truncate text-xs font-bold">
-              {store.name}
-            </span>
-          </header>
+          <Header variant="title" title={store.name} />
 
-          <StoreDetailView
-            store={store}
-            onMainImageLoaded={() => setImageLoaded(true)}
-          />
+          <StoreDetailView store={store} onMainImageLoaded={() => setImageLoaded(true)} />
         </>
       )}
     </div>

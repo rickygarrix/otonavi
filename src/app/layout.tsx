@@ -13,8 +13,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'オトナビ',
-  description: '音箱・クラブ・バーを探す大人のための音楽スポット検索',
+  title: 'オトナビ｜音箱検索サイト',
+  description:
+    '夜の音楽体験をもっと身近にする音箱検索サイト。エリアやこだわり条件で絞って、お気に入りのクラブ・バー・ライブハウスを探せます。',
+  icons: {
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export default function RootLayout({
@@ -23,11 +27,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja">
+    <html lang="ja" className="bg-dark-5 flex items-start justify-center">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} flex items-start justify-center bg-[url(/background-pc.png)] bg-cover bg-fixed antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} bg-light-1 text-dark-5 mx-auto w-full max-w-105 antialiased`}
       >
-        <div className="sp-frame bg-light-1 mx-auto w-full max-w-105">{children}</div>
+        {children}
       </body>
     </html>
   );

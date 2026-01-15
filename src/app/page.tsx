@@ -12,11 +12,7 @@ import Footer from '@/components/ui/Footer';
 import HomeFilterSections from '@/components/home/HomeFilterSections';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
-import {
-  useHomeStoreCards,
-  useHomeMasters,
-  useHomeFilterState,
-} from '@/hooks/home';
+import { useHomeStoreCards, useHomeMasters, useHomeFilterState } from '@/hooks/home';
 import { useStoresForSearch, useStoreFilters } from '@/hooks/store';
 
 import { fetchStoresForSearch } from '@/lib/fetchStores';
@@ -36,20 +32,11 @@ export default function HomePage() {
   const masters = useHomeMasters();
 
   const storeTypes = useMemo<GenericMaster[]>(() => {
-    return Array.from(masters.genericMasters.values()).filter(
-      (m) => m.table === 'store_types'
-    );
+    return Array.from(masters.genericMasters.values()).filter((m) => m.table === 'store_types');
   }, [masters.genericMasters]);
 
   const filter = useHomeFilterState(masters.externalLabelMap, { storeTypeId });
-  const {
-    selectedKeys,
-    selectedLabels,
-    handleClear,
-    prefectureIds,
-    areaIds,
-    ...setters
-  } = filter;
+  const { selectedKeys, selectedLabels, handleClear, prefectureIds, areaIds, ...setters } = filter;
 
   const { stores: searchStores } = useStoresForSearch();
   const { filteredStores } = useStoreFilters(searchStores, {
@@ -57,11 +44,7 @@ export default function HomePage() {
     storeTypeId,
   });
 
-  const {
-    setStores,
-    setLoading: setPrefetchLoading,
-    loading: prefetchLoading,
-  } = useSearchStore();
+  const { setStores, setLoading: setPrefetchLoading, loading: prefetchLoading } = useSearchStore();
 
   const handleClearAll = () => {
     handleClear();
@@ -76,7 +59,7 @@ export default function HomePage() {
     selectedKeys.forEach((k) => params.append('filters', k));
 
     const apiFilters = selectedKeys.filter(
-      (k) => !prefectureIds.includes(k) && !areaIds.includes(k)
+      (k) => !prefectureIds.includes(k) && !areaIds.includes(k),
     );
 
     setPrefetchLoading(true);
@@ -116,9 +99,7 @@ export default function HomePage() {
       {prefetchLoading && <LoadingOverlay />}
 
       <div className="text-light-3 relative flex h-146 flex-col items-center gap-10 overflow-hidden bg-[url('/background-sp@2x.png')] bg-cover bg-center px-4 pt-20">
-        <p className="text-[10px] tracking-widest">
-          夜の音楽をもっと楽しむための音箱ナビ
-        </p>
+        <p className="text-[10px] tracking-widest">夜の音楽をもっと楽しむための音箱ナビ</p>
 
         <Image
           src="/logo-white.svg"
