@@ -49,7 +49,7 @@ export default function ContactConfirmPage() {
       sessionStorage.removeItem('contactForm'); // 入力用は消す
 
       router.push('/contact/complete');
-    } catch (e) {
+    } catch  {
       setSending(false);
       alert('送信に失敗しました。時間をおいて再度お試しください。');
     }

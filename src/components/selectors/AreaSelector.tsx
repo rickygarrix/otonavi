@@ -95,6 +95,13 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
   const openCity = openMenu === 'city';
   const isAnyOpen = openMenu !== null;
 
+
+  useEffect(() => {
+    setSelectedPrefecture(null);
+    setSelectedCity(null);
+    setOpenMenu(null);
+  }, [clearKey]);
+
   // ============================
   // 都道府県（display_order）
   // ============================

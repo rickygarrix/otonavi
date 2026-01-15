@@ -15,8 +15,6 @@ type HeaderProps =
     };
 
 export default function Header(props: HeaderProps) {
-  const variant = props.variant ?? 'simple';
-
   return (
     <header className="sticky inset-x-0 top-0 z-200 flex h-20 items-center gap-4 px-4">
       <HomeButton />

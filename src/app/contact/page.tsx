@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 
 import Header from '@/components/ui/Header';
-import HomeButton from '@/components/ui/HomeButton';
 import Footer from '@/components/ui/Footer';
 
 type ContactForm = {
