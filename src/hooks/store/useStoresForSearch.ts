@@ -29,7 +29,6 @@ export function useStoresForSearch(options?: Options) {
 
       const { data, error } = await supabase
         .from('stores')
-        .eq('is_active', true)
         .select(
           `
           *,
@@ -54,6 +53,7 @@ export function useStoresForSearch(options?: Options) {
           store_images ( image_url, order_num )
         `,
         )
+        .eq('is_active', true)
         .order('updated_at', { ascending: false });
 
       if (!mounted) return;

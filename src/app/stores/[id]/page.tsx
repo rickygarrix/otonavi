@@ -27,7 +27,6 @@ export default function StoreDetailPage() {
 
       const { data, error } = await supabase
         .from('stores')
-        .eq('is_active', true)
         .select(
           `
           *,
@@ -51,6 +50,7 @@ export default function StoreDetailPage() {
           store_media_mentions(*)
         `,
         )
+        .eq('is_active', true)
         .eq('id', storeId)
         .single();
 

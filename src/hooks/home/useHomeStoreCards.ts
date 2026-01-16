@@ -19,7 +19,6 @@ export function useHomeStoreCards(limit = 12) {
 
       const { data, error } = await supabase
         .from('stores')
-        .eq('is_active', true)
         .select(
           `
           id,
@@ -36,6 +35,7 @@ export function useHomeStoreCards(limit = 12) {
           )
         `,
         )
+        .eq('is_active', true)
         .returns<StoreRow[]>()
         .order('updated_at', { ascending: false })
         .limit(limit);
