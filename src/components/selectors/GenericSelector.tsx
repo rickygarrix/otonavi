@@ -50,14 +50,9 @@ export default function GenericSelector({
 
   // ===== Tooltip =====
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
-
-  // タイマー
   const pressTimer = useRef<number | null>(null);
   const hoverTimer = useRef<number | null>(null);
-
-  // 状態フラグ
-  const isTouchingRef = useRef(false);        // 直前がタッチ操作か
-  const didLongPressRef = useRef(false);     // 長押しが成立したか
+  const isTouchingRef = useRef(false);
 
   // description を持つテーブルだけ有効
   const enableDescription =
@@ -72,7 +67,7 @@ export default function GenericSelector({
         ? 'id, key, label, display_order, description'
         : 'id, key, label, display_order';
 
-      const { data, error } = await supabase
+        const { data, error } = await supabase
         .from(table)
         .select(selectColumns)
         .eq('is_active', true)
@@ -83,8 +78,12 @@ export default function GenericSelector({
         return;
       }
 
+      const rows = (data ?? []) as unknown as (GenericMaster & {
+        description?: string | null;
+      })[];
+
       setItems(
-        (data ?? []).map((d) => ({
+        rows.map((d) => ({
           ...d,
           table,
         })),
@@ -163,7 +162,7 @@ export default function GenericSelector({
   };
 
   // =========================
-  // 📱 Mobile: 長押しのみ表示
+  // 📱 Mobile: 0.5秒「長押し」した時だけ表示
   // =========================
   const onTouchStart = (
     e: React.TouchEvent,
@@ -172,46 +171,43 @@ export default function GenericSelector({
   ) => {
     if (!enableDescription || !description) return;
 
+    // タップ（クリック化）を止める
     e.preventDefault();
     isTouchingRef.current = true;
-    didLongPressRef.current = false;
 
     clearAllTimers();
 
     pressTimer.current = window.setTimeout(() => {
-      didLongPressRef.current = true; // ← 長押し成立
       showTooltipAtTargetTop(description, target);
-    }, 500);
+    }, 500); // ← 0.5秒長押し
   };
 
   const onTouchMove = () => {
-    // スクロールなど → 即キャンセル
+    // 指が動いたらキャンセル
     clearAllTimers();
     hideTooltip();
   };
 
   const onTouchEnd = () => {
+    // 指を離したら即非表示
     clearAllTimers();
     hideTooltip();
 
-    // 直後に mouse イベントが来るので、少しの間無視する
     setTimeout(() => {
       isTouchingRef.current = false;
-      didLongPressRef.current = false;
     }, 50);
   };
 
   // =========================
-  // 🖥 PC: 0.5秒ホバーで表示
+  // 🖥 PC: 0.5秒ホバーで表示（動いても消えない、離れたら消える）
   // =========================
   const onMouseEnter = (description: string | null | undefined, target: HTMLElement) => {
-    // ★ 直前がタッチ操作なら無視（タップ後の誤表示防止）
     if (isTouchingRef.current) return;
     if (!enableDescription || !description) return;
 
     clearAllTimers();
 
-   ReceiverQ: hoverTimer.current = window.setTimeout(() => {
+    hoverTimer.current = window.setTimeout(() => {
       showTooltipAtTargetTop(description, target);
     }, 500);
   };
@@ -260,11 +256,15 @@ export default function GenericSelector({
           }}
         >
           <div className="relative flex flex-col items-center">
+            {/* 吹き出し本体 */}
             <div className="max-w-[260px] rounded-full bg-dark-5 px-5 py-2 text-center text-white text-xs leading-4 shadow-lg">
               {tooltip.text}
             </div>
+
+            {/* ▼ しっぽ（三角） */}
             <div
-              className="w-0 h-0 border-l-[8px] border-r-[8px] border-t-[6px] border-l-transparent border-r-transparent border-t-dark-5"
+              className="w-0 h-0 border-l-[8px] border-r-[8px] border-t-[6px]
+                         border-l-transparent border-r-transparent border-t-dark-5"
               style={{ marginTop: '-1px' }}
             />
           </div>
