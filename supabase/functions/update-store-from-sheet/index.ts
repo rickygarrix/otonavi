@@ -1,157 +1,198 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+// ===============================
+// 🔗 Supabase Edge Function 設定
+// ===============================
+const SUPABASE_FUNCTION_URL =
+  "https://tphptguwscpmraqxwdoi.functions.supabase.co/update-store-from-sheet";
 
-serve(async (req) => {
-  try {
-    if (req.method !== "POST") {
-      return new Response("Method Not Allowed", { status: 405 });
-    }
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwaHB0Z3V3c2NwbXJhcXh3ZG9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwMTA4MjQsImV4cCI6MjA4MzU4NjgyNH0.0VRdZqZ-v2EpUEIznWr-aiLoIIYo_BomXqQEP1jHALw";
 
-    const body = await req.json();
-    const { action } = body;
+// ===============================
+// 📘 マスターシート読み込み
+// label(日本語) → id の Map を作る
+// ===============================
+function loadMasterMap(sheetName, labelCol, idCol) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+  if (!sheet) throw new Error(`マスターシートが見つかりません: ${sheetName}`);
 
-    const supabase = createClient(
-      Deno.env.get("PROJECT_URL")!,
-      Deno.env.get("SERVICE_ROLE_KEY")!
-    );
+  const values = sheet.getDataRange().getValues();
+  const headers = values[0];
 
-    // =======================
-    // ① stores: INSERT / UPDATE
-    // =======================
-    if (action === "upsert_store") {
-      const { id, google_place_id, ...fields } = body;
+  const labelIndex = headers.indexOf(labelCol);
+  const idIndex = headers.indexOf(idCol);
 
-      // ---------
-      // UPDATE
-      // ---------
-      if (id) {
-        const { data, error } = await supabase
-          .from("stores")
-          .update({ ...fields, google_place_id })
-          .eq("id", id)
-          .select("id")
-          .single();
-
-        if (error) throw error;
-
-        return new Response(JSON.stringify({ success: true, id: data.id }), {
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-
-      // ---------
-      // INSERT（新規）
-      // ただし google_place_id が既存なら拒否
-      // ---------
-      if (!google_place_id) {
-        return new Response("Missing google_place_id", { status: 400 });
-      }
-
-      const { data: existing, error: selectError } = await supabase
-        .from("stores")
-        .select("id")
-        .eq("google_place_id", google_place_id)
-        .maybeSingle();
-
-      if (selectError) throw selectError;
-
-      if (existing) {
-        return new Response(
-          JSON.stringify({
-            success: false,
-            reason: "DUPLICATE_PLACE_ID",
-            existing_id: existing.id,
-          }),
-          { headers: { "Content-Type": "application/json" } }
-        );
-      }
-
-      const { data: inserted, error: insertError } = await supabase
-        .from("stores")
-        .insert({ ...fields, google_place_id })
-        .select("id")
-        .single();
-
-      if (insertError) throw insertError;
-
-      return new Response(
-        JSON.stringify({ success: true, id: inserted.id }),
-        { headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    // =======================
-    // ② 中間テーブル 差分同期（共通）
-    // =======================
-    const RELATION_TABLES: Record<string, { table: string; storeKey: string; defKey: string }> = {
-      sync_store_customers: { table: "store_customers", storeKey: "store_id", defKey: "customer_id" },
-      sync_store_atmosphere: { table: "store_atmosphere", storeKey: "store_id", defKey: "atmosphere_id" },
-      sync_store_drinks: { table: "store_drinks", storeKey: "store_id", defKey: "drink_id" },
-      sync_store_payments: { table: "store_payments", storeKey: "store_id", defKey: "payment_method_id" },
-      sync_store_events: { table: "store_events", storeKey: "store_id", defKey: "event_trend_id" },
-      sync_store_baggage: { table: "store_baggage", storeKey: "store_id", defKey: "baggage_id" },
-      sync_store_smoking: { table: "store_smoking", storeKey: "store_id", defKey: "smoking_id" },
-      sync_store_toilets: { table: "store_toilets", storeKey: "store_id", defKey: "toilet_id" },
-      sync_store_environment: { table: "store_environment", storeKey: "store_id", defKey: "environment_id" },
-      sync_store_other: { table: "store_other", storeKey: "store_id", defKey: "other_id" },
-    };
-
-    if (RELATION_TABLES[action]) {
-      const { store_id, ids } = body;
-      const { table, storeKey, defKey } = RELATION_TABLES[action];
-
-      if (!store_id || !Array.isArray(ids)) {
-        return new Response("Missing store_id or ids", { status: 400 });
-      }
-
-      // 既存取得
-      const { data: existing, error: fetchError } = await supabase
-        .from(table)
-        .select(defKey)
-        .eq(storeKey, store_id);
-
-      if (fetchError) throw fetchError;
-
-      const existingIds = existing.map((r) => r[defKey]);
-
-      // 差分計算
-      const toInsert = ids.filter((id) => !existingIds.includes(id));
-      const toDelete = existingIds.filter((id) => !ids.includes(id));
-
-      // INSERT
-      if (toInsert.length > 0) {
-        const insertData = toInsert.map((id) => ({
-          [storeKey]: store_id,
-          [defKey]: id,
-        }));
-
-        const { error: insertError } = await supabase.from(table).insert(insertData);
-        if (insertError) throw insertError;
-      }
-
-      // DELETE
-      if (toDelete.length > 0) {
-        const { error: deleteError } = await supabase
-          .from(table)
-          .delete()
-          .eq(storeKey, store_id)
-          .in(defKey, toDelete);
-
-        if (deleteError) throw deleteError;
-      }
-
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response("Invalid action", { status: 400 });
-
-  } catch (err) {
-    console.error("Function error:", err);
-    return new Response(
-      JSON.stringify({ success: false, error: String(err) }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+  if (labelIndex === -1 || idIndex === -1) {
+    throw new Error(`${sheetName} のカラム名が正しくありません`);
   }
-});
+
+  const map = {};
+  for (let i = 1; i < values.length; i++) {
+    const label = values[i][labelIndex];
+    const id = values[i][idIndex];
+    if (label && id) {
+      map[label] = id;
+    }
+  }
+  return map;
+}
+
+// ===============================
+// 🔄 1行を Supabase に同期（UPSERT）
+// ・新規: id なし → INSERT
+// ・既存: id あり → UPDATE
+// ・成功時は { success, id } を返す想定
+// ===============================
+function syncRowToSupabase(row, masters) {
+  const payload = {
+    action: "upsert_store",
+
+    id: row["店舗ID"],
+
+    name: row["店名*"],
+    kana: row["読み方*"],
+    google_place_id: row["Google Place ID*"],
+
+    prefecture_id: masters.prefectures[row["都道府県*"]] || null,
+    municipality_id: masters.municipalities[row["市区町村*"]] || null,
+    area_id: masters.municipalities[row["エリア"]] || null,
+
+    postcode: row["郵便番号*"],
+    address: row["所在地*"],
+    access: row["アクセス*"],
+    description: row["説明"],
+    official_site_url: row["公式サイト"],
+    instagram_url: row["Instagram"],
+    x_url: row["X"],
+    facebook_url: row["Facebook"],
+    tiktok_url: row["TikTok"],
+    business_hours: row["営業時間"],
+
+    store_type_id: masters.venueTypes[row["店舗タイプ"]] || null,
+    size: masters.sizes[row["広さ"]] || null,
+    price_range_id: masters.priceRanges[row["価格帯"]] || null,
+
+    payment_method_other: row["その他の支払い方法"],
+  };
+
+  const options = {
+    method: "post",
+    contentType: "application/json",
+    headers: {
+      Authorization: "Bearer " + SUPABASE_ANON_KEY,
+    },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true,
+  };
+
+  const res = UrlFetchApp.fetch(SUPABASE_FUNCTION_URL, options);
+  const text = res.getContentText();
+  Logger.log(text);
+
+  try {
+    const json = JSON.parse(text);
+    return json; // { success: boolean, id?: string, reason?: string }
+  } catch (e) {
+    Logger.log("レスポンスの JSON 解析に失敗");
+    return { success: false, error: "INVALID_JSON" };
+  }
+}
+
+// ===============================
+// 🚀 本番用：詳細情報シートをすべて同期
+// ・新規: 「公開待ち」かつ 店舗ID空 かつ PlaceID重複なし → INSERT
+// ・既存: 店舗IDあり → UPDATE
+// ・新規成功後: 店舗ID書き戻し + ステータスを「公開済み」へ
+// ===============================
+function syncAllStores() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("詳細情報");
+  if (!sheet) throw new Error("「詳細情報」シートが見つかりません");
+
+  const values = sheet.getDataRange().getValues();
+  const headers = values[0];
+
+  // ヘッダ → 列番号
+  const colIndex = {};
+  headers.forEach((h, i) => (colIndex[h] = i));
+
+  // ===============================
+  // 📘 マスターは一度だけロード
+  // ===============================
+  const masters = {
+    prefectures: loadMasterMap("prefectures", "name_ja", "id"),
+    municipalities: loadMasterMap("municipalities", "name", "id"),
+    venueTypes: loadMasterMap("venue_types", "label", "id"),
+    sizes: loadMasterMap("sizes", "label", "id"),
+    priceRanges: loadMasterMap("price_ranges", "label", "id"),
+  };
+
+  // ===============================
+  // 🔁 Place ID の重複チェック用カウント
+  // ===============================
+  const placeIdCount = {};
+  for (let i = 1; i < values.length; i++) {
+    const placeId = values[i][colIndex["Google Place ID*"]];
+    if (placeId) {
+      placeIdCount[placeId] = (placeIdCount[placeId] || 0) + 1;
+    }
+  }
+
+  // ===============================
+  // 🔁 各行を処理
+  // ===============================
+  for (let i = 1; i < values.length; i++) {
+    const rowArr = values[i];
+    const row = {};
+    headers.forEach((h, j) => (row[h] = rowArr[j]));
+
+    const storeId = row["店舗ID"];
+    const placeId = row["Google Place ID*"];
+    const status = row["ステータス"];
+
+    // ===============================
+    // 🆕 新規登録対象
+    // ===============================
+    if (!storeId && status === "公開待ち") {
+      if (!placeId) {
+        Logger.log(`行 ${i + 1}: Place ID なし → スキップ`);
+        continue;
+      }
+
+      if (placeIdCount[placeId] > 1) {
+        Logger.log(`行 ${i + 1}: Place ID 重複 → スキップ`);
+        continue;
+      }
+
+      const result = syncRowToSupabase(row, masters);
+
+      if (result && result.success && result.id) {
+        // ① 店舗IDを書き戻す
+        sheet.getRange(i + 1, colIndex["店舗ID"] + 1).setValue(result.id);
+        // ② ステータスを「公開済み」に変更
+        sheet.getRange(i + 1, colIndex["ステータス"] + 1).setValue("公開済み");
+
+        Logger.log(`行 ${i + 1}: 新規登録完了 → ID: ${result.id}`);
+      } else {
+        Logger.log(`行 ${i + 1}: 新規登録失敗 → ${JSON.stringify(result)}`);
+      }
+
+      continue;
+    }
+
+    // ===============================
+    // ♻ 既存店舗の更新
+    // ===============================
+    if (storeId) {
+      const result = syncRowToSupabase(row, masters);
+      if (result && result.success) {
+        Logger.log(`行 ${i + 1}: 更新完了`);
+      } else {
+        Logger.log(`行 ${i + 1}: 更新失敗 → ${JSON.stringify(result)}`);
+      }
+      continue;
+    }
+
+    Logger.log(`行 ${i + 1}: 条件外 → スキップ`);
+  }
+
+  Logger.log("=== 同期完了 ===");
+}

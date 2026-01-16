@@ -74,7 +74,10 @@ export async function searchStores({
   prefectureId = null,
   cityIds = [],
 }: SearchParams): Promise<HomeStore[]> {
-  let query = supabase.from('stores').select(`*, store_types(*)`);
+  let query = supabase
+  .from('stores')
+  .select(`*, store_types(*)`)
+  .eq('is_active', true);
 
   // ① stores直カラム
   if (storeTypeId) query = query.eq('store_type_id', storeTypeId);

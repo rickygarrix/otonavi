@@ -27,6 +27,7 @@ export default function StoreDetailPage() {
 
       const { data, error } = await supabase
         .from('stores')
+        .eq('is_active', true)
         .select(
           `
           *,
