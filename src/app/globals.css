@@ -1,0 +1,98 @@
+@config '../../tailwind.config.js';
+@import 'tailwindcss';
+
+/* ================================
+   Tailwind theme bridge
+================================ */
+
+@theme inline {
+  /* font (Next.js recommended) */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ================================
+   Dark mode
+================================ */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+/* ================================
+   Body / Typography
+================================ */
+
+html::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url('/background-pc.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+
+body {
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  box-shadow:
+    0 0 80px 0 rgba(0, 0, 0, 0.1),
+    0 0 16px 0 rgba(0, 0, 0, 0.15);
+}
+
+/* ================================
+   Scrollbar（非表示）
+================================ */
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* ================================
+   Image / Media
+================================ */
+
+img,
+video {
+  object-fit: cover;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* ================================
+   Swiper（3D カルーセル）
+================================ */
+
+.swiper-wrapper {
+  padding-bottom: 20px;
+}
+
+.swiper-slide {
+  transition:
+    transform 0.35s ease,
+    opacity 0.35s ease;
+}
+
+.swiper-slide img {
+  border-radius: 1.5rem;
+}
+
+/* 中央スライド */
+.swiper-slide-active {
+  transform: scale(1.15);
+  z-index: 20;
+}
+
+/* 前後スライド */
+.swiper-slide-prev,
+.swiper-slide-next {
+  opacity: 0.8;
+  filter: blur(0.5px);
+}
