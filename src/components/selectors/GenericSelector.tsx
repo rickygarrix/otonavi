@@ -67,7 +67,7 @@ export default function GenericSelector({
         ? 'id, key, label, display_order, description'
         : 'id, key, label, display_order';
 
-        const { data, error } = await supabase
+      const { data, error } = await supabase
         .from(table)
         .select(selectColumns)
         .eq('is_active', true)
@@ -216,6 +216,22 @@ export default function GenericSelector({
     clearAllTimers();
     hideTooltip();
   };
+
+  // =========================
+  // 🖥 PC: スクロール時は Tooltip を閉じる
+  // =========================
+  useEffect(() => {
+    const handleScroll = () => {
+      clearAllTimers();
+      hideTooltip();
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   // =========================
   // UI

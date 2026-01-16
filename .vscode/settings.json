@@ -4,5 +4,8 @@
 
   "deno.enable": true,
   "deno.lint": true,
-  "deno.unstable": true
+  "deno.unstable": true,
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  }
 }
