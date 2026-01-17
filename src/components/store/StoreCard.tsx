@@ -20,31 +20,36 @@ export default function StoreCard({ store, query }: Props) {
     }
   };
 
+  /**
+   * ★ 最終防衛ライン
+   * Next/Image に「空文字・undefined」を絶対に渡さない
+   */
   const imageUrl =
-    store.image_url && store.image_url.trim() !== '' ? store.image_url : '/noshop.svg';
+    typeof store.image_url === 'string' && store.image_url.trim() !== ''
+      ? store.image_url
+      : '/noshop.svg';
 
   const locationLabel =
     store.prefecture_label === '東京都' && store.city_label
       ? `東京 ${store.city_label}`
-      : (store.prefecture_label ?? '');
+      : store.prefecture_label ?? '';
 
   return (
     <button
       onClick={handleClick}
-      className="active:bg-light-1 w-full rounded-3xl py-2 text-left transition active:scale-95"
+      className="w-full rounded-3xl py-2 text-left transition active:scale-95 active:bg-light-1"
     >
       {/* 画像 */}
       <div className="p-2">
         <div
-          className={`relative aspect-square overflow-hidden rounded-2xl ${
-            imageUrl === '/noshop.svg' ? 'shadow-none' : 'shadow-sm'
-          }`}
+          className={`relative aspect-square overflow-hidden rounded-2xl ${imageUrl === '/noshop.svg' ? 'shadow-none' : 'shadow-sm'
+            }`}
         >
           <Image
             src={imageUrl}
             alt={store.name}
             fill
-            priority // ★ ここが超重要
+            loading="lazy"
             sizes="(max-width: 420px) 50vw, 210px"
             className="object-cover"
           />
@@ -53,9 +58,11 @@ export default function StoreCard({ store, query }: Props) {
 
       {/* テキスト */}
       <div className="flex flex-col gap-1 px-4 py-1">
-        <p className="line-clamp-1 text-sm leading-[1.5] font-bold">{store.name}</p>
+        <p className="line-clamp-1 text-sm font-bold leading-[1.5]">
+          {store.name}
+        </p>
 
-        <div className="text-dark-4 line-clamp-1 text-xs leading-[1.5]">
+        <div className="line-clamp-1 text-xs leading-[1.5] text-dark-4">
           {locationLabel}
           {store.type_label && ` ・ ${store.type_label}`}
         </div>

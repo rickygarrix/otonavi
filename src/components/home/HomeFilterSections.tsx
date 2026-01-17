@@ -3,7 +3,6 @@
 import { useCallback } from 'react';
 import AreaSelector from '@/components/selectors/AreaSelector';
 import GenericSelector from '@/components/selectors/GenericSelector';
-import DrinkSelector from '@/components/selectors/DrinkSelector';
 
 type Props = {
   clearKey: number;
@@ -27,26 +26,21 @@ type Props = {
 };
 
 /* =========================
-   設定
+   Filter 定義
 ========================= */
 
 type FilterConfig =
   | {
-      key: string;
-      type: 'city';
-    }
+    key: string;
+    type: 'city';
+  }
   | {
-      key: string;
-      type: 'drink';
-      onChange?: (v: string[]) => void;
-    }
-  | {
-      key: string;
-      type: 'generic';
-      table: string;
-      columns: 2 | 3;
-      onChange?: (v: string[]) => void;
-    };
+    key: string;
+    type: 'generic' | 'drink';
+    table: string;
+    columns: 2 | 3;
+    onChange?: (v: string[]) => void;
+  };
 
 export default function HomeFilterSections(props: Props) {
   const {
@@ -70,6 +64,9 @@ export default function HomeFilterSections(props: Props) {
     setOtherKeys,
   } = props;
 
+  // =========================
+  // エリア変更
+  // =========================
   const handleCityChange = useCallback(
     (prefIds: string[], cityIds: string[]) => {
       setPrefectureIds(prefIds);
@@ -78,6 +75,9 @@ export default function HomeFilterSections(props: Props) {
     [setPrefectureIds, setCityIds],
   );
 
+  // =========================
+  // フィルター定義
+  // =========================
   const FILTERS: FilterConfig[] = [
     { key: 'エリア', type: 'city' },
 
@@ -95,8 +95,20 @@ export default function HomeFilterSections(props: Props) {
       columns: 3,
       onChange: setAtmosphereKeys,
     },
-    { key: '広さ', type: 'generic', table: 'size_definitions', columns: 3, onChange: setSizeKey },
-    { key: 'ドリンク', type: 'drink', onChange: setDrinkKeys },
+    {
+      key: '広さ',
+      type: 'generic',
+      table: 'size_definitions',
+      columns: 3,
+      onChange: setSizeKey,
+    },
+    {
+      key: 'ドリンク',
+      type: 'drink',
+      table: 'drink_definitions',
+      columns: 3, // ※ 実際の列数は variant 側で制御
+      onChange: setDrinkKeys,
+    },
     {
       key: '価格帯',
       type: 'generic',
@@ -155,6 +167,9 @@ export default function HomeFilterSections(props: Props) {
     },
   ];
 
+  // =========================
+  // UI
+  // =========================
   return (
     <div className="pb-10">
       {FILTERS.map((filter) => (
@@ -165,29 +180,29 @@ export default function HomeFilterSections(props: Props) {
           }}
           className="flex flex-col gap-4 p-4"
         >
+          {/* エリア */}
           {filter.type === 'city' && (
             <>
-              <h3 className="text-md text-dark-5 leading-[1.5] font-bold tracking-widest">
+              <h3 className="text-md font-bold tracking-widest text-dark-5">
                 エリア
               </h3>
               <AreaSelector clearKey={clearKey} onChange={handleCityChange} />
             </>
           )}
 
-          {filter.type === 'drink' && filter.onChange && (
-            <DrinkSelector title={filter.key} clearKey={clearKey} onChange={filter.onChange} />
-          )}
-
-          {filter.type === 'generic' && filter.onChange && (
-            <GenericSelector
-              title={filter.key}
-              table={filter.table}
-              selection="multi"
-              columns={filter.columns}
-              clearKey={clearKey}
-              onChange={filter.onChange}
-            />
-          )}
+          {/* Generic / Drink（統合） */}
+          {(filter.type === 'generic' || filter.type === 'drink') &&
+            filter.onChange && (
+              <GenericSelector
+                title={filter.key}
+                table={filter.table}
+                selection="multi"
+                columns={filter.columns}
+                clearKey={clearKey}
+                variant={filter.type === 'drink' ? 'drink' : 'default'}
+                onChange={filter.onChange}
+              />
+            )}
         </section>
       ))}
     </div>

@@ -6,22 +6,11 @@ import { supabase } from '@/lib/supabase';
 import type { SearchStore } from '@/types/store';
 import { normalizeSearchStore } from '@/lib/normalize/normalizeSearchStore';
 
-type Options = {
-  enabled?: boolean;
-};
-
-export function useStoresForSearch(options?: Options) {
-  const enabled = options?.enabled ?? true;
-
+export function useStoresForSearch() {
   const [stores, setStores] = useState<SearchStore[]>([]);
-  const [loading, setLoading] = useState(enabled);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!enabled) {
-      setLoading(false);
-      return;
-    }
-
     let mounted = true;
 
     const load = async () => {
@@ -49,9 +38,11 @@ export function useStoresForSearch(options?: Options) {
           store_other ( other_definitions ( key, label ) ),
           store_event_trends ( event_trend_definitions ( key, label ) ),
           store_payment_methods ( payment_method_definitions ( key, label ) ),
-
-          store_images ( image_url, order_num )
-        `,
+          store_images:store_images!store_images_store_id_fkey (
+            image_url,
+            order_num
+          )
+        `
         )
         .eq('is_active', true)
         .order('updated_at', { ascending: false });
@@ -59,6 +50,7 @@ export function useStoresForSearch(options?: Options) {
       if (!mounted) return;
 
       if (error || !data) {
+        console.error('useStoresForSearch error:', error);
         setStores([]);
         setLoading(false);
         return;
@@ -69,10 +61,11 @@ export function useStoresForSearch(options?: Options) {
     };
 
     load();
+
     return () => {
       mounted = false;
     };
-  }, [enabled]);
+  }, []);
 
   return {
     stores,

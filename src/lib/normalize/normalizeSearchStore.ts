@@ -10,6 +10,9 @@ type DefinitionRef = {
 
 type M2MRow = Record<string, DefinitionRef | undefined>;
 
+/**
+ * M2M テーブルから key 配列を抽出
+ */
 function extractKeys(list: unknown, defKey: string): string[] {
   if (!Array.isArray(list)) return [];
 
@@ -18,14 +21,31 @@ function extractKeys(list: unknown, defKey: string): string[] {
     .filter((k): k is string => typeof k === 'string');
 }
 
+/**
+ * サムネイル画像を安全に1枚選択
+ * - order_num が最小のものを採用
+ * - null / undefined / 空文字 / 空白文字 はすべて fallback
+ */
 function selectImage(store_images: StoreRow['store_images']): string {
-  if (!store_images?.length) return '/noshop.svg';
+  if (!store_images || store_images.length === 0) {
+    return '/noshop.svg';
+  }
 
-  const sorted = [...store_images].sort((a, b) => (a.order_num ?? 999) - (b.order_num ?? 999));
+  const sorted = [...store_images].sort(
+    (a, b) => (a.order_num ?? 999) - (b.order_num ?? 999),
+  );
 
-  return sorted[0]?.image_url ?? '/noshop.svg';
+  const url = sorted[0]?.image_url;
+
+  return typeof url === 'string' && url.trim() !== ''
+    ? url
+    : '/noshop.svg';
 }
 
+/**
+ * StoreRow → SearchStore 正規化
+ * UI が「何も疑わずに使える形」にする
+ */
 export function normalizeSearchStore(raw: StoreRow): SearchStore {
   return {
     id: raw.id,
@@ -41,7 +61,7 @@ export function normalizeSearchStore(raw: StoreRow): SearchStore {
     store_type_id: raw.store_types?.id ?? null,
     type_label: raw.store_types?.label ?? null,
 
-    // ★ サムネは order_num 最小
+    // ★ 画像は normalize 層で完全に安全化
     image_url: selectImage(raw.store_images),
 
     price_range_key: raw.price_range_definitions?.key ?? null,
@@ -51,8 +71,14 @@ export function normalizeSearchStore(raw: StoreRow): SearchStore {
     atmosphere_keys: extractKeys(raw.store_atmospheres, 'atmosphere_definitions'),
     environment_keys: extractKeys(raw.store_environment, 'environment_definitions'),
     drink_keys: extractKeys(raw.store_drinks, 'drink_definitions'),
-    payment_method_keys: extractKeys(raw.store_payment_methods, 'payment_method_definitions'),
-    event_trend_keys: extractKeys(raw.store_event_trends, 'event_trend_definitions'),
+    payment_method_keys: extractKeys(
+      raw.store_payment_methods,
+      'payment_method_definitions',
+    ),
+    event_trend_keys: extractKeys(
+      raw.store_event_trends,
+      'event_trend_definitions',
+    ),
     baggage_keys: extractKeys(raw.store_baggage, 'baggage_definitions'),
     smoking_keys: extractKeys(raw.store_smoking, 'smoking_definitions'),
     toilet_keys: extractKeys(raw.store_toilet, 'toilet_definitions'),

@@ -1,6 +1,8 @@
 // src/lib/searchStores.ts
 import { supabase } from '@/lib/supabase';
-import type { HomeStore } from '@/types/store';
+import type { StoreRow } from '@/types/store-db';
+import type { SearchStore } from '@/types/store';
+import { normalizeSearchStore } from '@/lib/normalize/normalizeSearchStore';
 
 export type SearchParams = {
   filters: string[];
@@ -73,79 +75,134 @@ export async function searchStores({
   storeTypeId,
   prefectureId = null,
   cityIds = [],
-}: SearchParams): Promise<HomeStore[]> {
+}: SearchParams): Promise<SearchStore[]> {
+  /**
+   * =========================
+   * ① ベースクエリ（★重要）
+   * useStoresForSearch と完全一致
+   * =========================
+   */
   let query = supabase
-  .from('stores')
-  .select(`*, store_types(*)`)
-  .eq('is_active', true);
+    .from('stores')
+    .select(
+      `
+      *,
+      prefectures ( id, name_ja ),
+      cities ( id, name ),
+      store_types ( id, label ),
 
-  // ① stores直カラム
+      price_range_definitions ( key ),
+      size_definitions ( key ),
+
+      store_customers ( customer_definitions ( key ) ),
+      store_atmospheres ( atmosphere_definitions ( key ) ),
+      store_drinks ( drink_definitions ( key, display_order ) ),
+      store_baggage ( baggage_definitions ( key ) ),
+      store_toilet ( toilet_definitions ( key ) ),
+      store_smoking ( smoking_definitions ( key ) ),
+      store_environment ( environment_definitions ( key ) ),
+      store_other ( other_definitions ( key ) ),
+      store_event_trends ( event_trend_definitions ( key ) ),
+      store_payment_methods ( payment_method_definitions ( key ) ),
+
+      store_images:store_images!store_images_store_id_fkey (
+        image_url,
+        order_num
+      )
+      `,
+    )
+    .eq('is_active', true);
+
+  /**
+   * =========================
+   * ② stores 直カラム
+   * =========================
+   */
   if (storeTypeId) query = query.eq('store_type_id', storeTypeId);
   if (prefectureId) query = query.eq('prefecture_id', prefectureId);
   if (prefectureId && cityIds.length > 0) query = query.in('city_id', cityIds);
 
-  // ② size / price
+  /**
+   * =========================
+   * ③ size / price（AND）
+   * =========================
+   */
   if (filters.length > 0) {
-    const { data: sizeDefs, error: sizeErr } = await supabase
+    const { data: sizeDefs } = await supabase
       .from('size_definitions')
       .select('id')
       .in('key', filters)
       .eq('is_active', true);
-    if (sizeErr) throw sizeErr;
-    if (sizeDefs?.length)
+
+    if (sizeDefs?.length) {
       query = query.in(
-        'size',
+        'size_id',
         sizeDefs.map((s) => s.id),
       );
+    }
 
-    const { data: priceDefs, error: priceErr } = await supabase
+    const { data: priceDefs } = await supabase
       .from('price_range_definitions')
       .select('id')
       .in('key', filters)
       .eq('is_active', true);
-    if (priceErr) throw priceErr;
-    if (priceDefs?.length)
+
+    if (priceDefs?.length) {
       query = query.in(
         'price_range_id',
         priceDefs.map((p) => p.id),
       );
+    }
   }
 
-  // ③ M2M AND
+  /**
+   * =========================
+   * ④ M2M AND フィルタ
+   * =========================
+   */
   let filteredStoreIds: string[] | null = null;
 
   for (const config of FILTER_MAP) {
-    const { data: defs, error: defError } = await supabase
+    const { data: defs } = await supabase
       .from(config.definitionTable)
       .select('id')
       .in('key', filters)
       .eq('is_active', true);
 
-    if (defError) throw defError;
     if (!defs?.length) continue;
 
     const defIds = defs.map((d) => d.id);
 
-    const { data: storeRows, error: midError } = await supabase
+    const { data: storeRows } = await supabase
       .from(config.middleTable)
       .select('store_id')
       .in(config.definitionIdColumn, defIds);
 
-    if (midError) throw midError;
     if (!storeRows?.length) return [];
 
     const storeIds = storeRows.map((r) => r.store_id);
 
     filteredStoreIds =
-      filteredStoreIds === null ? storeIds : filteredStoreIds.filter((id) => storeIds.includes(id));
+      filteredStoreIds === null
+        ? storeIds
+        : filteredStoreIds.filter((id) => storeIds.includes(id));
 
     if (filteredStoreIds.length === 0) return [];
   }
 
-  if (filteredStoreIds?.length) query = query.in('id', filteredStoreIds);
+  if (filteredStoreIds?.length) {
+    query = query.in('id', filteredStoreIds);
+  }
 
-  const { data, error } = await query;
+  /**
+   * =========================
+   * ⑤ 実行 & normalize
+   * =========================
+   */
+  const { data, error } = await query.order('updated_at', { ascending: false });
+
   if (error) throw error;
+  if (!data) return [];
 
-  return (data ?? []) as HomeStore[];
+  return (data as StoreRow[]).map(normalizeSearchStore);
 }

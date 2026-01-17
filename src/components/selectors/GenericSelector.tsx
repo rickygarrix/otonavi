@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import Chip from '@/components/ui/Chip';
 import type { GenericMaster } from '@/types/master';
@@ -9,8 +9,8 @@ type BaseProps = {
   title: string;
   table: string;
   columns?: 2 | 3;
-  sectionRef?: React.RefObject<HTMLDivElement | null> | React.RefCallback<HTMLDivElement> | null;
   clearKey?: number;
+  variant?: 'default' | 'drink';
 };
 
 type SingleProps = BaseProps & {
@@ -42,6 +42,7 @@ export default function GenericSelector({
   onChange,
   columns = 2,
   clearKey,
+  variant = 'default',
 }: Props) {
   const [items, setItems] = useState<(GenericMaster & { description?: string | null })[]>([]);
   const [selected, setSelected] = useState<string[] | string | null>(
@@ -54,7 +55,6 @@ export default function GenericSelector({
   const hoverTimer = useRef<number | null>(null);
   const isTouchingRef = useRef(false);
 
-  // description を持つテーブルだけ有効
   const enableDescription =
     table === 'size_definitions' || table === 'price_range_definitions';
 
@@ -78,23 +78,14 @@ export default function GenericSelector({
         return;
       }
 
-      const rows = (data ?? []) as unknown as (GenericMaster & {
-        description?: string | null;
-      })[];
-
-      setItems(
-        rows.map((d) => ({
-          ...d,
-          table,
-        })),
-      );
+      setItems((data ?? []) as any);
     };
 
     load();
   }, [table, enableDescription]);
 
   // =========================
-  // クリア処理
+  // クリア
   // =========================
   useEffect(() => {
     if (clearKey === undefined) return;
@@ -127,19 +118,32 @@ export default function GenericSelector({
   };
 
   const isSelected = (key: string) =>
-    selection === 'single' ? selected === key : Array.isArray(selected) && selected.includes(key);
+    selection === 'single'
+      ? selected === key
+      : Array.isArray(selected) && selected.includes(key);
 
   // =========================
-  // Tooltip位置（ターゲット中央の真上）
+  // ドリンク用 分割
+  // =========================
+  const { normalItems, specialItems } = useMemo(() => {
+    if (variant !== 'drink') {
+      return { normalItems: items, specialItems: [] };
+    }
+
+    return {
+      normalItems: items.filter((i) => (i.display_order ?? 0) < 90),
+      specialItems: items.filter((i) => (i.display_order ?? 0) >= 90),
+    };
+  }, [items, variant]);
+
+  // =========================
+  // Tooltip helpers
   // =========================
   const getAnchorPoint = (el: HTMLElement) => {
     const rect = el.getBoundingClientRect();
-    const x = rect.left + rect.width / 2;
-    const y = rect.top;
-
     return {
-      x: clamp(x, 12, window.innerWidth - 12),
-      y: clamp(y, 12, window.innerHeight - 12),
+      x: clamp(rect.left + rect.width / 2, 12, window.innerWidth - 12),
+      y: clamp(rect.top, 12, window.innerHeight - 12),
     };
   };
 
@@ -151,18 +155,13 @@ export default function GenericSelector({
   const hideTooltip = () => setTooltip(null);
 
   const clearAllTimers = () => {
-    if (pressTimer.current) {
-      window.clearTimeout(pressTimer.current);
-      pressTimer.current = null;
-    }
-    if (hoverTimer.current) {
-      window.clearTimeout(hoverTimer.current);
-      hoverTimer.current = null;
-    }
+    if (pressTimer.current) window.clearTimeout(pressTimer.current);
+    if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
+    pressTimer.current = hoverTimer.current = null;
   };
 
   // =========================
-  // 📱 Mobile: 0.5秒「長押し」した時だけ表示
+  // Touch / Mouse handlers
   // =========================
   const onTouchStart = (
     e: React.TouchEvent,
@@ -171,25 +170,21 @@ export default function GenericSelector({
   ) => {
     if (!enableDescription || !description) return;
 
-    // タップ（クリック化）を止める
     e.preventDefault();
     isTouchingRef.current = true;
-
     clearAllTimers();
 
     pressTimer.current = window.setTimeout(() => {
       showTooltipAtTargetTop(description, target);
-    }, 500); // ← 0.5秒長押し
+    }, 500);
   };
 
   const onTouchMove = () => {
-    // 指が動いたらキャンセル
     clearAllTimers();
     hideTooltip();
   };
 
   const onTouchEnd = () => {
-    // 指を離したら即非表示
     clearAllTimers();
     hideTooltip();
 
@@ -198,10 +193,10 @@ export default function GenericSelector({
     }, 50);
   };
 
-  // =========================
-  // 🖥 PC: 0.5秒ホバーで表示（動いても消えない、離れたら消える）
-  // =========================
-  const onMouseEnter = (description: string | null | undefined, target: HTMLElement) => {
+  const onMouseEnter = (
+    description: string | null | undefined,
+    target: HTMLElement,
+  ) => {
     if (isTouchingRef.current) return;
     if (!enableDescription || !description) return;
 
@@ -218,50 +213,46 @@ export default function GenericSelector({
   };
 
   // =========================
-  // 🖥 PC: スクロール時は Tooltip を閉じる
-  // =========================
-  useEffect(() => {
-    const handleScroll = () => {
-      clearAllTimers();
-      hideTooltip();
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
-  // =========================
   // UI
   // =========================
+  const renderList = (list: typeof items, cols: 2 | 3) => (
+    <ul className={`grid ${cols === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+      {list.map((item) => (
+        <li key={item.key}>
+          <div
+            onTouchStart={(e) => onTouchStart(e, item.description, e.currentTarget)}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+            onTouchCancel={onTouchEnd}
+            onMouseEnter={(e) => onMouseEnter(item.description, e.currentTarget)}
+            onMouseLeave={onMouseLeave}
+          >
+            <Chip
+              label={item.label}
+              selected={isSelected(item.key)}
+              onChange={() => toggle(item.key)}
+            />
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+
   return (
     <>
-      <h3 className="text-md text-dark-5 leading-[1.5] font-bold tracking-widest">{title}</h3>
+      <h3 className="text-md text-dark-5 leading-[1.5] font-bold tracking-widest">
+        {title}
+      </h3>
 
-      <ul className={`grid ${columns === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
-        {items.map((item) => (
-          <li key={item.key}>
-            <div
-              onTouchStart={(e) => onTouchStart(e, item.description, e.currentTarget)}
-              onTouchMove={onTouchMove}
-              onTouchEnd={onTouchEnd}
-              onTouchCancel={onTouchEnd}
-              onMouseEnter={(e) => onMouseEnter(item.description, e.currentTarget)}
-              onMouseLeave={onMouseLeave}
-            >
-              <Chip
-                label={item.label}
-                selected={isSelected(item.key)}
-                onChange={() => toggle(item.key)}
-              />
-            </div>
-          </li>
-        ))}
-      </ul>
+      {variant === 'drink' ? (
+        <div>
+          {normalItems.length > 0 && renderList(normalItems, 3)}
+          {specialItems.length > 0 && renderList(specialItems, 2)}
+        </div>
+      ) : (
+        renderList(items, columns)
+      )}
 
-      {/* ===== Tooltip（対象チップの中央の真上） ===== */}
       {tooltip && (
         <div
           className="fixed z-50"
@@ -272,12 +263,9 @@ export default function GenericSelector({
           }}
         >
           <div className="relative flex flex-col items-center">
-            {/* 吹き出し本体 */}
-            <div className="max-w-[260px] rounded-full bg-dark-5 px-5 py-2 text-center text-white text-xs leading-4 shadow-lg">
+            <div className="max-w-[260px] rounded-full bg-dark-5 px-5 py-2 text-center text-xs text-white shadow-lg">
               {tooltip.text}
             </div>
-
-            {/* ▼ しっぽ（三角） */}
             <div
               className="w-0 h-0 border-l-[8px] border-r-[8px] border-t-[6px]
                          border-l-transparent border-r-transparent border-t-dark-5"
