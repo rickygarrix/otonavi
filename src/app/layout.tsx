@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 
+import ServiceWorkerRegister from './_pwa/ServiceWorkerRegister';
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -16,19 +18,25 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'オトナビ｜音箱検索サイト',
   description:
-    '夜の音楽体験をもっと身近にする音箱検索サイト。エリアやこだわり条件で絞って、お気に入りのクラブ・バー・ライブハウスを探せます。',
+    '夜の音楽体験をもっと身近にする音箱検索サイト。',
   icons: {
     apple: '/apple-touch-icon.png',
   },
+  appleWebApp: {
+    capable: true,
+    title: 'オトナビ',
+    statusBarStyle: 'black-translucent',
+  },
+  themeColor: '#000000',
 };
 
 const GA_ID = 'G-WEZPMCLCSW';
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="ja" className="bg-dark-5 flex items-start justify-center">
       <head>
@@ -52,6 +60,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} bg-light-1 text-dark-5 mx-auto w-full max-w-105 antialiased`}
       >
+        {/* ★ PWA判定用（超重要） */}
+        <ServiceWorkerRegister />
+
         {children}
       </body>
     </html>
