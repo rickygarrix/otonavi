@@ -109,8 +109,8 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
     const loadPrefectures = async () => {
       const { data, error } = await supabase
         .from('prefectures')
-        .select('id, name_ja, code')
-        .order('code', { ascending: true });
+        .select('id, name, sort_order')
+        .order('sort_order', { ascending: true });
 
       if (error) {
         console.error('prefectures load error:', error);
@@ -123,7 +123,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
     loadPrefectures();
   }, []);
 
-  const isTokyo = selectedPrefecture?.name_ja === '東京都';
+  const isTokyo = selectedPrefecture?.name === '東京都';
 
   // ============================
   // 市区町村（sort_order）
@@ -210,7 +210,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
       {/* 都道府県セレクター */}
       <div className="relative flex-1">
         <Selector
-          label={selectedPrefecture?.name_ja ?? '都道府県'}
+          label={selectedPrefecture?.name ?? '都道府県'}
           selected={selectedPrefecture !== null}
           menuId={MENU_ID.pref}
           open={openPref}
@@ -238,7 +238,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
               return (
                 <OptionRow
                   key={p.id}
-                  label={p.name_ja}
+                  label={p.name}
                   selected={isSelected}
                   onClick={() => selectPrefecture(p)}
                 />

@@ -15,7 +15,7 @@ export function normalizeHomeStore(raw: StoreRow): HomeStoreLite {
     name: raw.name,
 
     prefecture_id: raw.prefectures?.id ?? null,
-    prefecture_label: raw.prefectures?.name_ja ?? null,
+    prefecture_label: raw.prefectures?.name ?? null,
 
     city_id: raw.cities?.id ?? null,
     city_label: raw.cities?.name ?? null,

@@ -55,7 +55,7 @@ export default function StoreAccess({ store }: Props) {
 
       {/* ① 住所 */}
       <div>
-        {store.postcode && <p>〒{store.postcode}</p>}
+        {store.postsort_order && <p>〒{store.postsort_order}</p>}
         {store.address && (
           <p className="whitespace-pre-line">{store.address}</p>
         )}

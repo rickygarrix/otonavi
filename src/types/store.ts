@@ -49,7 +49,7 @@ export type HomeStore = {
   access: string | null;
   google_place_id: string | null;
   address: string | null;
-  postcode: string | null;
+  postsort_order: string | null;
   business_hours: string | null;
 
   hasAward: boolean;

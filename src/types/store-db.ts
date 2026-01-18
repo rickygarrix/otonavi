@@ -13,7 +13,7 @@ export type IdNameRow = {
 
 export type PrefectureRow = {
   id: string;
-  name_ja: string;
+  name: string;
 };
 
 export type StoreImageRow = {
@@ -38,7 +38,7 @@ export type StoreRow = {
   access: string | null;
   google_place_id: string | null;
   address: string | null;
-  postcode: string | null;
+  postsort_order: string | null;
   business_hours: string | null;
 
   // ===== SNS / Web =====
@@ -55,20 +55,20 @@ export type StoreRow = {
   prefectures: PrefectureRow | null;
   cities: IdNameRow | null;
   venue_types: IdLabelRow | null;
-  price_range_definitions: DefinitionKV | null;
-  size_definitions: DefinitionKV | null;
+  price_ranges: DefinitionKV | null;
+  sizes: DefinitionKV | null;
 
   // ===== M:N =====
-  store_event_trends: M2MRow<'event_trend_definitions'>[];
-  store_baggage: M2MRow<'baggage_definitions'>[];
-  store_toilet: M2MRow<'toilet_definitions'>[];
-  store_smoking: M2MRow<'smoking_definitions'>[];
-  store_environment: M2MRow<'environment_definitions'>[];
-  store_other: M2MRow<'other_definitions'>[];
-  store_payment_methods: M2MRow<'payment_method_definitions'>[];
-  store_customers: M2MRow<'customer_definitions'>[];
-  store_atmospheres: M2MRow<'atmosphere_definitions'>[];
-  store_drinks: M2MRow<'drink_definitions'>[];
+  store_event_trends: M2MRow<'event_trends'>[];
+  store_baggage: M2MRow<'luggages'>[];
+  store_toilet: M2MRow<'toilets'>[];
+  store_smoking: M2MRow<'smoking_policies'>[];
+  store_environment: M2MRow<'environments'>[];
+  store_other: M2MRow<'amenities'>[];
+  store_payment_methods: M2MRow<'payment_methods'>[];
+  store_customers: M2MRow<'audience_types'>[];
+  store_atmospheres: M2MRow<'atmospheres'>[];
+  store_drinks: M2MRow<'drinks'>[];
 
   // ===== Images =====
   store_images: StoreImageRow[];

@@ -1,7 +1,7 @@
 export type Prefecture = {
   id: string;
-  name_ja: string;
-  code: number;
+  name: string;
+  sort_order: number;
 };
 
 export type City = {

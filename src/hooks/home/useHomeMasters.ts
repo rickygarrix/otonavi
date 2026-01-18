@@ -7,17 +7,17 @@ import type { DrinkDefinition, GenericMaster } from '@/types/master';
 
 const TABLE_TO_SECTION: Record<string, string> = {
   venue_types: '店舗タイプ',
-  event_trend_definitions: 'イベントの傾向',
-  baggage_definitions: '荷物預かり',
-  toilet_definitions: 'トイレ',
-  size_definitions: '広さ',
-  smoking_definitions: '喫煙',
-  environment_definitions: '周辺環境',
-  other_definitions: 'その他',
-  price_range_definitions: '価格帯',
-  payment_method_definitions: '支払い方法',
-  customer_definitions: '客層',
-  atmosphere_definitions: '雰囲気',
+  event_trends: 'イベントの傾向',
+  luggages: '荷物預かり',
+  toilets: 'トイレ',
+  sizes: '広さ',
+  smoking_policies: '喫煙',
+  environments: '周辺環境',
+  amenities: 'その他',
+  price_ranges: '価格帯',
+  payment_methods: '支払い方法',
+  audience_types: '客層',
+  atmospheres: '雰囲気',
 };
 
 type GenericMasterRow = {
@@ -82,14 +82,14 @@ export function useHomeMasters() {
         ] = await Promise.all([
           supabase
             .from('prefectures')
-            .select('id, name_ja,code')
-            .order('code', { ascending: true }),
+            .select('id, name,sort_order')
+            .order('sort_order', { ascending: true }),
           supabase
             .from('cities')
             .select('id, name, is_23ward, sort_order')
             .order('sort_order', { ascending: true }),
           supabase
-            .from('drink_definitions')
+            .from('drinks')
             .select('key, label, sort_order')
             .eq('is_active', true)
             .order('sort_order', { ascending: true }),
@@ -97,7 +97,7 @@ export function useHomeMasters() {
 
         if (prefError) console.error('prefectures load error:', prefError);
         if (cityError) console.error('cities load error:', cityError);
-        if (drinkError) console.error('drink_definitions load error:', drinkError);
+        if (drinkError) console.error('drinks load error:', drinkError);
 
         const genericMap = await loadGenericMasters();
 
@@ -122,7 +122,7 @@ export function useHomeMasters() {
   const externalLabelMap = useMemo(() => {
     const map = new Map<string, string>();
 
-    prefectures.forEach((p) => map.set(p.id, p.name_ja));
+    prefectures.forEach((p) => map.set(p.id, p.name));
     cities.forEach((a) => map.set(a.id, a.name));
     drinkMasters.forEach((d) => map.set(d.key, d.label));
     genericMasters.forEach((v) => map.set(v.key, v.label));
@@ -138,7 +138,7 @@ export function useHomeMasters() {
       if (section) map.set(label, section);
     });
 
-    prefectures.forEach((p) => map.set(p.name_ja, 'エリア'));
+    prefectures.forEach((p) => map.set(p.name, 'エリア'));
     cities.forEach((a) => map.set(a.name, 'エリア'));
     drinkMasters.forEach((d) => map.set(d.label, 'ドリンク'));
 

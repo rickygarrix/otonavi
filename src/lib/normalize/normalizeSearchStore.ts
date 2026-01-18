@@ -53,7 +53,7 @@ export function normalizeSearchStore(raw: StoreRow): SearchStore {
     kana: raw.kana,
 
     prefecture_id: raw.prefectures?.id ?? null,
-    prefecture_label: raw.prefectures?.name_ja ?? null,
+    prefecture_label: raw.prefectures?.name ?? null,
 
     city_id: raw.cities?.id ?? null,
     city_label: raw.cities?.name ?? null,
@@ -64,25 +64,25 @@ export function normalizeSearchStore(raw: StoreRow): SearchStore {
     // ★ 画像は normalize 層で完全に安全化
     image_url: selectImage(raw.store_images),
 
-    price_range_key: raw.price_range_definitions?.key ?? null,
-    size_key: raw.size_definitions?.key ?? null,
+    price_range_key: raw.price_ranges?.key ?? null,
+    size_key: raw.sizes?.key ?? null,
 
-    customer_keys: extractKeys(raw.store_customers, 'customer_definitions'),
-    atmosphere_keys: extractKeys(raw.store_atmospheres, 'atmosphere_definitions'),
-    environment_keys: extractKeys(raw.store_environment, 'environment_definitions'),
-    drink_keys: extractKeys(raw.store_drinks, 'drink_definitions'),
+    customer_keys: extractKeys(raw.store_customers, 'audience_types'),
+    atmosphere_keys: extractKeys(raw.store_atmospheres, 'atmospheres'),
+    environment_keys: extractKeys(raw.store_environment, 'environments'),
+    drink_keys: extractKeys(raw.store_drinks, 'drinks'),
     payment_method_keys: extractKeys(
       raw.store_payment_methods,
-      'payment_method_definitions',
+      'payment_methods',
     ),
     event_trend_keys: extractKeys(
       raw.store_event_trends,
-      'event_trend_definitions',
+      'event_trends',
     ),
-    baggage_keys: extractKeys(raw.store_baggage, 'baggage_definitions'),
-    smoking_keys: extractKeys(raw.store_smoking, 'smoking_definitions'),
-    toilet_keys: extractKeys(raw.store_toilet, 'toilet_definitions'),
-    other_keys: extractKeys(raw.store_other, 'other_definitions'),
+    baggage_keys: extractKeys(raw.store_baggage, 'luggages'),
+    smoking_keys: extractKeys(raw.store_smoking, 'smoking_policies'),
+    toilet_keys: extractKeys(raw.store_toilet, 'toilets'),
+    other_keys: extractKeys(raw.store_other, 'amenities'),
 
     updated_at: raw.updated_at,
   };

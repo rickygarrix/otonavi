@@ -19,52 +19,52 @@ type FilterConfig = {
 
 const FILTER_MAP: FilterConfig[] = [
   {
-    definitionTable: 'atmosphere_definitions',
+    definitionTable: 'atmospheres',
     middleTable: 'store_atmospheres',
     definitionIdColumn: 'atmosphere_id',
   },
   {
-    definitionTable: 'event_trend_definitions',
+    definitionTable: 'event_trends',
     middleTable: 'store_event_trends',
     definitionIdColumn: 'event_trend_id',
   },
   {
-    definitionTable: 'drink_definitions',
+    definitionTable: 'drinks',
     middleTable: 'store_drinks',
     definitionIdColumn: 'drink_id',
   },
   {
-    definitionTable: 'payment_method_definitions',
+    definitionTable: 'payment_methods',
     middleTable: 'store_payment_methods',
     definitionIdColumn: 'payment_method_id',
   },
   {
-    definitionTable: 'smoking_definitions',
+    definitionTable: 'smoking_policies',
     middleTable: 'store_smoking',
     definitionIdColumn: 'smoking_id',
   },
   {
-    definitionTable: 'toilet_definitions',
+    definitionTable: 'toilets',
     middleTable: 'store_toilet',
     definitionIdColumn: 'toilet_id',
   },
   {
-    definitionTable: 'environment_definitions',
+    definitionTable: 'environments',
     middleTable: 'store_environment',
     definitionIdColumn: 'environment_id',
   },
   {
-    definitionTable: 'baggage_definitions',
+    definitionTable: 'luggages',
     middleTable: 'store_baggage',
     definitionIdColumn: 'baggage_id',
   },
   {
-    definitionTable: 'customer_definitions',
+    definitionTable: 'audience_types',
     middleTable: 'store_customers',
     definitionIdColumn: 'customer_id',
   },
   {
-    definitionTable: 'other_definitions',
+    definitionTable: 'amenities',
     middleTable: 'store_other',
     definitionIdColumn: 'other_id',
   },
@@ -87,23 +87,23 @@ export async function searchStores({
     .select(
       `
       *,
-      prefectures ( id, name_ja ),
+      prefectures ( id, name ),
       cities ( id, name ),
       venue_types ( id, label ),
 
-      price_range_definitions ( key ),
-      size_definitions ( key ),
+      price_ranges ( key ),
+      sizes ( key ),
 
-      store_customers ( customer_definitions ( key ) ),
-      store_atmospheres ( atmosphere_definitions ( key ) ),
-      store_drinks ( drink_definitions ( key, sort_order ) ),
-      store_baggage ( baggage_definitions ( key ) ),
-      store_toilet ( toilet_definitions ( key ) ),
-      store_smoking ( smoking_definitions ( key ) ),
-      store_environment ( environment_definitions ( key ) ),
-      store_other ( other_definitions ( key ) ),
-      store_event_trends ( event_trend_definitions ( key ) ),
-      store_payment_methods ( payment_method_definitions ( key ) ),
+      store_customers ( audience_types ( key ) ),
+      store_atmospheres ( atmospheres ( key ) ),
+      store_drinks ( drinks ( key, sort_order ) ),
+      store_baggage ( luggages ( key ) ),
+      store_toilet ( toilets ( key ) ),
+      store_smoking ( smoking_policies ( key ) ),
+      store_environment ( environments ( key ) ),
+      store_other ( amenities ( key ) ),
+      store_event_trends ( event_trends ( key ) ),
+      store_payment_methods ( payment_methods ( key ) ),
 
       store_images:store_images!store_images_store_id_fkey (
         image_url,
@@ -129,7 +129,7 @@ export async function searchStores({
    */
   if (filters.length > 0) {
     const { data: sizeDefs } = await supabase
-      .from('size_definitions')
+      .from('sizes')
       .select('id')
       .in('key', filters)
       .eq('is_active', true);
@@ -142,7 +142,7 @@ export async function searchStores({
     }
 
     const { data: priceDefs } = await supabase
-      .from('price_range_definitions')
+      .from('price_ranges')
       .select('id')
       .in('key', filters)
       .eq('is_active', true);

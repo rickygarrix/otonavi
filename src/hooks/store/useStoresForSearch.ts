@@ -33,23 +33,23 @@ export function useStoresForSearch(
         .select(
           `
           *,
-          prefectures ( id, name_ja ),
+          prefectures ( id, name ),
           cities ( id, name ),
           venue_types ( id, label ),
 
-          price_range_definitions ( key, label ),
-          size_definitions ( key, label ),
+          price_ranges ( key, label ),
+          sizes ( key, label ),
 
-          store_customers ( customer_definitions ( key, label ) ),
-          store_atmospheres ( atmosphere_definitions ( key, label ) ),
-          store_drinks ( drink_definitions ( key, label, sort_order ) ),
-          store_baggage ( baggage_definitions ( key, label ) ),
-          store_toilet ( toilet_definitions ( key, label ) ),
-          store_smoking ( smoking_definitions ( key, label ) ),
-          store_environment ( environment_definitions ( key, label ) ),
-          store_other ( other_definitions ( key, label ) ),
-          store_event_trends ( event_trend_definitions ( key, label ) ),
-          store_payment_methods ( payment_method_definitions ( key, label ) ),
+          store_customers ( audience_types ( key, label ) ),
+          store_atmospheres ( atmospheres ( key, label ) ),
+          store_drinks ( drinks ( key, label, sort_order ) ),
+          store_baggage ( luggages ( key, label ) ),
+          store_toilet ( toilets ( key, label ) ),
+          store_smoking ( smoking_policies ( key, label ) ),
+          store_environment ( environments ( key, label ) ),
+          store_other ( amenities ( key, label ) ),
+          store_event_trends ( event_trends ( key, label ) ),
+          store_payment_methods ( payment_methods ( key, label ) ),
           store_images:store_images!store_images_store_id_fkey (
             image_url,
             order_num

@@ -56,7 +56,7 @@ export default function GenericSelector({
   const isTouchingRef = useRef(false);
 
   const enableDescription =
-    table === 'size_definitions' || table === 'price_range_definitions';
+    table === 'sizes' || table === 'price_ranges';
 
   // =========================
   // データ取得
