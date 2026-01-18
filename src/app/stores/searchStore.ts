@@ -1,10 +1,11 @@
+// src/stores/searchStore.ts
 import { create } from 'zustand';
-import type { HomeStore } from '@/types/store';
+import type { SearchStore } from '@/types/store';
 
 type SearchStoreState = {
-  stores: HomeStore[];
+  stores: SearchStore[];
   loading: boolean;
-  setStores: (stores: HomeStore[]) => void;
+  setStores: (stores: SearchStore[]) => void;
   setLoading: (loading: boolean) => void;
   reset: () => void;
 };
@@ -12,7 +13,9 @@ type SearchStoreState = {
 export const useSearchStore = create<SearchStoreState>((set) => ({
   stores: [],
   loading: false,
+
   setStores: (stores) => set({ stores }),
   setLoading: (loading) => set({ loading }),
+
   reset: () => set({ stores: [], loading: false }),
 }));

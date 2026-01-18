@@ -1,4 +1,3 @@
-// src/hooks/store/useStoresForSearch.ts
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -6,11 +5,24 @@ import { supabase } from '@/lib/supabase';
 import type { SearchStore } from '@/types/store';
 import { normalizeSearchStore } from '@/lib/normalize/normalizeSearchStore';
 
-export function useStoresForSearch() {
+type UseStoresForSearchOptions = {
+  enabled?: boolean;
+};
+
+export function useStoresForSearch(
+  options: UseStoresForSearchOptions = {}
+) {
+  const { enabled = true } = options;
+
   const [stores, setStores] = useState<SearchStore[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
 
   useEffect(() => {
+    if (!enabled) {
+      setLoading(false);
+      return;
+    }
+
     let mounted = true;
 
     const load = async () => {
@@ -65,7 +77,7 @@ export function useStoresForSearch() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [enabled]);
 
   return {
     stores,

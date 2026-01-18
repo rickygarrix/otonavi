@@ -51,18 +51,11 @@ export async function POST(req: Request) {
 
         <hr />
 
-        <p>
-          内容を確認のうえ、<br />
-          <strong>3営業日以内</strong>にご連絡いたします。<br />
-          今しばらくお待ちください。
-        </p>
-
-        <br />
-
-        <p>
-          ――――――――――<br />
-          オトナビ運営
-        </p>
+      <p>
+       内容を確認のうえ、<strong>3営業日以内</strong>にご連絡いたします。<br />
+       今しばらくお待ちください。<br /><br />
+       オトナビ運営
+     </p>
 
         <hr />
 

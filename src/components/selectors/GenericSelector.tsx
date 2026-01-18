@@ -78,7 +78,9 @@ export default function GenericSelector({
         return;
       }
 
-      setItems((data ?? []) as any);
+      setItems(
+        (data ?? []) as unknown as (GenericMaster & { description?: string | null })[]
+      );
     };
 
     load();
