@@ -64,14 +64,14 @@ export default function GenericSelector({
   useEffect(() => {
     const load = async () => {
       const selectColumns = enableDescription
-        ? 'id, key, label, display_order, description'
-        : 'id, key, label, display_order';
+        ? 'id, key, label, sort_order, description'
+        : 'id, key, label, sort_order';
 
       const { data, error } = await supabase
         .from(table)
         .select(selectColumns)
         .eq('is_active', true)
-        .order('display_order', { ascending: true });
+        .order('sort_order', { ascending: true });
 
       if (error) {
         console.error(`GenericSelector load error (${table}):`, error);
@@ -133,8 +133,8 @@ export default function GenericSelector({
     }
 
     return {
-      normalItems: items.filter((i) => (i.display_order ?? 0) < 90),
-      specialItems: items.filter((i) => (i.display_order ?? 0) >= 90),
+      normalItems: items.filter((i) => (i.sort_order ?? 0) < 90),
+      specialItems: items.filter((i) => (i.sort_order ?? 0) >= 90),
     };
   }, [items, variant]);
 

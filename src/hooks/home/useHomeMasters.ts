@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { RegionKey, Prefecture, City } from '@/types/location';
+import type { Prefecture, City } from '@/types/location';
 import type { DrinkDefinition, GenericMaster } from '@/types/master';
 
 const TABLE_TO_SECTION: Record<string, string> = {
-  store_types: '店舗タイプ',
+  venue_types: '店舗タイプ',
   event_trend_definitions: 'イベントの傾向',
   baggage_definitions: '荷物預かり',
   toilet_definitions: 'トイレ',
@@ -24,7 +24,7 @@ type GenericMasterRow = {
   id: string;
   key: string;
   label: string;
-  display_order: number;
+  sort_order: number;
 };
 
 async function loadGenericMasters(): Promise<Map<string, GenericMaster>> {
@@ -34,9 +34,9 @@ async function loadGenericMasters(): Promise<Map<string, GenericMaster>> {
     Object.keys(TABLE_TO_SECTION).map(async (table) => {
       const { data, error } = await supabase
         .from(table)
-        .select('id, key, label, display_order')
+        .select('id, key, label, sort_order')
         .eq('is_active', true)
-        .order('display_order', { ascending: true });
+        .order('sort_order', { ascending: true });
 
       if (error) {
         console.error(`loadGenericMasters error: ${table}`, error);
@@ -51,7 +51,7 @@ async function loadGenericMasters(): Promise<Map<string, GenericMaster>> {
           key: item.key,
           label: item.label,
           table,
-          display_order: item.display_order,
+          sort_order: item.sort_order,
         });
       });
     }),
@@ -82,17 +82,17 @@ export function useHomeMasters() {
         ] = await Promise.all([
           supabase
             .from('prefectures')
-            .select('id, name_ja, region, code')
+            .select('id, name_ja,code')
             .order('code', { ascending: true }),
           supabase
             .from('cities')
-            .select('id, name, is_23ward, display_order')
-            .order('display_order', { ascending: true }),
+            .select('id, name, is_23ward, sort_order')
+            .order('sort_order', { ascending: true }),
           supabase
             .from('drink_definitions')
-            .select('key, label, display_order')
+            .select('key, label, sort_order')
             .eq('is_active', true)
-            .order('display_order', { ascending: true }),
+            .order('sort_order', { ascending: true }),
         ]);
 
         if (prefError) console.error('prefectures load error:', prefError);
@@ -145,12 +145,6 @@ export function useHomeMasters() {
     return map;
   }, [genericMasters, prefectures, cities, drinkMasters]);
 
-  const prefectureRegionMap = useMemo(() => {
-    const map = new Map<string, RegionKey>();
-    prefectures.forEach((p) => map.set(p.name_ja, p.region));
-    return map;
-  }, [prefectures]);
-
   const cityMap = useMemo(() => {
     const map = new Map<string, City>();
     cities.forEach((a) => map.set(a.name, a));
@@ -161,7 +155,6 @@ export function useHomeMasters() {
     loading,
     externalLabelMap,
     labelToSectionMap,
-    prefectureRegionMap,
     cityMap,
     genericMasters,
     drinkMasters,

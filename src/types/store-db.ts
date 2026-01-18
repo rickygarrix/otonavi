@@ -30,7 +30,7 @@ export type StoreRow = {
   // ===== Core =====
   id: string;
   name: string;
-  name_kana: string | null;
+  kana: string | null;
   updated_at: string;
 
   // ===== Text / Info =====
@@ -54,7 +54,7 @@ export type StoreRow = {
   // ===== 1:N / FK =====
   prefectures: PrefectureRow | null;
   cities: IdNameRow | null;
-  store_types: IdLabelRow | null;
+  venue_types: IdLabelRow | null;
   price_range_definitions: DefinitionKV | null;
   size_definitions: DefinitionKV | null;
 

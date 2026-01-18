@@ -5,7 +5,7 @@ import type { SearchStore } from '@/types/store';
 type DefinitionRef = {
   key?: unknown;
   label?: unknown;
-  display_order?: unknown;
+  sort_order?: unknown;
 };
 
 type M2MRow = Record<string, DefinitionRef | undefined>;
@@ -50,7 +50,7 @@ export function normalizeSearchStore(raw: StoreRow): SearchStore {
   return {
     id: raw.id,
     name: raw.name,
-    name_kana: raw.name_kana,
+    kana: raw.kana,
 
     prefecture_id: raw.prefectures?.id ?? null,
     prefecture_label: raw.prefectures?.name_ja ?? null,
@@ -58,8 +58,8 @@ export function normalizeSearchStore(raw: StoreRow): SearchStore {
     city_id: raw.cities?.id ?? null,
     city_label: raw.cities?.name ?? null,
 
-    store_type_id: raw.store_types?.id ?? null,
-    type_label: raw.store_types?.label ?? null,
+    store_type_id: raw.venue_types?.id ?? null,
+    type_label: raw.venue_types?.label ?? null,
 
     // ★ 画像は normalize 層で完全に安全化
     image_url: selectImage(raw.store_images),

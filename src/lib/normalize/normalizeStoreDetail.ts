@@ -11,7 +11,7 @@ const asArray = <T>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
 type DefinitionRef = {
   key?: unknown;
   label?: unknown;
-  display_order?: unknown;
+  sort_order?: unknown;
 };
 
 type M2MRow = Record<string, DefinitionRef | undefined>;
@@ -29,10 +29,10 @@ function extractM2MOrdered(list: unknown, defKey: string): { keys: string[]; lab
       ): d is {
         key: string;
         label: string;
-        display_order?: number;
+        sort_order?: number;
       } => typeof d?.key === 'string' && typeof d?.label === 'string',
     )
-    .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 
   return {
     keys: defs.map((d) => d.key),
@@ -82,7 +82,7 @@ export function normalizeStoreDetail(raw: StoreRow): HomeStore {
   return {
     id: raw.id,
     name: raw.name,
-    name_kana: raw.name_kana,
+    kana: raw.kana,
 
     prefecture_id: raw.prefectures?.id ?? null,
     prefecture_label: raw.prefectures?.name_ja ?? null,
@@ -90,8 +90,8 @@ export function normalizeStoreDetail(raw: StoreRow): HomeStore {
     city_id: raw.cities?.id ?? null,
     city_label: raw.cities?.name ?? null,
 
-    store_type_id: raw.store_types?.id ?? null,
-    type_label: raw.store_types?.label ?? null,
+    store_type_id: raw.venue_types?.id ?? null,
+    type_label: raw.venue_types?.label ?? null,
 
     price_range_key: raw.price_range_definitions?.key ?? null,
     price_range_label: raw.price_range_definitions?.label ?? null,

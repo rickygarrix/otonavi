@@ -32,7 +32,7 @@ export default function HomePage() {
   const masters = useHomeMasters();
 
   const storeTypes = useMemo<GenericMaster[]>(() => {
-    return Array.from(masters.genericMasters.values()).filter((m) => m.table === 'store_types');
+    return Array.from(masters.genericMasters.values()).filter((m) => m.table === 'venue_types');
   }, [masters.genericMasters]);
 
   const filter = useHomeFilterState(masters.externalLabelMap, { storeTypeId });

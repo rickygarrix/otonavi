@@ -89,14 +89,14 @@ export async function searchStores({
       *,
       prefectures ( id, name_ja ),
       cities ( id, name ),
-      store_types ( id, label ),
+      venue_types ( id, label ),
 
       price_range_definitions ( key ),
       size_definitions ( key ),
 
       store_customers ( customer_definitions ( key ) ),
       store_atmospheres ( atmosphere_definitions ( key ) ),
-      store_drinks ( drink_definitions ( key, display_order ) ),
+      store_drinks ( drink_definitions ( key, sort_order ) ),
       store_baggage ( baggage_definitions ( key ) ),
       store_toilet ( toilet_definitions ( key ) ),
       store_smoking ( smoking_definitions ( key ) ),

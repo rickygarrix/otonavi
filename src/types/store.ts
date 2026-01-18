@@ -19,7 +19,7 @@ export type StoreMediaMention = {
 export type HomeStore = {
   id: string;
   name: string;
-  name_kana: string | null;
+  kana: string | null;
 
   prefecture_id: string | null;
   prefecture_label: string | null;
@@ -110,7 +110,7 @@ export type HomeStoreLite = {
 export type SearchStore = {
   id: string;
   name: string;
-  name_kana: string | null;
+  kana: string | null;
 
   prefecture_id: string | null;
   prefecture_label: string | null;

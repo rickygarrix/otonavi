@@ -7,5 +7,12 @@
   "deno.unstable": true,
   "[typescriptreact]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
-  }
+  },
+  "python-envs.pythonProjects": [
+    {
+      "path": "supabase/db_dump",
+      "envManager": "ms-python.python:venv",
+      "packageManager": "ms-python.python:pip"
+    }
+  ]
 }

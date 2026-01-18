@@ -42,7 +42,7 @@ export default function StoresClient() {
 
     if (storeTypeId) {
       const storeTypeLabel = Array.from(masters.genericMasters.values()).find(
-        (m) => m.table === 'store_types' && m.id === storeTypeId,
+        (m) => m.table === 'venue_types' && m.id === storeTypeId,
       )?.label;
       if (storeTypeLabel) labels.push(storeTypeLabel);
     }

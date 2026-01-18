@@ -103,13 +103,13 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
   }, [clearKey]);
 
   // ============================
-  // 都道府県（display_order）
+  // 都道府県（sort_order）
   // ============================
   useEffect(() => {
     const loadPrefectures = async () => {
       const { data, error } = await supabase
         .from('prefectures')
-        .select('id, name_ja, region, code')
+        .select('id, name_ja, code')
         .order('code', { ascending: true });
 
       if (error) {
@@ -126,7 +126,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
   const isTokyo = selectedPrefecture?.name_ja === '東京都';
 
   // ============================
-  // 市区町村（display_order）
+  // 市区町村（sort_order）
   // ============================
   useEffect(() => {
     if (!isTokyo || !selectedPrefecture) {
@@ -138,9 +138,9 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
     const loadCities = async () => {
       const { data, error } = await supabase
         .from('cities')
-        .select('id, name, is_23ward, display_order')
+        .select('id, name, is_23ward, sort_order')
         .eq('prefecture_id', selectedPrefecture.id)
-        .order('display_order', { ascending: true });
+        .order('sort_order', { ascending: true });
 
       if (error) {
         console.error('cities load error:', error);

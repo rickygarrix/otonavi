@@ -2,7 +2,7 @@
 export type DrinkDefinition = {
   key: string
   label: string
-  display_order?: number | null
+  sort_order?: number | null
 }
 
 export type GenericMaster = {
@@ -10,5 +10,5 @@ export type GenericMaster = {
   key: string
   label: string
   table: string
-  display_order: number
+  sort_order: number
 }

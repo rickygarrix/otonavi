@@ -35,14 +35,14 @@ export function useStoresForSearch(
           *,
           prefectures ( id, name_ja ),
           cities ( id, name ),
-          store_types ( id, label ),
+          venue_types ( id, label ),
 
           price_range_definitions ( key, label ),
           size_definitions ( key, label ),
 
           store_customers ( customer_definitions ( key, label ) ),
           store_atmospheres ( atmosphere_definitions ( key, label ) ),
-          store_drinks ( drink_definitions ( key, label, display_order ) ),
+          store_drinks ( drink_definitions ( key, label, sort_order ) ),
           store_baggage ( baggage_definitions ( key, label ) ),
           store_toilet ( toilet_definitions ( key, label ) ),
           store_smoking ( smoking_definitions ( key, label ) ),
