@@ -6,21 +6,41 @@ const ogImage = new URL('/ogp.png', SITE_URL).toString();
 // 基本のメタデータ
 export const baseMetadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+
   title: {
     default: SITE_TITLE,
     template: `%s｜${SITE_NAME}`,
   },
+
   description: SITE_DESC,
+
   openGraph: {
     siteName: SITE_NAME,
     type: 'website',
     locale: 'ja_JP',
     images: [ogImage],
   },
+
   twitter: {
     card: 'summary_large_image',
     images: [ogImage],
   },
+
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
+
+  appleWebApp: {
+    capable: true,
+    title: 'オトナビ',
+    statusBarStyle: 'black-translucent',
+  },
+
+  themeColor: '#081624',
 };
 
 // 検索結果に表示しないページ用

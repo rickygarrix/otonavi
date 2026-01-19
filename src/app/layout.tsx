@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
-import { SITE_NAME, SITE_DESC, SITE_URL } from '@/lib/site';
 import ServiceWorkerRegister from './_pwa/ServiceWorkerRegister';
+import { baseMetadata } from '@/lib/metadata';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -15,68 +15,9 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-
-  title: SITE_NAME,
-  description: SITE_DESC,
-
-  robots: {
-    index: true,
-    follow: true,
-  },
-
-  // 正規のURL
-  alternates: {
-    canonical: SITE_URL,
-  },
-
-  // OGP
-  openGraph: {
-    title: SITE_NAME,
-    description: SITE_DESC,
-    url: SITE_URL,
-    siteName: 'オトナビ',
-    type: 'website',
-    images: [
-      {
-        url: '/ogp.png',
-        width: 1200,
-        height: 630,
-        alt: SITE_NAME,
-      },
-    ],
-    locale: 'ja_JP',
-  },
-
-  // X
-  twitter: {
-    card: 'summary_large_image',
-    title: SITE_NAME,
-    description: SITE_DESC,
-    images: ['/ogp.png'],
-  },
-
-  // icon
-  icons: {
-    icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico', sizes: 'any' },
-    ],
-    apple: '/apple-touch-icon.png',
-  },
-
-  // PWA
-  appleWebApp: {
-    capable: true,
-    title: 'オトナビ',
-    statusBarStyle: 'black-translucent',
-  },
-
-  themeColor: '#081624',
-};
-
 const GA_ID = 'G-WEZPMCLCSW';
+
+export const metadata = baseMetadata;
 
 export default function RootLayout({
   children,
