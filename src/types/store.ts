@@ -19,7 +19,7 @@ export type StoreMediaMention = {
 export type HomeStore = {
   id: string;
   name: string;
-  name_kana: string | null;
+  kana: string | null;
 
   prefecture_id: string | null;
   prefecture_label: string | null;
@@ -27,7 +27,7 @@ export type HomeStore = {
   city_id: string | null;
   city_label: string | null;
 
-  store_type_id: string | null;
+  venue_type_id: string | null;
   type_label: string | null;
 
   price_range_key: string | null;
@@ -35,7 +35,7 @@ export type HomeStore = {
 
   payment_method_keys: string[];
   payment_method_labels: string[];
-  payment_method_other: string | null;
+  other_payment_method: string | null;
 
   image_url: string;
   description: string | null;
@@ -47,9 +47,9 @@ export type HomeStore = {
   official_site_url: string | null;
 
   access: string | null;
-  google_place_id: string | null;
+  place_id: string | null;
   address: string | null;
-  postcode: string | null;
+  postsort_order: string | null;
   business_hours: string | null;
 
   hasAward: boolean;
@@ -100,7 +100,7 @@ export type HomeStoreLite = {
   city_id: string | null;
   city_label: string | null;
 
-  store_type_id: string | null;
+  venue_type_id: string | null;
   type_label: string | null;
 
   image_url: string;
@@ -110,7 +110,7 @@ export type HomeStoreLite = {
 export type SearchStore = {
   id: string;
   name: string;
-  name_kana: string | null;
+  kana: string | null;
 
   prefecture_id: string | null;
   prefecture_label: string | null;
@@ -118,7 +118,7 @@ export type SearchStore = {
   city_id: string | null;
   city_label: string | null;
 
-  store_type_id: string | null;
+  venue_type_id: string | null;
   type_label: string | null;
 
   image_url: string;

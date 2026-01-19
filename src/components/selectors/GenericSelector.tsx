@@ -5,6 +5,10 @@ import { supabase } from '@/lib/supabase';
 import Chip from '@/components/ui/Chip';
 import type { GenericMaster } from '@/types/master';
 
+/* =========================
+   Types
+========================= */
+
 type BaseProps = {
   title: string;
   table: string;
@@ -31,9 +35,17 @@ type TooltipState = {
   y: number;
 };
 
+/* =========================
+   Utils
+========================= */
+
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
+
+/* =========================
+   Component
+========================= */
 
 export default function GenericSelector({
   title,
@@ -44,49 +56,53 @@ export default function GenericSelector({
   clearKey,
   variant = 'default',
 }: Props) {
-  const [items, setItems] = useState<(GenericMaster & { description?: string | null })[]>([]);
+  const [items, setItems] = useState<(GenericMaster & { hint?: string | null })[]>([]);
   const [selected, setSelected] = useState<string[] | string | null>(
     selection === 'single' ? null : [],
   );
 
-  // ===== Tooltip =====
+  /* =========================
+     Tooltip state
+  ========================= */
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
   const pressTimer = useRef<number | null>(null);
   const hoverTimer = useRef<number | null>(null);
   const isTouchingRef = useRef(false);
 
   const enableDescription =
-    table === 'size_definitions' || table === 'price_range_definitions';
+    table === 'sizes' ||
+    table === 'price_ranges' ||
+    table === 'luggages';
 
-  // =========================
-  // データ取得
-  // =========================
+  /* =========================
+     Data fetch
+  ========================= */
   useEffect(() => {
     const load = async () => {
       const selectColumns = enableDescription
-        ? 'id, key, label, display_order, description'
-        : 'id, key, label, display_order';
+        ? 'id, key, label, sort_order, hint'
+        : 'id, key, label, sort_order';
 
       const { data, error } = await supabase
         .from(table)
         .select(selectColumns)
         .eq('is_active', true)
-        .order('display_order', { ascending: true });
+        .order('sort_order', { ascending: true });
 
       if (error) {
         console.error(`GenericSelector load error (${table}):`, error);
         return;
       }
 
-      setItems((data ?? []) as any);
+      setItems((data ?? []) as (GenericMaster & { hint?: string | null })[]);
     };
 
     load();
   }, [table, enableDescription]);
 
-  // =========================
-  // クリア
-  // =========================
+  /* =========================
+     Clear selection
+  ========================= */
   useEffect(() => {
     if (clearKey === undefined) return;
 
@@ -99,9 +115,9 @@ export default function GenericSelector({
     }
   }, [clearKey, selection, onChange]);
 
-  // =========================
-  // 選択トグル
-  // =========================
+  /* =========================
+     Selection logic
+  ========================= */
   const toggle = (key: string) => {
     if (selection === 'single') {
       const next = selected === key ? null : key;
@@ -111,7 +127,9 @@ export default function GenericSelector({
     }
 
     const prev = Array.isArray(selected) ? selected : [];
-    const next = prev.includes(key) ? prev.filter((v) => v !== key) : [...prev, key];
+    const next = prev.includes(key)
+      ? prev.filter((v) => v !== key)
+      : [...prev, key];
 
     setSelected(next);
     onChange?.(next);
@@ -122,23 +140,23 @@ export default function GenericSelector({
       ? selected === key
       : Array.isArray(selected) && selected.includes(key);
 
-  // =========================
-  // ドリンク用 分割
-  // =========================
+  /* =========================
+     Drink variant split
+  ========================= */
   const { normalItems, specialItems } = useMemo(() => {
     if (variant !== 'drink') {
       return { normalItems: items, specialItems: [] };
     }
 
     return {
-      normalItems: items.filter((i) => (i.display_order ?? 0) < 90),
-      specialItems: items.filter((i) => (i.display_order ?? 0) >= 90),
+      normalItems: items.filter((i) => (i.sort_order ?? 0) < 90),
+      specialItems: items.filter((i) => (i.sort_order ?? 0) >= 90),
     };
   }, [items, variant]);
 
-  // =========================
-  // Tooltip helpers
-  // =========================
+  /* =========================
+     Tooltip helpers
+  ========================= */
   const getAnchorPoint = (el: HTMLElement) => {
     const rect = el.getBoundingClientRect();
     return {
@@ -160,22 +178,20 @@ export default function GenericSelector({
     pressTimer.current = hoverTimer.current = null;
   };
 
-  // =========================
-  // Touch / Mouse handlers
-  // =========================
+  /* =========================
+     Touch / Mouse handlers
+  ========================= */
   const onTouchStart = (
-    e: React.TouchEvent,
-    description: string | null | undefined,
+    hint: string | null | undefined,
     target: HTMLElement,
   ) => {
-    if (!enableDescription || !description) return;
+    if (!enableDescription || !hint) return;
 
-    e.preventDefault();
     isTouchingRef.current = true;
     clearAllTimers();
 
     pressTimer.current = window.setTimeout(() => {
-      showTooltipAtTargetTop(description, target);
+      showTooltipAtTargetTop(hint, target);
     }, 500);
   };
 
@@ -187,23 +203,22 @@ export default function GenericSelector({
   const onTouchEnd = () => {
     clearAllTimers();
     hideTooltip();
-
     setTimeout(() => {
       isTouchingRef.current = false;
     }, 50);
   };
 
   const onMouseEnter = (
-    description: string | null | undefined,
+    hint: string | null | undefined,
     target: HTMLElement,
   ) => {
     if (isTouchingRef.current) return;
-    if (!enableDescription || !description) return;
+    if (!enableDescription || !hint) return;
 
     clearAllTimers();
 
     hoverTimer.current = window.setTimeout(() => {
-      showTooltipAtTargetTop(description, target);
+      showTooltipAtTargetTop(hint, target);
     }, 500);
   };
 
@@ -212,19 +227,19 @@ export default function GenericSelector({
     hideTooltip();
   };
 
-  // =========================
-  // UI
-  // =========================
+  /* =========================
+     UI helpers
+  ========================= */
   const renderList = (list: typeof items, cols: 2 | 3) => (
     <ul className={`grid ${cols === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
       {list.map((item) => (
         <li key={item.key}>
           <div
-            onTouchStart={(e) => onTouchStart(e, item.description, e.currentTarget)}
+            onTouchStart={(e) => onTouchStart(item.hint, e.currentTarget)}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
             onTouchCancel={onTouchEnd}
-            onMouseEnter={(e) => onMouseEnter(item.description, e.currentTarget)}
+            onMouseEnter={(e) => onMouseEnter(item.hint, e.currentTarget)}
             onMouseLeave={onMouseLeave}
           >
             <Chip
@@ -238,6 +253,9 @@ export default function GenericSelector({
     </ul>
   );
 
+  /* =========================
+     Render
+  ========================= */
   return (
     <>
       <h3 className="text-md text-dark-5 leading-[1.5] font-bold tracking-widest">

@@ -46,7 +46,7 @@ export default function StoreDetailView({ store, onMainImageLoaded }: Props) {
     {
       order: 60,
       label: '支払い方法',
-      value: formatPaymentMethods(store.payment_method_labels, store.payment_method_other),
+      value: formatPaymentMethods(store.payment_method_labels, store.other_payment_method),
     },
     { order: 70, label: 'イベントの傾向', value: join(store.event_trend_labels) },
     { order: 80, label: '荷物預かり', value: join(store.baggage_labels) },

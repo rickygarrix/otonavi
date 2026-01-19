@@ -5,7 +5,7 @@ import type { SearchStore } from '@/types/store';
 type DefinitionRef = {
   key?: unknown;
   label?: unknown;
-  display_order?: unknown;
+  sort_order?: unknown;
 };
 
 type M2MRow = Record<string, DefinitionRef | undefined>;
@@ -50,39 +50,39 @@ export function normalizeSearchStore(raw: StoreRow): SearchStore {
   return {
     id: raw.id,
     name: raw.name,
-    name_kana: raw.name_kana,
+    kana: raw.kana,
 
     prefecture_id: raw.prefectures?.id ?? null,
-    prefecture_label: raw.prefectures?.name_ja ?? null,
+    prefecture_label: raw.prefectures?.name ?? null,
 
     city_id: raw.cities?.id ?? null,
     city_label: raw.cities?.name ?? null,
 
-    store_type_id: raw.store_types?.id ?? null,
-    type_label: raw.store_types?.label ?? null,
+    venue_type_id: raw.venue_types?.id ?? null,
+    type_label: raw.venue_types?.label ?? null,
 
     // ★ 画像は normalize 層で完全に安全化
     image_url: selectImage(raw.store_images),
 
-    price_range_key: raw.price_range_definitions?.key ?? null,
-    size_key: raw.size_definitions?.key ?? null,
+    price_range_key: raw.price_ranges?.key ?? null,
+    size_key: raw.sizes?.key ?? null,
 
-    customer_keys: extractKeys(raw.store_customers, 'customer_definitions'),
-    atmosphere_keys: extractKeys(raw.store_atmospheres, 'atmosphere_definitions'),
-    environment_keys: extractKeys(raw.store_environment, 'environment_definitions'),
-    drink_keys: extractKeys(raw.store_drinks, 'drink_definitions'),
+    customer_keys: extractKeys(raw.store_audience_types, 'audience_types'),
+    atmosphere_keys: extractKeys(raw.store_atmospheres, 'atmospheres'),
+    environment_keys: extractKeys(raw.store_environments, 'environments'),
+    drink_keys: extractKeys(raw.store_drinks, 'drinks'),
     payment_method_keys: extractKeys(
       raw.store_payment_methods,
-      'payment_method_definitions',
+      'payment_methods',
     ),
     event_trend_keys: extractKeys(
       raw.store_event_trends,
-      'event_trend_definitions',
+      'event_trends',
     ),
-    baggage_keys: extractKeys(raw.store_baggage, 'baggage_definitions'),
-    smoking_keys: extractKeys(raw.store_smoking, 'smoking_definitions'),
-    toilet_keys: extractKeys(raw.store_toilet, 'toilet_definitions'),
-    other_keys: extractKeys(raw.store_other, 'other_definitions'),
+    baggage_keys: extractKeys(raw.store_luggages, 'luggages'),
+    smoking_keys: extractKeys(raw.store_smoking_policies, 'smoking_policies'),
+    toilet_keys: extractKeys(raw.store_toilets, 'toilets'),
+    other_keys: extractKeys(raw.store_amenities, 'amenities'),
 
     updated_at: raw.updated_at,
   };

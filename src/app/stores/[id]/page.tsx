@@ -27,29 +27,48 @@ export default function StoreDetailPage() {
 
       const { data, error } = await supabase
         .from('stores')
-        .select(
-          `
-          *,
-          prefectures:prefecture_id(*),
-          cities:city_id(*),
-          store_types:store_type_id(*),
-          price_range_definitions:price_range_id(*),
-          size_definitions:size(*),
+        .select(`
+        *,
+        prefectures:prefecture_id(*),
+        cities:city_id(*),
+        venue_types:venue_type_id(*),
+        price_ranges:price_range_id(*),
+        sizes(*),
 
-          store_drinks(id, drink_definitions:drink_id(*)),
-          store_customers(id, customer_definitions:customer_id(*)),
-          store_atmospheres(id, atmosphere_definitions:atmosphere_id(*)),
-          store_event_trends(event_trend_definitions(*)),
-          store_baggage(baggage_definitions(*)),
-          store_toilet(toilet_definitions(*)),
-          store_smoking(smoking_definitions(*)),
-          store_environment(environment_definitions(*)),
-          store_other(other_definitions(*)),
-          store_payment_methods(payment_method_definitions(*)),
-          store_awards(*),
-          store_media_mentions(*)
-        `,
-        )
+        store_drinks(
+          drinks(*)
+        ),
+        store_audience_types(
+          audience_types(*)
+        ),
+        store_atmospheres(
+          atmospheres(*)
+        ),
+        store_event_trends(
+          event_trends(*)
+        ),
+        store_luggages(
+          luggages(*)
+        ),
+        store_toilets(
+          toilets(*)
+        ),
+        store_smoking_policies(
+          smoking_policies(*)
+        ),
+        store_environments(
+          environments(*)
+        ),
+        store_amenities(
+          amenities(*)
+        ),
+        store_payment_methods(
+          payment_methods(*)
+        ),
+
+        store_awards(*),
+        store_media_mentions(*)
+      `)
         .eq('is_active', true)
         .eq('id', storeId)
         .single();

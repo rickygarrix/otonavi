@@ -18,7 +18,7 @@ export default function StoresClient() {
   const searchParams = useSearchParams();
 
   const selectedFilters = searchParams.getAll('filters');
-  const storeTypeId = searchParams.get('store_type_id');
+  const storeTypeId = searchParams.get('venue_type_id');
   const params = searchParams.toString();
 
   const masters = useHomeMasters();
@@ -42,7 +42,7 @@ export default function StoresClient() {
 
     if (storeTypeId) {
       const storeTypeLabel = Array.from(masters.genericMasters.values()).find(
-        (m) => m.table === 'store_types' && m.id === storeTypeId,
+        (m) => m.table === 'venue_types' && m.id === storeTypeId,
       )?.label;
       if (storeTypeLabel) labels.push(storeTypeLabel);
     }

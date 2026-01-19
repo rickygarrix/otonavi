@@ -12,7 +12,7 @@ export function useStoreFilters(stores: SearchStore[], options?: Options) {
   const filteredStores = useMemo(() => {
     return stores.filter((store) => {
       // ===== storeType =====
-      if (options?.storeTypeId && store.store_type_id !== options.storeTypeId) {
+      if (options?.storeTypeId && store.venue_type_id !== options.storeTypeId) {
         return false;
       }
 

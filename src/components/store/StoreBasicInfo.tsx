@@ -24,8 +24,8 @@ export default function StoreBasicInfo({ store }: Props) {
         <h1 className="text-2xl leading-[1.5]">{store.name}</h1>
 
         {/* 読み仮名 */}
-        {store.name_kana && (
-          <p className="text-dark-3 text-[10px] leading-[1.5] tracking-widest">{store.name_kana}</p>
+        {store.kana && (
+          <p className="text-dark-3 text-[10px] leading-[1.5] tracking-widest">{store.kana}</p>
         )}
       </div>
 

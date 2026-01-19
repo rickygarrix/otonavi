@@ -15,13 +15,13 @@ export function normalizeHomeStore(raw: StoreRow): HomeStoreLite {
     name: raw.name,
 
     prefecture_id: raw.prefectures?.id ?? null,
-    prefecture_label: raw.prefectures?.name_ja ?? null,
+    prefecture_label: raw.prefectures?.name ?? null,
 
     city_id: raw.cities?.id ?? null,
     city_label: raw.cities?.name ?? null,
 
-    store_type_id: raw.store_types?.id ?? null,
-    type_label: raw.store_types?.label ?? null,
+    venue_type_id: raw.venue_types?.id ?? null,
+    type_label: raw.venue_types?.label ?? null,
 
     image_url: selectImage(raw.store_images),
     updated_at: raw.updated_at,
