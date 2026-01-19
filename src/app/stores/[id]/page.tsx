@@ -65,14 +65,6 @@ export default function StoreDetailPage() {
     load();
   }, [storeId]);
 
-  if (!dataLoading && !store) {
-    return (
-      <div className="p-10 text-center text-sm text-gray-500">
-        店舗情報の読み込みに失敗しました
-      </div>
-    );
-  }
-
   return (
     <div className="relative -mt-20 bg-white">
       {(dataLoading || !imageLoaded) && <LoadingOverlay />}
