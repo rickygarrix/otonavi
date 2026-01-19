@@ -36,7 +36,7 @@ export type StoreRow = {
   // ===== Text / Info =====
   description: string | null;
   access: string | null;
-  google_place_id: string | null;
+  place_id: string | null;
   address: string | null;
   postsort_order: string | null;
   business_hours: string | null;
@@ -49,7 +49,7 @@ export type StoreRow = {
   official_site_url: string | null;
 
   // ===== Other =====
-  payment_method_other: string | null;
+  other_payment_method: string | null;
 
   // ===== 1:N / FK =====
   prefectures: PrefectureRow | null;
@@ -60,13 +60,13 @@ export type StoreRow = {
 
   // ===== M:N =====
   store_event_trends: M2MRow<'event_trends'>[];
-  store_baggage: M2MRow<'luggages'>[];
-  store_toilet: M2MRow<'toilets'>[];
-  store_smoking: M2MRow<'smoking_policies'>[];
-  store_environment: M2MRow<'environments'>[];
-  store_other: M2MRow<'amenities'>[];
+  store_luggages: M2MRow<'luggages'>[];
+  store_toilets: M2MRow<'toilets'>[];
+  store_smoking_policies: M2MRow<'smoking_policies'>[];
+  store_environments: M2MRow<'environments'>[];
+  store_amenities: M2MRow<'amenities'>[];
   store_payment_methods: M2MRow<'payment_methods'>[];
-  store_customers: M2MRow<'audience_types'>[];
+  store_audience_types: M2MRow<'audience_types'>[];
   store_atmospheres: M2MRow<'atmospheres'>[];
   store_drinks: M2MRow<'drinks'>[];
 

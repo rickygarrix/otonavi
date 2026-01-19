@@ -20,7 +20,7 @@ export function normalizeHomeStore(raw: StoreRow): HomeStoreLite {
     city_id: raw.cities?.id ?? null,
     city_label: raw.cities?.name ?? null,
 
-    store_type_id: raw.venue_types?.id ?? null,
+    venue_type_id: raw.venue_types?.id ?? null,
     type_label: raw.venue_types?.label ?? null,
 
     image_url: selectImage(raw.store_images),

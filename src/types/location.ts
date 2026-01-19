@@ -7,6 +7,5 @@ export type Prefecture = {
 export type City = {
   id: string;
   name: string;
-  is_23ward: boolean;
   sort_order: number;
 };

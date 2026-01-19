@@ -27,29 +27,48 @@ export default function StoreDetailPage() {
 
       const { data, error } = await supabase
         .from('stores')
-        .select(
-          `
-          *,
-          prefectures:prefecture_id(*),
-          cities:city_id(*),
-          venue_types:store_type_id(*),
-          price_ranges:price_range_id(*),
-          sizes:size(*),
+        .select(`
+        *,
+        prefectures:prefecture_id(*),
+        cities:city_id(*),
+        venue_types:venue_type_id(*),
+        price_ranges:price_range_id(*),
+        sizes(*),
 
-          store_drinks(id, drinks:drink_id(*)),
-          store_customers(id, audience_types:customer_id(*)),
-          store_atmospheres(id, atmospheres:atmosphere_id(*)),
-          store_event_trends(event_trends(*)),
-          store_baggage(luggages(*)),
-          store_toilet(toilets(*)),
-          store_smoking(smoking_policies(*)),
-          store_environment(environments(*)),
-          store_other(amenities(*)),
-          store_payment_methods(payment_methods(*)),
-          store_awards(*),
-          store_media_mentions(*)
-        `,
-        )
+        store_drinks(
+          drinks(*)
+        ),
+        store_audience_types(
+          audience_types(*)
+        ),
+        store_atmospheres(
+          atmospheres(*)
+        ),
+        store_event_trends(
+          event_trends(*)
+        ),
+        store_luggages(
+          luggages(*)
+        ),
+        store_toilets(
+          toilets(*)
+        ),
+        store_smoking_policies(
+          smoking_policies(*)
+        ),
+        store_environments(
+          environments(*)
+        ),
+        store_amenities(
+          amenities(*)
+        ),
+        store_payment_methods(
+          payment_methods(*)
+        ),
+
+        store_awards(*),
+        store_media_mentions(*)
+      `)
         .eq('is_active', true)
         .eq('id', storeId)
         .single();

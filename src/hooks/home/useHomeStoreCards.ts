@@ -27,7 +27,7 @@ export function useHomeStoreCards(limit = 12) {
 
           prefectures:prefecture_id ( id, name ),
           cities:city_id ( id, name ),
-          venue_types:store_type_id ( id, label ),
+          venue_types:venue_type_id ( id, label ),
 
           store_images (
             image_url,

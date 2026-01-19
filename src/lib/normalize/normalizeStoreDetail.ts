@@ -90,7 +90,7 @@ export function normalizeStoreDetail(raw: StoreRow): HomeStore {
     city_id: raw.cities?.id ?? null,
     city_label: raw.cities?.name ?? null,
 
-    store_type_id: raw.venue_types?.id ?? null,
+    venue_type_id: raw.venue_types?.id ?? null,
     type_label: raw.venue_types?.label ?? null,
 
     price_range_key: raw.price_ranges?.key ?? null,
@@ -102,7 +102,7 @@ export function normalizeStoreDetail(raw: StoreRow): HomeStore {
       raw.store_payment_methods,
       'payment_methods',
     ).labels,
-    payment_method_other: raw.payment_method_other,
+    other_payment_method: raw.other_payment_method,
 
     image_url: selectImage(raw.store_images),
     description: raw.description,
@@ -114,7 +114,7 @@ export function normalizeStoreDetail(raw: StoreRow): HomeStore {
     official_site_url: raw.official_site_url,
 
     access: raw.access,
-    google_place_id: raw.google_place_id,
+    place_id: raw.place_id,
     address: raw.address,
     postsort_order: raw.postsort_order,
     business_hours: raw.business_hours,
@@ -127,23 +127,23 @@ export function normalizeStoreDetail(raw: StoreRow): HomeStore {
     event_trend_keys: extractM2MOrdered(raw.store_event_trends, 'event_trends').keys,
     event_trend_labels: extractM2MOrdered(raw.store_event_trends, 'event_trends').labels,
 
-    baggage_keys: extractM2MOrdered(raw.store_baggage, 'luggages').keys,
-    baggage_labels: extractM2MOrdered(raw.store_baggage, 'luggages').labels,
+    baggage_keys: extractM2MOrdered(raw.store_luggages, 'luggages').keys,
+    baggage_labels: extractM2MOrdered(raw.store_luggages, 'luggages').labels,
 
-    toilet_keys: extractM2MOrdered(raw.store_toilet, 'toilets').keys,
-    toilet_labels: extractM2MOrdered(raw.store_toilet, 'toilets').labels,
+    toilet_keys: extractM2MOrdered(raw.store_toilets, 'toilets').keys,
+    toilet_labels: extractM2MOrdered(raw.store_toilets, 'toilets').labels,
 
-    smoking_keys: extractM2MOrdered(raw.store_smoking, 'smoking_policies').keys,
-    smoking_labels: extractM2MOrdered(raw.store_smoking, 'smoking_policies').labels,
+    smoking_keys: extractM2MOrdered(raw.store_smoking_policies, 'smoking_policies').keys,
+    smoking_labels: extractM2MOrdered(raw.store_smoking_policies, 'smoking_policies').labels,
 
-    environment_keys: extractM2MOrdered(raw.store_environment, 'environments').keys,
-    environment_labels: extractM2MOrdered(raw.store_environment, 'environments').labels,
+    environment_keys: extractM2MOrdered(raw.store_environments, 'environments').keys,
+    environment_labels: extractM2MOrdered(raw.store_environments, 'environments').labels,
 
-    other_keys: extractM2MOrdered(raw.store_other, 'amenities').keys,
-    other_labels: extractM2MOrdered(raw.store_other, 'amenities').labels,
+    other_keys: extractM2MOrdered(raw.store_amenities, 'amenities').keys,
+    other_labels: extractM2MOrdered(raw.store_amenities, 'amenities').labels,
 
-    customer_keys: extractM2MOrdered(raw.store_customers, 'audience_types').keys,
-    customer_labels: extractM2MOrdered(raw.store_customers, 'audience_types').labels,
+    customer_keys: extractM2MOrdered(raw.store_audience_types, 'audience_types').keys,
+    customer_labels: extractM2MOrdered(raw.store_audience_types, 'audience_types').labels,
 
     atmosphere_keys: extractM2MOrdered(raw.store_atmospheres, 'atmospheres').keys,
     atmosphere_labels: extractM2MOrdered(raw.store_atmospheres, 'atmospheres').labels,

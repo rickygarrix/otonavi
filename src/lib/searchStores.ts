@@ -40,32 +40,32 @@ const FILTER_MAP: FilterConfig[] = [
   },
   {
     definitionTable: 'smoking_policies',
-    middleTable: 'store_smoking',
+    middleTable: 'store_smoking_policies',
     definitionIdColumn: 'smoking_id',
   },
   {
     definitionTable: 'toilets',
-    middleTable: 'store_toilet',
+    middleTable: 'store_toilets',
     definitionIdColumn: 'toilet_id',
   },
   {
     definitionTable: 'environments',
-    middleTable: 'store_environment',
+    middleTable: 'store_environments',
     definitionIdColumn: 'environment_id',
   },
   {
     definitionTable: 'luggages',
-    middleTable: 'store_baggage',
+    middleTable: 'store_luggages',
     definitionIdColumn: 'baggage_id',
   },
   {
     definitionTable: 'audience_types',
-    middleTable: 'store_customers',
+    middleTable: 'store_audience_types',
     definitionIdColumn: 'customer_id',
   },
   {
     definitionTable: 'amenities',
-    middleTable: 'store_other',
+    middleTable: 'store_amenities',
     definitionIdColumn: 'other_id',
   },
 ];
@@ -92,16 +92,16 @@ export async function searchStores({
       venue_types ( id, label ),
 
       price_ranges ( key ),
-      sizes ( key ),
+      size_id ( key ),
 
-      store_customers ( audience_types ( key ) ),
+      store_audience_types ( audience_types ( key ) ),
       store_atmospheres ( atmospheres ( key ) ),
       store_drinks ( drinks ( key, sort_order ) ),
-      store_baggage ( luggages ( key ) ),
-      store_toilet ( toilets ( key ) ),
-      store_smoking ( smoking_policies ( key ) ),
-      store_environment ( environments ( key ) ),
-      store_other ( amenities ( key ) ),
+      store_luggages ( luggages ( key ) ),
+      store_toilets ( toilets ( key ) ),
+      store_smoking_policies ( smoking_policies ( key ) ),
+      store_environments ( environments ( key ) ),
+      store_amenities ( amenities ( key ) ),
       store_event_trends ( event_trends ( key ) ),
       store_payment_methods ( payment_methods ( key ) ),
 
@@ -118,7 +118,7 @@ export async function searchStores({
    * ② stores 直カラム
    * =========================
    */
-  if (storeTypeId) query = query.eq('store_type_id', storeTypeId);
+  if (storeTypeId) query = query.eq('venue_type_id', storeTypeId);
   if (prefectureId) query = query.eq('prefecture_id', prefectureId);
   if (prefectureId && cityIds.length > 0) query = query.in('city_id', cityIds);
 

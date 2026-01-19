@@ -5,6 +5,10 @@ import { supabase } from '@/lib/supabase';
 import type { Prefecture, City } from '@/types/location';
 import { ChevronsUpDown, Check } from 'lucide-react';
 
+/* =========================
+   Types
+========================= */
+
 type Props = {
   clearKey: number;
   onChange: (prefectureIds: string[], cityIds: string[]) => void;
@@ -19,21 +23,6 @@ type OptionRowProps = {
   onClick: () => void;
 };
 
-function OptionRow({ label, selected, onClick }: OptionRowProps) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start active:bg-black/3 ${selected ? 'text-dark-5 bg-black/5 font-semibold' : 'text-gray-4'}`}
-    >
-      <Check
-        className={`h-4 w-4 shrink-0 ${selected ? 'opacity-100' : 'opacity-0'}`}
-        strokeWidth={2.0}
-      />
-      <span className="min-w-0 flex-1 truncate">{label}</span>
-    </button>
-  );
-}
-
 type SelectorProps = {
   label: string;
   selected: boolean;
@@ -46,6 +35,35 @@ type SelectorProps = {
   innerUnselected: string;
   innerSelected: string;
 };
+
+/* =========================
+   Small Components
+========================= */
+
+function OptionRow({ label, selected, onClick }: OptionRowProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`
+        flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start
+        transition-colors
+        active:bg-black/3
+        ${selected
+          ? 'bg-black/5 font-semibold text-dark-5'
+          : 'text-gray-4 hover:bg-black/3'
+        }
+      `}
+    >
+      <Check
+        className={`h-4 w-4 shrink-0 transition-opacity ${selected ? 'opacity-100' : 'opacity-0'
+          }`}
+        strokeWidth={2}
+      />
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+    </button>
+  );
+}
 
 function Selector({
   label,
@@ -69,10 +87,12 @@ function Selector({
       className="h-12 w-full p-1"
     >
       <div
-        className={`h-full overflow-hidden rounded-full p-px ${selected ? outerSelected : outerUnselected}`}
+        className={`h-full overflow-hidden rounded-full p-px ${selected ? outerSelected : outerUnselected
+          }`}
       >
         <div
-          className={`flex h-full items-center gap-2 rounded-full px-4 ${selected ? innerSelected : innerUnselected}`}
+          className={`flex h-full items-center gap-2 rounded-full px-4 ${selected ? innerSelected : innerUnselected
+            }`}
         >
           <span className="w-full truncate text-start">{label}</span>
           <ChevronsUpDown className="h-4 w-4" strokeWidth={1.2} />
@@ -82,6 +102,10 @@ function Selector({
   );
 }
 
+/* =========================
+   Main Component
+========================= */
+
 export default function AreaSelector({ clearKey, onChange }: Props) {
   const [prefectures, setPrefectures] = useState<Prefecture[]>([]);
   const [cities, setCities] = useState<City[]>([]);
@@ -89,22 +113,23 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
   const [selectedPrefecture, setSelectedPrefecture] = useState<Prefecture | null>(null);
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
 
-  // メニューの開閉
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
   const openPref = openMenu === 'pref';
   const openCity = openMenu === 'city';
   const isAnyOpen = openMenu !== null;
 
-
+  /* =========================
+     Reset
+  ========================= */
   useEffect(() => {
     setSelectedPrefecture(null);
     setSelectedCity(null);
     setOpenMenu(null);
   }, [clearKey]);
 
-  // ============================
-  // 都道府県（sort_order）
-  // ============================
+  /* =========================
+     Prefectures
+  ========================= */
   useEffect(() => {
     const loadPrefectures = async () => {
       const { data, error } = await supabase
@@ -125,9 +150,9 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
 
   const isTokyo = selectedPrefecture?.name === '東京都';
 
-  // ============================
-  // 市区町村（sort_order）
-  // ============================
+  /* =========================
+     Cities
+  ========================= */
   useEffect(() => {
     if (!isTokyo || !selectedPrefecture) {
       setCities([]);
@@ -138,7 +163,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
     const loadCities = async () => {
       const { data, error } = await supabase
         .from('cities')
-        .select('id, name, is_23ward, sort_order')
+        .select('id, name, sort_order')
         .eq('prefecture_id', selectedPrefecture.id)
         .order('sort_order', { ascending: true });
 
@@ -153,6 +178,23 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
     loadCities();
   }, [isTokyo, selectedPrefecture]);
 
+  /* =========================
+     Classification
+     sort_order <= 23 => 東京23区
+  ========================= */
+  const wards = useMemo(
+    () => cities.filter((c) => c.sort_order <= 23),
+    [cities],
+  );
+
+  const others = useMemo(
+    () => cities.filter((c) => c.sort_order > 23),
+    [cities],
+  );
+
+  /* =========================
+     Handlers
+  ========================= */
   const selectPrefecture = (p: Prefecture) => {
     setSelectedPrefecture(p);
     setSelectedCity(null);
@@ -179,52 +221,53 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
     onChange(selectedPrefecture ? [selectedPrefecture.id] : [], []);
   };
 
-  // ============================
-  // 分類（順序は DB に従う）
-  // ============================
-  const wards = useMemo(() => cities.filter((a) => a.is_23ward), [cities]);
-  const others = useMemo(() => cities.filter((a) => !a.is_23ward), [cities]);
-
-  // ============================
-  // 状態ごとのクラス
-  // ============================
+  /* =========================
+     Styles
+  ========================= */
   const outerUnselected = 'bg-gray-1 active:bg-gray-2';
   const outerSelected =
-    'from-blue-3 to-blue-4 bg-gradient-to-tr active:opacity-90 shadow-sm active:shadow-none';
-  const innerUnselected = 'text-gray-3 bg-white active:bg-light-1';
-  const innerSelected = 'bg-blue-1 active:opacity-90 text-blue-4';
+    'from-blue-3 to-blue-4 bg-gradient-to-tr shadow-sm active:opacity-90';
+  const innerUnselected = 'bg-white text-gray-3 active:bg-light-1';
+  const innerSelected = 'bg-blue-1 text-blue-4 active:opacity-90';
 
-  // UI
+  /* =========================
+     UI
+  ========================= */
   return (
     <div className="relative flex w-full text-sm">
-      {/* スクリム */}
+      {/* Scrim */}
       {isAnyOpen && (
         <button
           type="button"
-          aria-label="メニューを閉じる"
+          aria-label="close"
           className="fixed inset-0 z-10 cursor-default"
           onClick={() => setOpenMenu(null)}
         />
       )}
 
-      {/* 都道府県セレクター */}
+      {/* Prefecture */}
       <div className="relative flex-1">
         <Selector
           label={selectedPrefecture?.name ?? '都道府県'}
           selected={selectedPrefecture !== null}
           menuId={MENU_ID.pref}
           open={openPref}
-          onClick={() => setOpenMenu((current) => (current === 'pref' ? null : 'pref'))}
+          onClick={() =>
+            setOpenMenu((v) => (v === 'pref' ? null : 'pref'))
+          }
           {...{ outerUnselected, outerSelected, innerUnselected, innerSelected }}
         />
 
-        {/* 都道府県メニュー */}
         {openPref && (
           <div
             id={MENU_ID.pref}
-            role="listbox"
-            aria-label="都道府県"
-            className="border-gray-1 absolute top-12 left-0 z-20 h-100 w-full overflow-y-auto rounded-2xl border bg-white/40 p-2 shadow-lg backdrop-blur-lg"
+            className="
+              absolute top-12 left-0 z-20
+              h-100 w-full overflow-y-auto
+              rounded-2xl border border-gray-1
+              bg-white/40 p-2
+              shadow-lg backdrop-blur-lg
+            "
           >
             <OptionRow
               label="都道府県を選択"
@@ -232,23 +275,19 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
               onClick={clearPrefecture}
             />
 
-            {prefectures.map((p) => {
-              const isSelected = selectedPrefecture?.id === p.id;
-
-              return (
-                <OptionRow
-                  key={p.id}
-                  label={p.name}
-                  selected={isSelected}
-                  onClick={() => selectPrefecture(p)}
-                />
-              );
-            })}
+            {prefectures.map((p) => (
+              <OptionRow
+                key={p.id}
+                label={p.name}
+                selected={selectedPrefecture?.id === p.id}
+                onClick={() => selectPrefecture(p)}
+              />
+            ))}
           </div>
         )}
       </div>
 
-      {/* 市区町村セレクター */}
+      {/* City */}
       <div
         className={`relative flex-1 ${isTokyo ? 'visible' : 'invisible'}`}
         aria-hidden={!isTokyo}
@@ -259,17 +298,23 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
           menuId={MENU_ID.city}
           open={openCity}
           disabled={!isTokyo}
-          onClick={() => setOpenMenu((current) => (current === 'city' ? null : 'city'))}
+          onClick={() =>
+            setOpenMenu((v) => (v === 'city' ? null : 'city'))
+          }
           {...{ outerUnselected, outerSelected, innerUnselected, innerSelected }}
         />
 
-        {/* 市区町村メニュー */}
         {openCity && (
           <div
             id={MENU_ID.city}
-            role="listbox"
-            aria-label="市区町村"
-            className="text-gray-4 border-gray-1 absolute top-12 left-0 z-20 h-100 w-full overflow-y-auto rounded-2xl border bg-white/40 p-2 shadow-lg backdrop-blur-lg"
+            className="
+              absolute top-12 left-0 z-20
+              h-100 w-full overflow-y-auto
+              rounded-2xl border border-gray-1
+              bg-white/40 p-2
+              text-gray-4
+              shadow-lg backdrop-blur-lg
+            "
           >
             <OptionRow
               label="市区町村を選択"
@@ -279,39 +324,33 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
 
             {wards.length > 0 && (
               <>
-                <div className="p-2 text-xs font-semibold">東京23区</div>
-                {wards.map((c) => {
-                  const isSelected = selectedCity?.id === c.id;
-
-                  return (
-                    <OptionRow
-                      key={c.id}
-                      label={c.name}
-                      selected={isSelected}
-                      onClick={() => selectCity(c)}
-                    />
-                  );
-                })}
+                <div className="p-2 text-xs font-semibold">
+                  東京23区
+                </div>
+                {wards.map((c) => (
+                  <OptionRow
+                    key={c.id}
+                    label={c.name}
+                    selected={selectedCity?.id === c.id}
+                    onClick={() => selectCity(c)}
+                  />
+                ))}
               </>
             )}
 
             {others.length > 0 && (
               <>
-                <div className="border-gray-1 mt-2 border-t px-2 pt-6 pb-2 text-xs font-semibold">
+                <div className="mt-2 border-t border-gray-1 px-2 pt-6 pb-2 text-xs font-semibold">
                   その他
                 </div>
-                {others.map((c) => {
-                  const isSelected = selectedCity?.id === c.id;
-
-                  return (
-                    <OptionRow
-                      key={c.id}
-                      label={c.name}
-                      selected={isSelected}
-                      onClick={() => selectCity(c)}
-                    />
-                  );
-                })}
+                {others.map((c) => (
+                  <OptionRow
+                    key={c.id}
+                    label={c.name}
+                    selected={selectedCity?.id === c.id}
+                    onClick={() => selectCity(c)}
+                  />
+                ))}
               </>
             )}
           </div>

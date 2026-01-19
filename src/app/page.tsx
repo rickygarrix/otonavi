@@ -55,7 +55,7 @@ export default function HomePage() {
   const handleGoToStores = async () => {
     const params = new URLSearchParams();
 
-    if (storeTypeId) params.set('store_type_id', storeTypeId);
+    if (storeTypeId) params.set('venue_type_id', storeTypeId);
     selectedKeys.forEach((k) => params.append('filters', k));
 
     const apiFilters = selectedKeys.filter(

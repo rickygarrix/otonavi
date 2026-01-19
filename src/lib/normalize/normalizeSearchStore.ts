@@ -58,7 +58,7 @@ export function normalizeSearchStore(raw: StoreRow): SearchStore {
     city_id: raw.cities?.id ?? null,
     city_label: raw.cities?.name ?? null,
 
-    store_type_id: raw.venue_types?.id ?? null,
+    venue_type_id: raw.venue_types?.id ?? null,
     type_label: raw.venue_types?.label ?? null,
 
     // ★ 画像は normalize 層で完全に安全化
@@ -67,9 +67,9 @@ export function normalizeSearchStore(raw: StoreRow): SearchStore {
     price_range_key: raw.price_ranges?.key ?? null,
     size_key: raw.sizes?.key ?? null,
 
-    customer_keys: extractKeys(raw.store_customers, 'audience_types'),
+    customer_keys: extractKeys(raw.store_audience_types, 'audience_types'),
     atmosphere_keys: extractKeys(raw.store_atmospheres, 'atmospheres'),
-    environment_keys: extractKeys(raw.store_environment, 'environments'),
+    environment_keys: extractKeys(raw.store_environments, 'environments'),
     drink_keys: extractKeys(raw.store_drinks, 'drinks'),
     payment_method_keys: extractKeys(
       raw.store_payment_methods,
@@ -79,10 +79,10 @@ export function normalizeSearchStore(raw: StoreRow): SearchStore {
       raw.store_event_trends,
       'event_trends',
     ),
-    baggage_keys: extractKeys(raw.store_baggage, 'luggages'),
-    smoking_keys: extractKeys(raw.store_smoking, 'smoking_policies'),
-    toilet_keys: extractKeys(raw.store_toilet, 'toilets'),
-    other_keys: extractKeys(raw.store_other, 'amenities'),
+    baggage_keys: extractKeys(raw.store_luggages, 'luggages'),
+    smoking_keys: extractKeys(raw.store_smoking_policies, 'smoking_policies'),
+    toilet_keys: extractKeys(raw.store_toilets, 'toilets'),
+    other_keys: extractKeys(raw.store_amenities, 'amenities'),
 
     updated_at: raw.updated_at,
   };

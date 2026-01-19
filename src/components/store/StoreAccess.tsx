@@ -10,12 +10,12 @@ function GoogleMapEmbed({ store }: { store: HomeStore }) {
     return null;
   }
 
-  if (!store.google_place_id) {
+  if (!store.place_id) {
     // Place ID が無い店舗は地図を出さない
     return null;
   }
 
-  const q = `place_id:${store.google_place_id}`;
+  const q = `place_id:${store.place_id}`;
   const embedUrl = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(
     q
   )}`;
@@ -43,7 +43,7 @@ type Props = {
  */
 export default function StoreAccess({ store }: Props) {
 
-  if (!store.access && !store.address && !store.google_place_id) {
+  if (!store.access && !store.address && !store.place_id) {
     return null;
   }
 

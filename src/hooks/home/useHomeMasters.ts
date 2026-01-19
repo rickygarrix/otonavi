@@ -86,7 +86,7 @@ export function useHomeMasters() {
             .order('sort_order', { ascending: true }),
           supabase
             .from('cities')
-            .select('id, name, is_23ward, sort_order')
+            .select('id, name, sort_order')
             .order('sort_order', { ascending: true }),
           supabase
             .from('drinks')
