@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
-
+import { SITE_NAME, SITE_DESC, SITE_URL } from '@/lib/site';
 import ServiceWorkerRegister from './_pwa/ServiceWorkerRegister';
 
 const geistSans = Geist({
@@ -14,10 +14,6 @@ const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
 });
-
-const SITE_NAME = 'オトナビ｜音箱検索サイト';
-const SITE_DESC = '夜の音楽体験をもっと身近にする音箱検索サイト。エリアやこだわり条件で絞って、お気に入りのクラブ・バー・ライブハウスを探せます。';
-const SITE_URL = 'https://otnv.jp';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
