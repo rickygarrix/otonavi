@@ -1,3 +1,12 @@
+import type { Metadata } from 'next';
+import { staticMeta } from '@/lib/metadata';
+
+export const metadata: Metadata = staticMeta({
+  title: 'プライバシーポリシー',
+  path: '/privacy',
+  description: 'オトナビのプライバシーポリシーです。',
+});
+
 export default function PrivacyPage() {
   return (
     <>
