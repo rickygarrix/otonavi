@@ -52,6 +52,59 @@ export const baseViewport: Viewport = {
 };
 
 /* =========================
+   Noindex helper
+   confirm / complete / thanks 等
+========================= */
+export function noindex(meta: Metadata): Metadata {
+  return {
+    ...meta,
+    robots: {
+      index: false,
+      follow: true,
+      googleBot: {
+        index: false,
+        follow: true,
+      },
+    },
+  };
+}
+
+/* =========================
+   Static Page Metadata
+   contact / privacy / terms 用
+========================= */
+export function staticMeta(opts: {
+  title: string;
+  path: string;
+  description?: string;
+}): Metadata {
+  const url = new URL(opts.path, SITE_URL).toString();
+  const description = opts.description ?? SITE_DESC;
+
+  return {
+    title: opts.title,
+    description,
+    alternates: { canonical: url },
+
+    openGraph: {
+      url,
+      title: `${opts.title}｜${SITE_NAME}`,
+      description,
+      images: [ogImage],
+      locale: 'ja_JP',
+      type: 'website',
+    },
+
+    twitter: {
+      card: 'summary_large_image',
+      title: `${opts.title}｜${SITE_NAME}`,
+      description,
+      images: [ogImage],
+    },
+  };
+}
+
+/* =========================
    Stores Page Metadata
 ========================= */
 export function storesMeta(opts: {

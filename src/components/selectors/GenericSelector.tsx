@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Tooltip from '@/components/ui/Tooltip';
 import Chip from '@/components/ui/Chip';
@@ -40,14 +40,6 @@ type MasterRow = {
   sort_order: number | null;
   hint?: string | null;
 };
-
-/* =========================
-   Utils
-========================= */
-
-function clamp(n: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, n));
-}
 
 /* =========================
    Component
