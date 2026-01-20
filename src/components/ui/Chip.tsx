@@ -1,13 +1,16 @@
 'use client';
 
+import { CircleQuestionMark } from 'lucide-react';
+
 type Props = {
   label: string;
   selected: boolean;
   onChange: (checked: boolean) => void;
+  hinted?: boolean;
   className?: string;
 };
 
-export default function Chip({ label, selected, onChange, className }: Props) {
+export default function Chip({ label, selected, onChange, hinted, className }: Props) {
   const isSelected = selected === true;
 
   //状態ごとのクラス
@@ -32,8 +35,9 @@ export default function Chip({ label, selected, onChange, className }: Props) {
           className={`relative flex h-full items-center justify-center rounded-full text-sm font-normal ${isSelected ? innerSelected : innerUnselected}`}
         >
           {label}
+          {hinted && <CircleQuestionMark aria-hidden="true" className="absolute -top-1 -right-1 h-2 w-2" strokeWidth={2.0} />}
         </span>
       </span>
-    </label>
+    </label >
   );
 }
