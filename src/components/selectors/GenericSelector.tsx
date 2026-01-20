@@ -206,7 +206,7 @@ export default function GenericSelector({
 
     pressTimer.current = window.setTimeout(() => {
       showTooltipAtTargetTop(hint, target);
-    }, 500);
+    }, 1000);
   };
 
   const onTouchMove = () => {
@@ -230,7 +230,7 @@ export default function GenericSelector({
 
     hoverTimer.current = window.setTimeout(() => {
       showTooltipAtTargetTop(hint, target);
-    }, 500);
+    }, 1000);
   };
 
   const onMouseLeave = () => {
@@ -253,7 +253,7 @@ export default function GenericSelector({
             onMouseEnter={(e) => onMouseEnter(item.hint, e.currentTarget)}
             onMouseLeave={onMouseLeave}
           >
-            <Chip label={item.label} selected={isSelected(item.key)} onChange={() => toggle(item.key)} />
+            <Chip label={item.label} selected={isSelected(item.key)} hinted={enableHint && !!item.hint} onChange={() => toggle(item.key)} />
           </div>
         </li>
       ))}
