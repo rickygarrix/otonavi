@@ -1,84 +1,40 @@
-'use client';
+import type { Metadata } from 'next';
+import StoreClient from './StoreClient';
+import { SITE_URL, SITE_NAME, SITE_DESC } from '@/lib/site';
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import { normalizeStoreDetail } from '@/lib/normalize/normalizeStoreDetail';
-import type { HomeStore } from '@/types/store';
-import StoreDetailView from '@/components/store/StoreDetailView';
+type Props = { params: { slug: string } };
 
-import Header from '@/components/ui/Header';
-import LoadingOverlay from '@/components/ui/LoadingOverlay';
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const slug = params.slug;
 
-export default function StoreDetailPage() {
-  const params = useParams();
-  const slug = params?.slug as string | undefined;
-
-  const [store, setStore] = useState<HomeStore | null>(null);
-  const [dataLoading, setDataLoading] = useState(true);
-  const [imageLoaded, setImageLoaded] = useState(false);
-
-  useEffect(() => {
-    if (!slug) return;
-
-    const load = async () => {
-      setDataLoading(true);
-      setImageLoaded(false);
-
-      const { data, error } = await supabase
+    // meta用は最小限でOK（重いjoinは避ける）
+    const { data } = await supabase
         .from('stores')
-        .select(`
-          *,
-          prefectures:prefecture_id(*),
-          cities:city_id(*),
-          venue_types:venue_type_id(*),
-          price_ranges:price_range_id(*),
-          sizes(*),
-
-          store_drinks(drinks(*)),
-          store_audience_types(audience_types(*)),
-          store_atmospheres(atmospheres(*)),
-          store_event_trends(event_trends(*)),
-          store_toilets(toilets(*)),
-          store_smoking_policies(smoking_policies(*)),
-          store_environments(environments(*)),
-          store_amenities(amenities(*)),
-          store_payment_methods(payment_methods(*)),
-          store_luggages(luggages(*)),
-
-          mentions:mentions!mentions_store_id_fkey(*)
-        `)
+        .select('name, slug, description, og_image_url, is_active')
         .eq('slug', slug)
-        .eq('is_active', true)
         .maybeSingle();
 
-      if (error || !data) {
-        setStore(null);
-        setDataLoading(false);
-        return;
-      }
+    // 非公開/存在しない：検索に出さない
+    if (!data || !data.is_active) {
+        return {
+            title: '店舗が見つかりません',
+            robots: {
+                index: false,
+                follow: true,
+                googleBot: { index: false, follow: true },
+            },
+        };
+    }
 
-      const mapped = normalizeStoreDetail(data);
-      setStore(mapped);
-      setDataLoading(false);
-    };
+    return storeMeta({
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        ogImageUrl: data.og_image_url,
+        isActive: data.is_active,
+    })
+}
 
-    load();
-  }, [slug]);
-
-  return (
-    <div className="relative -mt-20 bg-white">
-      {(dataLoading || !imageLoaded) && <LoadingOverlay />}
-
-      {store && (
-        <>
-          <Header variant="title" title={store.name} />
-          <StoreDetailView
-            store={store}
-            onMainImageLoaded={() => setImageLoaded(true)}
-          />
-        </>
-      )}
-    </div>
-  );
+export default function Page({ params }: Props) {
+    return <StoreDetailClient slug={params.slug} />;
 }

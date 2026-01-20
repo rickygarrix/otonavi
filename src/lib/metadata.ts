@@ -94,3 +94,44 @@ export function storesMeta(opts: { filters: string[]; storeTypeId?: string }): M
     twitter: { card: 'summary_large_image', title, description, images: [ogImage] },
   });
 }
+
+// 音箱詳細ページ用
+export function storeMeta(store: StoreMetaArgs): Metadata {
+  // 非公開・無効店舗は検索に出さない
+  if (!store.isActive) {
+    return noindex({
+      title: store.name ?? '店舗',
+      description: SITE_DESC,
+    });
+  }
+
+  const title = store.name; // ★ サイト名は付けない
+  const description =
+    (store.description && store.description.trim()) ||
+    `${store.name}の会場情報・アクセス・設備などを掲載。`;
+
+  const canonical = new URL(`/stores/${store.slug}`, SITE_URL).toString();
+  const image = store.ogImageUrl || ogImage;
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+
+    openGraph: {
+      url: canonical,
+      title: `${title}｜${SITE_NAME}`,
+      description,
+      images: [image],
+      locale: 'ja_JP',
+      type: 'article',
+    },
+
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title}｜${SITE_NAME}`,
+      description,
+      images: [image],
+    },
+  };
+}
