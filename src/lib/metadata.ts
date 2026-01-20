@@ -58,7 +58,7 @@ export function noindex(partial: Metadata): Metadata {
 // 静的ページ用
 export function staticMeta(opts: { title: string; path: string; description?: string }): Metadata {
   const url = new URL(opts.path, SITE_URL).toString();
-  const title = `${opts.title}｜${SITE_NAME}`;
+  const title = opts.title;
   const description = opts.description ?? SITE_DESC;
 
   return {
