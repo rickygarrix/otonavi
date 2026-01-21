@@ -31,6 +31,8 @@ export const baseMetadata: Metadata = {
 
   icons: {
     icon: [
+      { url: '/favicon-48.png', sizes: '48x48', type: 'image/png' },
+      { url: '/favicon-192.png', sizes: '192x192', type: 'image/png' },
       { url: '/favicon.svg', type: 'image/svg+xml' },
       { url: '/favicon.ico', sizes: 'any' },
     ],
@@ -73,11 +75,7 @@ export function noindex(meta: Metadata): Metadata {
    Static Page Metadata
    contact / privacy / terms 用
 ========================= */
-export function staticMeta(opts: {
-  title: string;
-  path: string;
-  description?: string;
-}): Metadata {
+export function staticMeta(opts: { title: string; path: string; description?: string }): Metadata {
   const url = new URL(opts.path, SITE_URL).toString();
   const description = opts.description ?? SITE_DESC;
 
@@ -107,14 +105,8 @@ export function staticMeta(opts: {
 /* =========================
    Stores Page Metadata
 ========================= */
-export function storesMeta(opts: {
-  filters: string[];
-  storeTypeId?: string;
-}): Metadata {
-  const title =
-    !opts.filters.length && !opts.storeTypeId
-      ? '検索結果'
-      : '条件付き検索結果';
+export function storesMeta(opts: { filters: string[]; storeTypeId?: string }): Metadata {
+  const title = !opts.filters.length && !opts.storeTypeId ? '検索結果' : '条件付き検索結果';
 
   const description =
     'オトナビの検索結果一覧。エリアやこだわり条件で音箱（クラブ・バー・ライブハウス等）を探せます。';
