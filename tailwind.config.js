@@ -30,12 +30,21 @@ module.exports = {
       animation: {
         'spin-slow': 'spin 1.6s linear infinite',
         wave: 'wave 1.6s ease-in-out infinite',
+        'scroll-dot': 'scroll-dot 4.0s ease-in-out infinite',
       },
 
       keyframes: {
         wave: {
           '0%, 100%': { transform: 'translateY(0)', opacity: '0.6' },
           '50%': { transform: 'translateY(-4px)', opacity: '1' },
+        },
+        'scroll-dot': {
+          '0%': { transform: 'translate(-50%, 0)', opacity: '0' },
+          '5%': { transform: 'translate(-50%, 0)', opacity: '0.9' },
+          '30%': { transform: 'translate(-50%, 0)', opacity: '0.9' },
+          '60%': { opacity: '0.9' },
+          '80%': { transform: 'translate(-50%, 48px)', opacity: '0' },
+          '100%': { transform: 'translate(-50%, 48px)', opacity: '0' },
         },
       },
     },
