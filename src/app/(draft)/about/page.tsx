@@ -2,7 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Search } from "lucide-react"
 import { staticMeta } from '@/lib/metadata'
-import { zenMaru } from '@/lib/fonts'
+import { zenMaru, zenKaku } from '@/lib/fonts'
 import Header from "@/components/ui/Header"
 import Footer from "@/components/ui/Footer"
 
@@ -16,7 +16,7 @@ export default function AboutPage() {
     <div className="bg-light-1 text-dark-5 -mt-20">
       <Header />
 
-      <main className={zenMaru.className}>
+      <main className={zenKaku.className}>
         {/* Hero */}
         <section className="relative flex h-146 flex-col items-start gap-6 overflow-hidden bg-[url('/background-sp@2x.png')] bg-cover bg-center px-8 pt-36">
 
@@ -28,8 +28,8 @@ export default function AboutPage() {
             className="drop-shadow-lg"
           />
 
-          <h1 className="mx-1 text-3xl text-light-1 font-light leading-[1.8] tracking-widest drop-shadow-lg">小さな非日常は、<br />いつもの帰り道に。</h1>
-          <p className="mx-1 text-md leading-[1.5] text-light-3 tracking-widest drop-shadow-lg">クラブもミュージックバーも<br />夜の音楽がもっと身近になるサイト</p>
+          <h1 className={`mx-1 text-3xl text-light-1 font-light leading-[1.8] tracking-widest drop-shadow-lg ${zenMaru.className}`}>小さな非日常は、<br />いつもの帰り道に。</h1>
+          <p className={`mx-1 text-md leading-[1.5] text-light-3 tracking-widest drop-shadow-lg ${zenMaru.className}`}>クラブもミュージックバーも<br />夜の音楽がもっと身近になるサイト</p>
 
           <span className="absolute bottom-14 left-1/2 text-light-3 -translate-x-1/2 text-center text-sm drop-shadow-lg after:left-1/2 after:bg-light-3 after:content-[''] after:absolute after:-bottom-4 after:block after:w-1 after:h-1 after:rounded-full after:animate-scroll-dot">
             オトナビを知る
@@ -37,47 +37,39 @@ export default function AboutPage() {
         </section>
 
         {/* Concept */}
-        <section id="concept" className="mx-auto max-w-md px-6 py-20 text-left">
-          <div className="mb-4 text-xs font-normal leading-4 tracking-wide text-Brand-Dark-5">
-            Concept
+        <section className="mx-auto max-w-md px-4 py-10 text-left flex flex-col gap-10">
+          <div className="flex flex-col gap-8">
+            <span className="text-xs leading-[1.5] tracking-widest">Concept</span>
+            <h2 className="text-3xl font-bold leading-[1.5] tracking-widest">夜の音楽体験を<br />もっと身近に</h2>
           </div>
 
-          <h2 className="mb-10 text-3xl font-bold leading-[48px] tracking-[3.2px] text-Brand-Dark-5">
-            夜の音楽体験を
-            <br />
-            もっと身近に
-          </h2>
-
-          <div className="mb-12 space-y-6">
-            <div className="overflow-hidden rounded-xl">
+          <div className="py-2 flex flex-col gap-4">
+            <div className="relative w-full aspect-[3/4]">
               <Image
-                src="/LP1.svg"
-                alt="ライブ会場の風景"
-                width={358}
-                height={480}
-                className="h-[480px] w-full object-cover"
+                src="/concept1@2x.jpg"
+                alt=""
+                fill
+                className="object-cover"
               />
             </div>
-
-            <div className="overflow-hidden rounded-xl">
+            <div className="relative w-full aspect-[3/4]">
               <Image
-                src="/LP2.svg"
-                alt="楽器を演奏する人"
-                width={358}
-                height={480}
-                className="h-[480px] w-full object-cover"
+                src="/concept2@2x.jpg"
+                alt=""
+                fill
+                className="object-cover"
               />
             </div>
           </div>
 
-          <div className="mb-12 flex flex-col gap-8 px-2">
-            <p className="text-base font-normal leading-8 text-Brand-Dark-5">
+          <div className="flex flex-col gap-8 px-2">
+            <p className="leading-[2.0]">
               「クラブってなんか怖い」
               <br />
               「バーって敷居が高そう」
             </p>
 
-            <p className="text-base font-normal leading-8 text-Brand-Dark-5">
+            <p className="leading-[2.0]">
               だけど本当はちょっとだけ憧れてる。
               <br />
               そんなあなたが初めて踏み出す一歩を
@@ -85,22 +77,18 @@ export default function AboutPage() {
               オトナビがそっとナビゲートします。
             </p>
 
-            <p className="text-base font-normal leading-8 text-Brand-Dark-5">
+            <p className="leading-[2.0]">
               夜の音楽体験が、日常に変わる瞬間へ。
             </p>
           </div>
 
-          <div className="flex w-full justify-center py-6">
-            <Link
-              href="/"
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-dark-4 bg-linear-to-t from-dark-3 to-dark-2 text-sm text-light-1 shadow-xs shadow-dark-3/50 transition active:scale-102 active:shadow-md"
-            >
-              <Search className="h-4 w-4 text-light-1" />
-              <span className="px-1 text-sm font-normal leading-5 text-light-1">
-                店舗を探す
-              </span>
-            </Link>
-          </div>
+          <Link
+            href="/"
+            className={`from-dark-3 border-dark-4 to-dark-2 text-light-1 shadow-dark-3/50 flex h-12 items-center justify-center gap-2 rounded-lg border bg-linear-to-t text-sm shadow-xs transition active:scale-102 active:shadow-md`}
+          >
+            <Search className="h-4 w-4" strokeWidth={1.2} />
+            店舗を探す
+          </Link>
         </section>
 
         {/* How to use */}
