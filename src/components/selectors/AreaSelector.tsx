@@ -110,7 +110,8 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
   const [prefectures, setPrefectures] = useState<Prefecture[]>([]);
   const [cities, setCities] = useState<City[]>([]);
 
-  const [selectedPrefecture, setSelectedPrefecture] = useState<Prefecture | null>(null);
+  const [selectedPrefecture, setSelectedPrefecture] =
+    useState<Prefecture | null>(null);
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
 
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
@@ -128,13 +129,35 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
   }, [clearKey]);
 
   /* =========================
-     Prefectures
+     Prefectures (店舗がある県のみ)
   ========================= */
   useEffect(() => {
     const loadPrefectures = async () => {
+      // ① stores から使用中 prefecture_id を取得
+      const { data: storePrefs, error: storeError } = await supabase
+        .from('stores')
+        .select('prefecture_id')
+        .not('prefecture_id', 'is', null);
+
+      if (storeError) {
+        console.error('stores prefecture load error:', storeError);
+        return;
+      }
+
+      const usedPrefectureIds = Array.from(
+        new Set((storePrefs ?? []).map((s) => s.prefecture_id))
+      );
+
+      if (usedPrefectureIds.length === 0) {
+        setPrefectures([]);
+        return;
+      }
+
+      // ② prefectures を絞り込み
       const { data, error } = await supabase
         .from('prefectures')
         .select('id, name, sort_order')
+        .in('id', usedPrefectureIds)
         .order('sort_order', { ascending: true });
 
       if (error) {
@@ -151,7 +174,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
   const isTokyo = selectedPrefecture?.name === '東京都';
 
   /* =========================
-     Cities
+     Cities (東京のみ)
   ========================= */
   useEffect(() => {
     if (!isTokyo || !selectedPrefecture) {
@@ -205,7 +228,10 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
   const selectCity = (c: City) => {
     setSelectedCity(c);
     setOpenMenu(null);
-    onChange(selectedPrefecture ? [selectedPrefecture.id] : [], [c.id]);
+    onChange(
+      selectedPrefecture ? [selectedPrefecture.id] : [],
+      [c.id],
+    );
   };
 
   const clearPrefecture = () => {
@@ -218,7 +244,10 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
   const clearCity = () => {
     setSelectedCity(null);
     setOpenMenu(null);
-    onChange(selectedPrefecture ? [selectedPrefecture.id] : [], []);
+    onChange(
+      selectedPrefecture ? [selectedPrefecture.id] : [],
+      [],
+    );
   };
 
   /* =========================
@@ -255,7 +284,12 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
           onClick={() =>
             setOpenMenu((v) => (v === 'pref' ? null : 'pref'))
           }
-          {...{ outerUnselected, outerSelected, innerUnselected, innerSelected }}
+          {...{
+            outerUnselected,
+            outerSelected,
+            innerUnselected,
+            innerSelected,
+          }}
         />
 
         {openPref && (
@@ -263,7 +297,7 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
             id={MENU_ID.pref}
             className="
               absolute top-12 left-0 z-20
-              h-100 w-full overflow-y-auto
+              max-h-100 w-full overflow-y-auto
               rounded-2xl border border-gray-1
               bg-white/40 p-2
               shadow-lg backdrop-blur-lg
@@ -287,9 +321,10 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
         )}
       </div>
 
-      {/* City */}
+      {/* City (東京のみ表示) */}
       <div
-        className={`relative flex-1 ${isTokyo ? 'visible' : 'invisible'}`}
+        className={`relative flex-1 ${isTokyo ? 'visible' : 'invisible'
+          }`}
         aria-hidden={!isTokyo}
       >
         <Selector
@@ -301,7 +336,12 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
           onClick={() =>
             setOpenMenu((v) => (v === 'city' ? null : 'city'))
           }
-          {...{ outerUnselected, outerSelected, innerUnselected, innerSelected }}
+          {...{
+            outerUnselected,
+            outerSelected,
+            innerUnselected,
+            innerSelected,
+          }}
         />
 
         {openCity && (
