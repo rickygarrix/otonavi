@@ -31,7 +31,6 @@ export default function StoreGalleryCarousel({
       .from('store_galleries')
       .select('id, gallery_url')
       .eq('store_id', storeId)
-      .eq('is_active', true)
       .order('sort_order')
       .then(({ data, error }) => {
         if (error) {

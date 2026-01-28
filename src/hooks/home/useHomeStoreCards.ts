@@ -43,8 +43,7 @@ export function useHomeStoreCards(limit = 12) {
          store_galleries (
             id,
             gallery_url,
-            sort_order,
-            is_active
+            sort_order
           )`
         )
         .eq('is_active', true)

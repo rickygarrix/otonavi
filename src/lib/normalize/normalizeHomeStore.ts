@@ -3,7 +3,7 @@ import type { StoreRow } from '@/types/store-db';
 
 function selectImage(store_galleries: StoreRow['store_galleries']): string {
   if (!store_galleries?.length) return '/noshop.svg';
-  const activeOnly = store_galleries.filter((g) => g.is_active === true);
+  const activeOnly = store_galleries;
 
   if (!activeOnly.length) return '/noshop.svg';
 

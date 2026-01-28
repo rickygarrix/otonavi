@@ -25,9 +25,7 @@ function selectImage(
 ): string {
   if (!store_galleries?.length) return '/noshop.svg';
 
-  const activeOnly = store_galleries.filter(
-    (g) => g.is_active === true,
-  );
+ const activeOnly = store_galleries;
 
   if (!activeOnly.length) return '/noshop.svg';
 

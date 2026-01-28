@@ -61,8 +61,7 @@ export function useStoresForSearch(
           store_galleries:store_galleries!store_galleries_store_id_fkey (
             id,
             gallery_url,
-            sort_order,
-            is_active
+            sort_order
           )
         `
         )
