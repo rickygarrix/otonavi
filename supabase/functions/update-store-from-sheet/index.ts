@@ -33,6 +33,7 @@ serve(async (req) => {
       return await handleUpsertStore(supabase, body);
     }
 
+
     /**************************************
      * stores INSERT（新規）
      **************************************/
@@ -81,6 +82,27 @@ serve(async (req) => {
     return jsonError(500, err instanceof Error ? err.message : String(err));
   }
 });
+
+/**************************************
+ * Storage: store/galleries/{storeId}/ フォルダ作成
+ **************************************/
+async function ensureStoreGalleryFolder(supabase: any, storeId: string) {
+  const path = `galleries/${storeId}/.keep`;
+
+  const { error } = await supabase.storage
+    .from("store")
+    .upload(path, new Uint8Array(), {
+      upsert: true,
+      contentType: "text/plain",
+    });
+
+  if (error) {
+    console.error("ensureStoreGalleryFolder FAILED", storeId, error);
+    throw error;
+  }
+
+  console.log("ensureStoreGalleryFolder OK", path);
+}
 
 /**************************************
  * stores UPSERT
@@ -166,6 +188,7 @@ async function handleInsertStore(supabase: any, body: any) {
     ...storesOnlyPayload
   } = storePayload;
 
+  // ===== stores INSERT =====
   const { data: insertedStore, error: insertError } = await supabase
     .from("stores")
     .insert(storesOnlyPayload)
@@ -178,6 +201,17 @@ async function handleInsertStore(supabase: any, body: any) {
 
   const storeId = insertedStore.id;
 
+  // ★ Storage galleries/{storeId}/ フォルダ作成（追加）
+  try {
+    await ensureStoreGalleryFolder(supabase, storeId);
+  } catch (e) {
+    // フォルダ作成失敗でもDBは作れているので
+    // ここで止めるか・警告にするかは好み
+    console.error("Storage folder create failed", storeId, e);
+    return jsonStepError(500, "storage_folder_create", e);
+  }
+
+  // ===== M2M =====
   const m2mResult = await runAllM2M(supabase, storeId, {
     store_audience_types: ["audience_type_id", audience_type_ids],
     store_atmospheres: ["atmosphere_id", atmosphere_ids],
@@ -270,38 +304,178 @@ async function handleDeactivateMention(supabase: any, body: any) {
 
 /**************************************
  * store_galleries
- * is_active 廃止：UPSERTは物理データのみ
- * deactivate は delete で対応
+ * - gallery_url を主キーとして扱う
+ * - gallery_url があれば → sort_order UPDATE
+ * - なければ：
+ *    - store_id + sort_order があれば → gallery_url UPDATE
+ *    - なければ → INSERT
  **************************************/
 async function handleUpsertStoreGallery(supabase: any, body: any) {
   console.log("=== UPSERT STORE GALLERY START ===");
 
-  // sort_order: 0 を許容したいので null/undefined でチェック
-  if (!body.store_id || !body.gallery_url || body.sort_order === null || body.sort_order === undefined) {
+  const { store_id, gallery_url, sort_order } = body;
+
+  if (!store_id || !gallery_url || sort_order == null) {
     return jsonError(400, "MISSING_REQUIRED_FIELDS");
   }
 
-  const payload: any = {
-    id: body.id || undefined,
-    store_id: body.store_id,
-    gallery_url: body.gallery_url,
-    sort_order: body.sort_order,
-    updated_at: new Date().toISOString(),
-  };
+  // ================================
+  // ① gallery_url で既存を探す
+  // ================================
+  const { data: byUrl, error: byUrlErr } = await supabase
+    .from("store_galleries")
+    .select("id, sort_order")
+    .eq("gallery_url", gallery_url)
+    .maybeSingle();
 
-  if (!payload.id) {
-    payload.created_at = new Date().toISOString();
+  if (byUrlErr) {
+    return jsonStepError(500, "store_galleries_select_by_url", byUrlErr);
   }
 
-  const { data, error } = await supabase
+  if (byUrl) {
+    const oldSort = byUrl.sort_order;
+
+    // ================================
+    // 並び替え衝突チェック
+    // ================================
+    const { data: bySort, error: bySortErr } = await supabase
+      .from("store_galleries")
+      .select("id, sort_order")
+      .eq("store_id", store_id)
+      .eq("sort_order", sort_order)
+      .maybeSingle();
+
+    if (bySortErr) {
+      return jsonStepError(500, "store_galleries_select_by_sort", bySortErr);
+    }
+
+    // ===== 衝突あり → 一時退避つきSWAP =====
+    if (bySort && bySort.id !== byUrl.id) {
+      console.log("SWAP with TEMP", byUrl.id, "<->", bySort.id);
+
+      // temp は絶対被らない値（負数でOK）
+      const tempSort = -Math.floor(Date.now() / 1000);
+
+      // 1) A(byUrl) を temp に退避（oldSort を空ける）
+      const { error: step1Err } = await supabase
+        .from("store_galleries")
+        .update({
+          sort_order: tempSort,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", byUrl.id);
+
+      if (step1Err) {
+        return jsonStepError(500, "store_galleries_swap_temp_a", step1Err);
+      }
+
+      // 2) B(bySort) を oldSort に移動
+      const { error: step2Err } = await supabase
+        .from("store_galleries")
+        .update({
+          sort_order: oldSort,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", bySort.id);
+
+      if (step2Err) {
+        return jsonStepError(500, "store_galleries_swap_temp_b", step2Err);
+      }
+
+      // 3) A(byUrl) を new sort_order に移動
+      const { error: step3Err } = await supabase
+        .from("store_galleries")
+        .update({
+          sort_order,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", byUrl.id);
+
+      if (step3Err) {
+        return jsonStepError(500, "store_galleries_swap_temp_a_final", step3Err);
+      }
+
+      return jsonSuccess({
+        id: byUrl.id,
+        mode: "update_sort_with_temp_swap",
+      });
+    }
+
+    // ===== 衝突なし → 普通にUPDATE =====
+    const { error: updErr } = await supabase
+      .from("store_galleries")
+      .update({
+        sort_order,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", byUrl.id);
+
+    if (updErr) {
+      return jsonStepError(500, "store_galleries_update_by_url", updErr);
+    }
+
+    return jsonSuccess({
+      id: byUrl.id,
+      mode: "update_sort_by_url",
+    });
+  }
+
+  // ================================
+  // ② store_id + sort_order で既存を探す（画像差し替え）
+  // ================================
+  const { data: bySort, error: bySortErr } = await supabase
     .from("store_galleries")
-    .upsert(payload, { onConflict: "store_id,sort_order" })
+    .select("id")
+    .eq("store_id", store_id)
+    .eq("sort_order", sort_order)
+    .maybeSingle();
+
+  if (bySortErr) {
+    return jsonStepError(500, "store_galleries_select_by_sort", bySortErr);
+  }
+
+  if (bySort) {
+    const { error: updErr } = await supabase
+      .from("store_galleries")
+      .update({
+        gallery_url,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", bySort.id);
+
+    if (updErr) {
+      return jsonStepError(500, "store_galleries_update_by_sort", updErr);
+    }
+
+    return jsonSuccess({
+      id: bySort.id,
+      mode: "update_image_by_sort",
+    });
+  }
+
+  // ================================
+  // ③ 完全新規
+  // ================================
+  const { data, error: insErr } = await supabase
+    .from("store_galleries")
+    .insert({
+      store_id,
+      gallery_url,
+      sort_order,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
     .select("id")
     .single();
 
-  if (error) return jsonStepError(500, "store_galleries_upsert", error);
+  if (insErr) {
+    return jsonStepError(500, "store_galleries_insert", insErr);
+  }
 
-  return jsonSuccess({ id: data.id });
+  return jsonSuccess({
+    id: data.id,
+    mode: "insert",
+  });
 }
 
 async function handleDeactivateStoreGallery(supabase: any, body: any) {
