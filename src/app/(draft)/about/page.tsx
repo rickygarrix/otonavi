@@ -92,9 +92,11 @@ export default function AboutPage() {
         </section>
 
         {/* How to use */}
-        <svg className="w-full h-12 pt-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 40" fill="none" preserveAspectRatio="none">
-          <path d="M195 0C263.263 0 328.862 11.401 390 32.4004V40H0V32.4004C61.1378 11.4009 126.737 0 195 0Z" fill="#E8ECF1" />
-        </svg>
+        <div className="relative h-22 justify-bottom" aria-hidden="true">
+          <svg className="absolute left-0 -bottom-px w-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 40" fill="none" preserveAspectRatio="none">
+            <path d="M195 0C263.263 0 328.862 11.401 390 32.4004V40H0V32.4004C61.1378 11.4009 126.737 0 195 0Z" fill="#E8ECF1" />
+          </svg>
+        </div>
 
         <section className="px-4 py-10 text-left flex flex-col gap-10 bg-light-2">
 
@@ -151,33 +153,12 @@ export default function AboutPage() {
           </ol>
         </section>
 
-        <svg className="w-full h-12 pt-2 bg-dark-5 scale-y-[-1]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 40" fill="none" preserveAspectRatio="none">
-          <path d="M195 0C263.263 0 328.862 11.401 390 32.4004V40H0V32.4004C61.1378 11.4009 126.737 0 195 0Z" fill="#E8ECF1" />
-        </svg>
+        <div className="relative h-22 bg-dark-5 scale-y-[-1] justify-bottom" aria-hidden="true">
+          <svg className="absolute left-0 -bottom-px w-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 40" fill="none" preserveAspectRatio="none">
+            <path d="M195 0C263.263 0 328.862 11.401 390 32.4004V40H0V32.4004C61.1378 11.4009 126.737 0 195 0Z" fill="#E8ECF1" />
+          </svg>
+        </div>
 
-        {/* YouTube */}
-        <section className="self-stretch bg-dark-5 px-6 py-20 text-light-3">
-          <div className="mx-auto flex w-full max-w-[600px] flex-col items-center gap-6">
-            <div className="self-stretch text-left text-xl font-normal leading-8 tracking-widest text-light-3 font-['Inter']">
-              オトナビ公式YouTube
-            </div>
-
-            <p className="self-stretch text-left text-sm font-normal leading-6 text-light-3 font-['Zen_Kaku_Gothic_New']">
-              開発の舞台裏をぜんぶ見せます。
-              <br />
-              アイデアが形になっていく過程や、サービス設計のリアルな悩みと工夫を共有しながら、
-              一緒にプロダクトづくりの面白さを楽しみましょう！
-            </p>
-
-            <div className="mt-4 w-full">
-              <div className="inline-flex h-52 w-full items-center justify-center gap-2.5 bg-light-5">
-                <div className="flex-1 text-center text-sm font-normal leading-6 text-dark-5 font-['Zen_Kaku_Gothic_New']">
-                  埋め込み
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
       <Footer />
