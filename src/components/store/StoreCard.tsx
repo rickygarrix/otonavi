@@ -4,6 +4,16 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { SearchStore } from '@/types/store';
 
+const STATUS_COLOR_MAP: Record<
+  NonNullable<SearchStore['status_key']>,
+  string
+> = {
+  normal: 'bg-emerald-500',
+  temporary: 'bg-yellow-400',
+  closed: 'bg-red-500',
+  irregular: 'bg-purple-600',
+};
+
 type Props = {
   store: SearchStore;
   query?: string;
@@ -14,18 +24,9 @@ export default function StoreCard({ store, query }: Props) {
 
   const handleClick = () => {
     const base = `/stores/${store.slug}`;
-
-    if (query && query.trim() !== '') {
-      router.push(`${base}?${query}`);
-    } else {
-      router.push(base);
-    }
+    router.push(query && query.trim() !== '' ? `${base}?${query}` : base);
   };
 
-  /**
-   * ★ 最終防衛ライン
-   * Next/Image に「空文字・undefined」を絶対に渡さない
-   */
   const imageUrl =
     typeof store.gallery_url === 'string' && store.gallery_url.trim() !== ''
       ? store.gallery_url
@@ -36,15 +37,17 @@ export default function StoreCard({ store, query }: Props) {
       ? `東京 ${store.city_label}`
       : store.prefecture_label ?? '';
 
+  const statusColor =
+    store.status_key ? STATUS_COLOR_MAP[store.status_key] : null;
+
   return (
     <button
       onClick={handleClick}
       className="w-full rounded-3xl py-2 text-left transition active:scale-95 active:bg-light-1"
     >
-      {/* 画像 */}
       <div className="p-2">
         <div
-          className={`relative aspect-square overflow-hidden rounded-2xl ${imageUrl === '/noshop.svg' ? 'shadow-none' : 'shadow-sm'
+          className={`relative aspect-square overflow-visible rounded-2xl ${imageUrl === '/noshop.svg' ? 'shadow-none' : 'shadow-sm'
             }`}
         >
           <Image
@@ -53,12 +56,17 @@ export default function StoreCard({ store, query }: Props) {
             fill
             loading="lazy"
             sizes="(max-width: 420px) 50vw, 210px"
-            className="object-cover"
+            className="object-cover rounded-2xl"
           />
+
+          {statusColor && (
+            <span
+              className={`absolute -left-1 -bottom-1 h-1.5 w-1.5 rounded-full ${statusColor}`}
+            />
+          )}
         </div>
       </div>
 
-      {/* テキスト */}
       <div className="flex flex-col gap-1 px-4 py-1">
         <p className="line-clamp-1 text-sm font-bold leading-[1.5]">
           {store.name}

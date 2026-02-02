@@ -59,7 +59,7 @@ export function normalizeSearchStore(raw: SearchStoreRow): SearchStore {
 
     venue_type_id: raw.venue_types?.id ?? null,
     type_label: raw.venue_types?.label ?? null,
-
+    status_key: raw.statuses?.key ?? 'normal',
     gallery_url: selectImage(raw.store_galleries),
 
     price_range_key: raw.price_ranges?.key ?? null,

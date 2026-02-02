@@ -40,6 +40,9 @@ export function useStoresForSearch(
           kana,
           updated_at,
 
+          status_id,
+          statuses:statuses!stores_status_id_fkey ( key ),
+
           prefectures ( id, name ),
           cities ( id, name ),
           venue_types ( id, label ),
@@ -49,7 +52,7 @@ export function useStoresForSearch(
 
           store_audience_types ( audience_types ( key ) ),
           store_atmospheres ( atmospheres ( key ) ),
-          store_drinks ( drinks ( key, sort_order ) ),
+          store_drinks ( drinks ( key ) ),
           store_luggages ( luggages ( key ) ),
           store_toilets ( toilets ( key ) ),
           store_smoking_policies ( smoking_policies ( key ) ),
@@ -58,12 +61,11 @@ export function useStoresForSearch(
           store_event_trends ( event_trends ( key ) ),
           store_payment_methods ( payment_methods ( key ) ),
 
-          store_galleries:store_galleries!store_galleries_store_id_fkey (
-            id,
+          store_galleries (
             gallery_url,
             sort_order
           )
-        `
+          `
         )
         .eq('is_active', true)
         .order('updated_at', { ascending: false })

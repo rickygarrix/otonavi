@@ -129,6 +129,7 @@ export type SearchStore = {
   smoking_keys: string[];
   toilet_keys: string[];
   other_keys: string[];
+  status_key?: 'normal' | 'temporary' | 'closed' | 'irregular';
 
   updated_at: string;
 };

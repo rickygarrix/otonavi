@@ -10,14 +10,20 @@ function asArray(v: string | string[] | undefined) {
   return Array.isArray(v) ? v : [v];
 }
 
+/**
+ * ✅ Next.js 14+ 対応版
+ * searchParams は Promise なので await する
+ */
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }): Promise<Metadata> {
-  const filters = asArray(searchParams.filters);
+  const params = await searchParams;
+
+  const filters = asArray(params.filters);
   const storeTypeId =
-    (searchParams.store_type_id as string | undefined) ?? undefined;
+    (params.store_type_id as string | undefined) ?? undefined;
 
   return storesMeta({ filters, storeTypeId });
 }

@@ -115,11 +115,16 @@ export type SearchStoreRow = {
   // ===== Type =====
   venue_types: IdLabelRow | null;
 
+  // ★★★ ここを追加 ★★★
+  statuses: {
+    key: 'normal' | 'temporary' | 'closed' | 'irregular';
+  } | null;
+
   // ===== Size / Price =====
   price_ranges: DefinitionKV | null;
   sizes: DefinitionKV | null;
 
-  // ===== M:N（key だけ使う）=====
+  // ===== M:N =====
   store_event_trends: M2MRow<'event_trends'>[];
   store_luggages: M2MRow<'luggages'>[];
   store_toilets: M2MRow<'toilets'>[];
