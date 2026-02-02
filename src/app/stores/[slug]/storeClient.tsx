@@ -23,26 +23,30 @@ export default function StoreClient({ slug }: { slug: string }) {
       const { data, error } = await supabase
         .from('stores')
         .select(`
-          *,
-          prefectures:prefecture_id(*),
-          cities:city_id(*),
-          venue_types:venue_type_id(*),
-          price_ranges:price_range_id(*),
-          sizes(*),
+    *,
+    statuses:statuses!stores_status_id_fkey (
+      key
+    ),
 
-          store_drinks(drinks(*)),
-          store_audience_types(audience_types(*)),
-          store_atmospheres(atmospheres(*)),
-          store_event_trends(event_trends(*)),
-          store_toilets(toilets(*)),
-          store_smoking_policies(smoking_policies(*)),
-          store_environments(environments(*)),
-          store_amenities(amenities(*)),
-          store_payment_methods(payment_methods(*)),
-          store_luggages(luggages(*)),
+    prefectures:prefecture_id(*),
+    cities:city_id(*),
+    venue_types:venue_type_id(*),
+    price_ranges:price_range_id(*),
+    sizes(*),
 
-          mentions:mentions!mentions_store_id_fkey(*)
-        `)
+    store_drinks(drinks(*)),
+    store_audience_types(audience_types(*)),
+    store_atmospheres(atmospheres(*)),
+    store_event_trends(event_trends(*)),
+    store_toilets(toilets(*)),
+    store_smoking_policies(smoking_policies(*)),
+    store_environments(environments(*)),
+    store_amenities(amenities(*)),
+    store_payment_methods(payment_methods(*)),
+    store_luggages(luggages(*)),
+
+    mentions:mentions!mentions_store_id_fkey(*)
+  `)
         .eq('slug', slug)
         .eq('is_active', true)
         .maybeSingle();

@@ -99,6 +99,7 @@ export function normalizeStoreDetail(raw: StoreRow): HomeStore {
     slug: raw.slug,
     name: raw.name,
     kana: raw.kana,
+    status_key: raw.statuses?.key ?? 'normal',
 
     /* ========= location ========= */
     prefecture_id: raw.prefectures?.id ?? null,
