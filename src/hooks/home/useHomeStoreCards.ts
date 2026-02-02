@@ -40,6 +40,8 @@ export function useHomeStoreCards(limit = 12) {
             label
           ),
 
+         statuses:statuses!stores_status_id_fkey ( key ),
+
          store_galleries (
             id,
             gallery_url,

@@ -4,22 +4,27 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { HomeStoreLite } from '@/types/store';
 
+const STATUS_COLOR_MAP: Record<
+  NonNullable<HomeStoreLite['status_key']>,
+  string
+> = {
+  normal: 'bg-green-700',
+  temporary: 'bg-yellow-600',
+  closed: 'bg-red-800',
+  irregular: 'bg-purple-600',
+};
+
 type Props = {
   store: HomeStoreLite;
 };
 
 export default function HomeStoreCard({ store }: Props) {
-  // =========================
-  // 画像
-  // =========================
+
   const imageUrl =
     store.gallery_url && store.gallery_url.trim() !== ''
       ? store.gallery_url
       : '/noshop.svg';
 
-  // =========================
-  // 表示ラベル（所在地のみ）
-  // =========================
   const isTokyo = store.prefecture_label === '東京都';
 
   const locationLabel = isTokyo
@@ -28,33 +33,35 @@ export default function HomeStoreCard({ store }: Props) {
       : '東京'
     : store.prefecture_label ?? '';
 
+  const statusColor =
+    store.status_key ? STATUS_COLOR_MAP[store.status_key] : null;
+
   return (
     <Link
       href={`/stores/${store.slug}`}
       className="flex w-full flex-col items-center gap-2 p-2 text-center transition active:scale-95"
     >
-      {/* =========================
-          画像
-      ========================= */}
-      <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/10 backdrop-blur-xl">
+
+      <div className="relative aspect-square w-full overflow-visible rounded-2xl border border-white/10 backdrop-blur-xl">
         <Image
           src={imageUrl}
           alt={store.name}
           fill
           sizes="(max-width: 768px) 50vw, 25vw"
-          className="object-cover"
+          className="object-cover rounded-2xl"
           priority
         />
+
+        {statusColor && (
+          <span
+            className={`absolute -left-1 -bottom-1 h-1.5 w-1.5 rounded-full ${statusColor}`}
+          />
+        )}
       </div>
 
-      {/* =========================
-          テキスト
-      ========================= */}
       <div className="flex w-full flex-col gap-1 px-2 py-1">
         <div className="flex h-7 items-center justify-center">
-          <p className="line-clamp-2 text-xs leading-[1.2]">
-            {store.name}
-          </p>
+          <p className="line-clamp-2 text-xs leading-[1.2]">{store.name}</p>
         </div>
 
         {locationLabel && (

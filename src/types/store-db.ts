@@ -1,10 +1,6 @@
 // src/types/store-db.ts
 import type { DefinitionKV } from './common';
 
-/* =========================
-   Basic FK rows
-========================= */
-
 export type IdLabelRow = {
   id: string;
   label: string;
@@ -20,10 +16,6 @@ export type PrefectureRow = {
   name: string;
 };
 
-/* =========================
-   Image
-========================= */
-
 export type StoreGalleryRow = {
   gallery_url: string | null;
   sort_order: number | null;
@@ -31,17 +23,9 @@ export type StoreGalleryRow = {
   updated_at: string;
 };
 
-/* =========================
-   M2M generic
-========================= */
-
 export type M2MRow<T extends string> = {
   [K in T]: DefinitionKV | null;
 };
-
-/* =========================
-   StoreRow（詳細ページ用・完全版）
-========================= */
 
 export type StoreRow = {
   // ===== Core =====
@@ -49,6 +33,9 @@ export type StoreRow = {
   slug: string;
   name: string;
   kana: string | null;
+   statuses: {
+    key: 'normal' | 'temporary' | 'closed' | 'irregular';
+  } | null;
   updated_at: string;
 
   // ===== Text / Info =====
@@ -95,11 +82,6 @@ export type StoreRow = {
   mentions?: unknown[];
 };
 
-/* =========================
-   SearchStoreRow（検索・一覧用）
-   ★ useStoresForSearch / searchStores 専用
-========================= */
-
 export type SearchStoreRow = {
   // ===== Core =====
   id: string;
@@ -114,8 +96,6 @@ export type SearchStoreRow = {
 
   // ===== Type =====
   venue_types: IdLabelRow | null;
-
-  // ★★★ ここを追加 ★★★
   statuses: {
     key: 'normal' | 'temporary' | 'closed' | 'irregular';
   } | null;

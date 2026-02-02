@@ -29,6 +29,8 @@ export function normalizeHomeStore(raw: StoreRow): HomeStoreLite {
     venue_type_id: raw.venue_types?.id ?? null,
     type_label: raw.venue_types?.label ?? null,
 
+    status_key: raw.statuses?.key ?? 'normal',
+
     gallery_url: selectImage(raw.store_galleries),
     updated_at: raw.updated_at,
   };

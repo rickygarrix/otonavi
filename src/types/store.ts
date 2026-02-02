@@ -94,6 +94,7 @@ export type HomeStoreLite = {
 
   venue_type_id: string | null;
   type_label: string | null;
+  status_key?: 'normal' | 'temporary' | 'closed' | 'irregular';
 
   gallery_url: string;
   updated_at: string;
