@@ -11,8 +11,8 @@ function asArray(v: string | string[] | undefined) {
 }
 
 /**
- * ✅ Next.js 14+ 対応版
- * searchParams は Promise なので await する
+ * ✅ Next.js 14+ 対応
+ * searchParams は Promise なので await
  */
 export async function generateMetadata({
   searchParams,
@@ -23,7 +23,7 @@ export async function generateMetadata({
 
   const filters = asArray(params.filters);
   const storeTypeId =
-    (params.store_type_id as string | undefined) ?? undefined;
+    (params.venue_type_id as string | undefined) ?? undefined;
 
   return storesMeta({ filters, storeTypeId });
 }

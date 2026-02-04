@@ -1,62 +1,104 @@
+// src/app/stores/[slug]/page.tsx
 import type { Metadata } from 'next';
 import StoreClient from './storeClient';
-import { SITE_URL, SITE_NAME, SITE_DESC } from '@/lib/site';
+import { SITE_URL, SITE_DESC } from '@/lib/site';
 import { getSupabaseServer } from '@/lib/supabaseServer';
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
-/* =========================
-   Metadata
-========================= */
 export async function generateMetadata(
   { params }: Props
 ): Promise<Metadata> {
-  // Next.js 15 では params は Promise
   const { slug } = await params;
-
   const supabase = getSupabaseServer();
 
-  // meta 用：最小限の取得（重い join はしない）
   const { data } = await supabase
     .from('stores')
-    .select('name, slug, description, og_gallery_url, is_active')
+    .select(`
+      name,
+      slug,
+      description,
+      store_galleries (
+        gallery_url,
+        sort_order
+      )
+    `)
     .eq('slug', slug)
     .maybeSingle();
 
-  // 非公開 or 存在しない
-  if (!data || !data.is_active) {
+  // =========================
+  // 店舗が見つからない場合
+  // =========================
+  if (!data) {
+    const fallbackOgp = `${SITE_URL}/ogp.png`;
+
     return {
-      title: '店舗が見つかりません',
-      robots: {
-        index: false,
-        follow: true,
-        googleBot: {
-          index: false,
-          follow: true,
-        },
+      title: 'オトナビ',
+      description: SITE_DESC,
+
+      openGraph: {
+        title: 'オトナビ',
+        description: SITE_DESC,
+        url: `${SITE_URL}/stores/${slug}`,
+        images: [fallbackOgp],
+      },
+
+      twitter: {
+        card: 'summary_large_image',
+        title: 'オトナビ',
+        description: SITE_DESC,
+        images: [fallbackOgp],
       },
     };
   }
 
+  // =========================
+  // OGP画像選定ロジック
+  // =========================
+  const sortedGalleries =
+    data.store_galleries
+      ?.slice()
+      .sort((a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999));
+
+  const firstGalleryUrl = sortedGalleries?.[0]?.gallery_url ?? null;
+
+  // SVGはOGP非対応なので除外
+  const isValidOgpImage =
+    typeof firstGalleryUrl === 'string' &&
+    !firstGalleryUrl.endsWith('.svg');
+
+  // 最終的に使うOGP画像
+  const ogpImage = isValidOgpImage
+    ? firstGalleryUrl
+    : `${SITE_URL}/ogp.png`;
+
+  // =========================
+  // Metadata 本体
+  // =========================
   return {
-    title: `${data.name} | ${SITE_NAME}`,
+    title: data.name, // ← baseMetadata の template により「店名｜オトナビ」になる
+
     description: data.description ?? SITE_DESC,
+
     openGraph: {
       title: data.name,
       description: data.description ?? SITE_DESC,
       url: `${SITE_URL}/stores/${data.slug}`,
-      images: data.og_gallery_url ? [data.og_gallery_url] : [],
+      images: [ogpImage],
+    },
+
+    twitter: {
+      card: 'summary_large_image',
+      title: data.name,
+      description: data.description ?? SITE_DESC,
+      images: [ogpImage],
     },
   };
 }
 
-/* =========================
-   Page
-========================= */
 export default async function Page({ params }: Props) {
   const { slug } = await params;
-
   return <StoreClient slug={slug} />;
 }

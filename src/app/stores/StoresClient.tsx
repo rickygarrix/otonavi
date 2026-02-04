@@ -9,7 +9,7 @@ import StoreCard from '@/components/store/StoreCard';
 import BackToHomeButton from '@/components/ui/BackToHomeButton';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
-import { useStoresForSearch } from '@/hooks/store';
+import { useStoresForSearch, useStoreFilters } from '@/hooks/store';
 import { useHomeMasters } from '@/hooks/home';
 import { useSearchStore } from '@/stores/searchStore';
 
@@ -20,7 +20,6 @@ export default function StoresClient() {
   const selectedFilters = searchParams.getAll('filters');
   const storeTypeId = searchParams.get('venue_type_id');
   const params = searchParams.toString();
-
   const masters = useHomeMasters();
   const labelMap = masters.externalLabelMap;
   const mastersLoading = masters.loading;
@@ -31,9 +30,14 @@ export default function StoresClient() {
     enabled: prefetchedStores.length === 0,
   });
 
-  const displayStores = useMemo(() => {
+  const baseStores = useMemo(() => {
     return prefetchedStores.length > 0 ? prefetchedStores : fetchedStores;
   }, [prefetchedStores, fetchedStores]);
+
+  const { filteredStores } = useStoreFilters(baseStores, {
+    filters: selectedFilters,
+    storeTypeId,
+  });
 
   const displayLabels = useMemo(() => {
     if (mastersLoading) return [];
@@ -53,20 +57,31 @@ export default function StoresClient() {
     });
 
     return labels;
-  }, [mastersLoading, storeTypeId, selectedFilters, labelMap, masters.genericMasters]);
+  }, [
+    mastersLoading,
+    storeTypeId,
+    selectedFilters,
+    labelMap,
+    masters.genericMasters,
+  ]);
 
-  const isReady = prefetchedStores.length > 0 || (!mastersLoading && !storesLoading);
+  const isReady =
+    prefetchedStores.length > 0 || (!mastersLoading && !storesLoading);
 
   if (!isReady) {
     return <LoadingOverlay />;
   }
 
   return (
-    <div className="text-dark-5 bg-white">
-      <Header variant="result" count={displayStores.length} labels={displayLabels.join(', ')} />
+    <div className="bg-white text-dark-5">
+      <Header
+        variant="result"
+        count={filteredStores.length}
+        labels={displayLabels.join(', ')}
+      />
 
       <ul className="grid grid-cols-2">
-        {displayStores.map((store) => (
+        {filteredStores.map((store) => (
           <li key={store.id}>
             <StoreCard store={store} query={params} />
           </li>
@@ -74,7 +89,9 @@ export default function StoresClient() {
       </ul>
 
       <div className="p-10">
-        <BackToHomeButton onClick={() => router.push('/')} />
+        <BackToHomeButton
+          onClick={() => router.push(`/?${params}`)}
+        />
       </div>
 
       <Footer />
