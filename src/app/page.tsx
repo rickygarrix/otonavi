@@ -24,13 +24,14 @@ export default function HomePage() {
   const router = useRouter();
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
-  const [storeTypeId, setStoreTypeId] = useState<string | null>(null);
+  // ✅ venue_type は key ベース
+  const [storeTypeKey, setStoreTypeKey] = useState<string | null>(null);
   const [clearKey, setClearKey] = useState(0);
 
-  /** ホーム上部の最新店舗 */
+  /** 最新店舗 */
   const { stores: cardStores, loading } = useHomeStoreCards(12);
 
-  /** マスタ取得 */
+  /** マスタ */
   const masters = useHomeMasters();
 
   const storeTypes = useMemo<GenericMaster[]>(() => {
@@ -40,38 +41,38 @@ export default function HomePage() {
   }, [masters.genericMasters]);
 
   /** フィルタ状態 */
-  const filter = useHomeFilterState(masters.externalLabelMap, { storeTypeId });
+  const filter = useHomeFilterState(masters.externalLabelMap);
   const {
     selectedKeys,
     selectedLabels,
     handleClear,
-    prefectureIds,
-    cityIds,
     ...setters
   } = filter;
 
-  /** 件数表示用（ローカル計算） */
+  /** 件数表示 */
   const { stores: searchStores } = useStoresForSearch();
   const { filteredStores } = useStoreFilters(searchStores, {
-    filters: selectedKeys,
-    storeTypeId,
+    filters: storeTypeKey
+      ? [storeTypeKey, ...selectedKeys]
+      : selectedKeys,
   });
 
   const handleClearAll = () => {
     handleClear();
     setClearKey((v) => v + 1);
-    setStoreTypeId(null);
+    setStoreTypeKey(null);
   };
 
   /**
-   * ✅ 検索実行
-   * - fetch しない
-   * - クエリだけ組み立てて /stores に遷移
+   * ✅ URL は filters=key のみ
    */
   const handleGoToStores = () => {
     const params = new URLSearchParams();
 
-    if (storeTypeId) params.set('venue_type_id', storeTypeId);
+    if (storeTypeKey) {
+      params.append('filters', storeTypeKey);
+    }
+
     selectedKeys.forEach((k) => params.append('filters', k));
 
     router.push(`/stores?${params.toString()}`);
@@ -104,35 +105,21 @@ export default function HomePage() {
         />
 
         {!loading && <HomeLatestStores stores={cardStores} />}
-
         <CommentSlider />
       </div>
 
-      {/* 店舗タイプ */}
+      {/* 店舗タイプ（✅ 修正ここ） */}
       <StoreTypeFilter
         storeTypes={storeTypes}
-        activeTypeId={storeTypeId}
-        onChange={setStoreTypeId}
+        activeTypeKey={storeTypeKey}
+        onChange={setStoreTypeKey}
       />
 
       {/* フィルタ */}
       <HomeFilterSections
         clearKey={clearKey}
         sectionRefs={sectionRefs}
-        setPrefectureIds={setters.setPrefectureIds}
-        setCityIds={setters.setCityIds}
-        setCustomerKeys={setters.setCustomerKeys}
-        setAtmosphereKeys={setters.setAtmosphereKeys}
-        setSizeKey={setters.setSizeKeys}
-        setDrinkKeys={setters.setDrinkKeys}
-        setPriceRangeKeys={setters.setPriceRangeKeys}
-        setPaymentMethodKeys={setters.setPaymentMethodKeys}
-        setEventTrendKeys={setters.setEventTrendKeys}
-        setBaggageKeys={setters.setBaggageKeys}
-        setSmokingKeys={setters.setSmokingKeys}
-        setToiletKeys={setters.setToiletKeys}
-        setEnvironmentKeys={setters.setEnvironmentKeys}
-        setOtherKeys={setters.setOtherKeys}
+        {...setters}
       />
 
       {/* 検索バー */}

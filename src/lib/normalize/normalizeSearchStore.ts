@@ -2,10 +2,6 @@
 import type { SearchStoreRow } from '@/types/store-db';
 import type { SearchStore } from '@/types/store';
 
-/* =========================
-   helpers
-========================= */
-
 type DefinitionRef = {
   key?: unknown;
 };
@@ -25,24 +21,15 @@ function selectImage(
 ): string {
   if (!store_galleries?.length) return '/noshop.svg';
 
- const activeOnly = store_galleries;
-
-  if (!activeOnly.length) return '/noshop.svg';
-
-  const sorted = [...activeOnly].sort(
+  const sorted = [...store_galleries].sort(
     (a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999),
   );
 
   const url = sorted[0]?.gallery_url;
-
   return typeof url === 'string' && url.trim() !== ''
     ? url
     : '/noshop.svg';
 }
-
-/* =========================
-   normalize
-========================= */
 
 export function normalizeSearchStore(raw: SearchStoreRow): SearchStore {
   return {
@@ -57,8 +44,11 @@ export function normalizeSearchStore(raw: SearchStoreRow): SearchStore {
     city_id: raw.cities?.id ?? null,
     city_label: raw.cities?.name ?? null,
 
-    venue_type_id: raw.venue_types?.id ?? null,
+    // ★ ここが最重要
+    venue_type_id: raw.venue_types?.id ?? null,      // 表示・既存用
+    venue_type_key: raw.venue_types?.key ?? null,    // ← filters 用
     type_label: raw.venue_types?.label ?? null,
+
     status_key: raw.statuses?.key ?? 'normal',
     gallery_url: selectImage(raw.store_galleries),
 

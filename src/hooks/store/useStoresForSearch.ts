@@ -45,7 +45,7 @@ export function useStoresForSearch(
 
           prefectures ( id, name ),
           cities ( id, name ),
-          venue_types ( id, label ),
+          venue_types ( id, key, label ),
 
           price_ranges ( key ),
           sizes ( key ),

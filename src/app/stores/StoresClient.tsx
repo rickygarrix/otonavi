@@ -17,9 +17,10 @@ export default function StoresClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // ✅ venue_type_id は使わない
   const selectedFilters = searchParams.getAll('filters');
-  const storeTypeId = searchParams.get('venue_type_id');
   const params = searchParams.toString();
+
   const masters = useHomeMasters();
   const labelMap = masters.externalLabelMap;
   const mastersLoading = masters.loading;
@@ -36,7 +37,6 @@ export default function StoresClient() {
 
   const { filteredStores } = useStoreFilters(baseStores, {
     filters: selectedFilters,
-    storeTypeId,
   });
 
   const displayLabels = useMemo(() => {
@@ -44,26 +44,13 @@ export default function StoresClient() {
 
     const labels: string[] = [];
 
-    if (storeTypeId) {
-      const storeTypeLabel = Array.from(masters.genericMasters.values()).find(
-        (m) => m.table === 'venue_types' && m.id === storeTypeId,
-      )?.label;
-      if (storeTypeLabel) labels.push(storeTypeLabel);
-    }
-
     selectedFilters.forEach((key) => {
       const label = labelMap.get(key);
       if (label) labels.push(label);
     });
 
     return labels;
-  }, [
-    mastersLoading,
-    storeTypeId,
-    selectedFilters,
-    labelMap,
-    masters.genericMasters,
-  ]);
+  }, [mastersLoading, selectedFilters, labelMap]);
 
   const isReady =
     prefetchedStores.length > 0 || (!mastersLoading && !storesLoading);
@@ -89,9 +76,7 @@ export default function StoresClient() {
       </ul>
 
       <div className="p-10">
-        <BackToHomeButton
-          onClick={() => router.push(`/?${params}`)}
-        />
+        <BackToHomeButton onClick={() => router.push(`/?${params}`)} />
       </div>
 
       <Footer />
