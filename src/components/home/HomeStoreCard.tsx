@@ -8,10 +8,10 @@ const STATUS_COLOR_MAP: Record<
   NonNullable<HomeStoreLite['status_key']>,
   string
 > = {
-  normal: 'bg-green-700',
-  temporary: 'bg-yellow-600',
-  closed: 'bg-red-800',
-  irregular: 'bg-purple-600',
+  normal: 'bg-green-4',
+  temporary: 'bg-yellow-4',
+  closed: 'bg-red-4',
+  irregular: 'bg-purple-4',
 };
 
 type Props = {
@@ -54,7 +54,7 @@ export default function HomeStoreCard({ store }: Props) {
 
         {statusColor && (
           <span
-            className={`absolute -left-1 -bottom-1 h-1.5 w-1.5 rounded-full ${statusColor}`}
+            className={`absolute left-0 bottom-0 h-1 w-1 rounded-full ${statusColor}`}
           />
         )}
       </div>
