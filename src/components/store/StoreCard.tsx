@@ -8,10 +8,10 @@ const STATUS_COLOR_MAP: Record<
   NonNullable<SearchStore['status_key']>,
   string
 > = {
-  normal: 'bg-emerald-500',
-  temporary: 'bg-yellow-400',
-  closed: 'bg-red-500',
-  irregular: 'bg-purple-600',
+  normal: 'bg-green-3',
+  temporary: 'bg-yellow-3',
+  closed: 'bg-red-3',
+  irregular: 'bg-purple-3',
 };
 
 type Props = {
@@ -61,7 +61,7 @@ export default function StoreCard({ store, query }: Props) {
 
           {statusColor && (
             <span
-              className={`absolute -left-1 -bottom-1 h-1.5 w-1.5 rounded-full ${statusColor}`}
+              className={`absolute left-0 bottom-0 h-1 w-1 rounded-full ${statusColor}`}
             />
           )}
         </div>

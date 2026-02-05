@@ -12,23 +12,23 @@ const STATUS_BADGE_MAP: Record<
   { bg: string; text: string; label: string }
 > = {
   normal: {
-    bg: 'bg-green-700',
-    text: 'text-green-100',
+    bg: 'bg-green-4',
+    text: 'text-green-1',
     label: '通常営業',
   },
   temporary: {
-    bg: 'bg-yellow-600',
-    text: 'text-yellow-50',
+    bg: 'bg-yellow-4',
+    text: 'text-yellow-1',
     label: '一時休業',
   },
   closed: {
-    bg: 'bg-red-800',
-    text: 'text-rose-100',
+    bg: 'bg-red-4',
+    text: 'text-red-1',
     label: '閉店',
   },
   irregular: {
-    bg: 'bg-purple-800',
-    text: 'text-violet-100',
+    bg: 'bg-purple-4',
+    text: 'text-purple-1',
     label: '不定期営業',
   },
 };
