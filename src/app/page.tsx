@@ -95,7 +95,7 @@ export default function HomePage() {
     handleClear();
     setClearKey((v) => v + 1);
     setStoreTypeKey(null);
-    router.replace('/');
+    router.replace('/', { scroll: false });
   };
 
   /** 検索実行 */
