@@ -13,26 +13,23 @@ type BaseProps = {
   title: string;
   table: string;
   columns?: 2 | 3;
-  clearKey?: number;
   variant?: 'default' | 'drink';
 };
 
 type SingleProps = BaseProps & {
   selection: 'single';
+  value: string | null;
   onChange?: (value: string | null) => void;
 };
 
 type MultiProps = BaseProps & {
   selection: 'multi';
+  value: string[];
   onChange?: (value: string[]) => void;
 };
 
 type Props = SingleProps | MultiProps;
 
-/**
- * DBから取れる「マスター1行」の最小セット
- * ※ GenericMaster の `table` はここでは不要＆DBから返らないので使わない
- */
 type MasterRow = {
   id: string;
   key: string;
@@ -49,95 +46,71 @@ export default function GenericSelector({
   title,
   table,
   selection,
+  value,
   onChange,
   columns = 2,
-  clearKey,
   variant = 'default',
 }: Props) {
   const [items, setItems] = useState<MasterRow[]>([]);
-  const [selected, setSelected] = useState<string[] | string | null>(
-    selection === 'single' ? null : [],
-  );
 
   /* =========================
-     Tooltip state
+     Tooltip
   ========================= */
   const enableHint =
-    table === 'sizes' || table === 'price_ranges' || table === 'luggages' || table === 'smoking_policies';
+    table === 'sizes' ||
+    table === 'price_ranges' ||
+    table === 'luggages' ||
+    table === 'smoking_policies';
 
   /* =========================
      Data fetch
   ========================= */
   useEffect(() => {
     const load = async () => {
-      if (enableHint) {
-        const { data, error } = await supabase
-          .from(table)
-          .select('id, key, label, sort_order, hint')
-          .eq('is_active', true)
-          .order('sort_order', { ascending: true });
+      const query = supabase
+        .from(table)
+        .select(
+          enableHint
+            ? 'id, key, label, sort_order, hint'
+            : 'id, key, label, sort_order',
+        )
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
 
-        if (error) {
-          console.error(`GenericSelector load error (${table})`, error);
-          return;
-        }
+      const { data, error } = await query;
 
-        setItems((data ?? []) as MasterRow[]);
-      } else {
-        const { data, error } = await supabase
-          .from(table)
-          .select('id, key, label, sort_order')
-          .eq('is_active', true)
-          .order('sort_order', { ascending: true });
-
-        if (error) {
-          console.error(`GenericSelector load error (${table})`, error);
-          return;
-        }
-
-        setItems((data ?? []) as MasterRow[]);
+      if (error) {
+        console.error(`GenericSelector load error (${table})`, error);
+        return;
       }
+
+      setItems((data ?? []) as MasterRow[]);
     };
 
     load();
   }, [table, enableHint]);
 
   /* =========================
-     Clear selection
+     Selection helpers
   ========================= */
-  useEffect(() => {
-    if (clearKey === undefined) return;
-
-    if (selection === 'single') {
-      setSelected(null);
-      onChange?.(null);
-    } else {
-      setSelected([]);
-      onChange?.([]);
-    }
-  }, [clearKey, selection, onChange]);
-
-  /* =========================
-     Selection logic
-  ========================= */
-  const toggle = (key: string) => {
-    if (selection === 'single') {
-      const next = selected === key ? null : key;
-      setSelected(next);
-      onChange?.(next);
-      return;
-    }
-
-    const prev = Array.isArray(selected) ? selected : [];
-    const next = prev.includes(key) ? prev.filter((v) => v !== key) : [...prev, key];
-    setSelected(next);
-    onChange?.(next);
-  };
-
   const isSelected = (key: string) =>
     selection === 'single'
-      ? selected === key
-      : Array.isArray(selected) && selected.includes(key);
+      ? value === key
+      : value.includes(key);
+
+  const toggle = (key: string) => {
+    if (!onChange) return;
+
+    if (selection === 'single') {
+      onChange(value === key ? null : key);
+    } else {
+      onChange(
+        value.includes(key)
+          ? value.filter((v) => v !== key)
+          : [...value, key],
+      );
+    }
+  };
 
   /* =========================
      Drink variant split
@@ -159,21 +132,24 @@ export default function GenericSelector({
   const renderList = (list: MasterRow[], cols: 2 | 3) => (
     <ul className={`grid ${cols === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
       {list.map((item) => {
-        const hinted = enableHint && !!item.hint;
         const chip = (
           <Chip
             label={item.label}
             selected={isSelected(item.key)}
-            hinted={hinted}
+            hinted={enableHint && !!item.hint}
             onChange={() => toggle(item.key)}
           />
         );
 
         return (
           <li key={item.key}>
-            {hinted ? <Tooltip content={item.hint!}>{chip}</Tooltip> : chip}
+            {enableHint && item.hint ? (
+              <Tooltip content={item.hint}>{chip}</Tooltip>
+            ) : (
+              chip
+            )}
           </li>
-        )
+        );
       })}
     </ul>
   );
@@ -183,7 +159,9 @@ export default function GenericSelector({
   ========================= */
   return (
     <>
-      <h3 className="text-md text-dark-5 leading-[1.5] font-bold tracking-widest">{title}</h3>
+      <h3 className="text-md font-bold tracking-widest text-dark-5">
+        {title}
+      </h3>
 
       {variant === 'drink' ? (
         <div>

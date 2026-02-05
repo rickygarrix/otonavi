@@ -11,6 +11,8 @@ import { ChevronsUpDown, Check } from 'lucide-react';
 
 type Props = {
   clearKey: number;
+  prefectureKeys: string[];
+  cityKeys: string[];
   onChange: (prefectureKeys: string[], cityKeys: string[]) => void;
 };
 
@@ -106,7 +108,12 @@ function Selector({
    Main Component
 ========================= */
 
-export default function AreaSelector({ clearKey, onChange }: Props) {
+export default function AreaSelector({
+  clearKey,
+  prefectureKeys,
+  cityKeys,
+  onChange,
+}: Props) {
   const [prefectures, setPrefectures] = useState<Prefecture[]>([]);
   const [cities, setCities] = useState<City[]>([]);
 
@@ -200,6 +207,29 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
 
     loadCities();
   }, [isTokyo, selectedPrefecture]);
+
+  /* =========================
+   URL / 外部 state → 選択状態の同期
+========================= */
+  useEffect(() => {
+    if (!prefectures.length) return;
+
+    const pref = prefectures.find(
+      (p) => p.name === prefectureKeys[0]
+    ) ?? null;
+
+    setSelectedPrefecture(pref);
+  }, [prefectureKeys, prefectures]);
+
+  useEffect(() => {
+    if (!cities.length) return;
+
+    const city = cities.find(
+      (c) => c.name === cityKeys[0]
+    ) ?? null;
+
+    setSelectedCity(city);
+  }, [cityKeys, cities]);
 
   /* =========================
      Classification
