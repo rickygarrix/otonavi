@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
 import CommentSlider from '@/components/home/CommentSlider';
@@ -22,16 +22,25 @@ import type { GenericMaster } from '@/types/master';
 
 export default function HomePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
-  // ✅ venue_type は key ベース
+  /** URL filters */
+  const urlFilters = useMemo(
+    () => searchParams.getAll('filters'),
+    [searchParams],
+  );
+
+  /** 店舗タイプ（venue_types.key） */
   const [storeTypeKey, setStoreTypeKey] = useState<string | null>(null);
+
+  /** clear 用 */
   const [clearKey, setClearKey] = useState(0);
 
   /** 最新店舗 */
   const { stores: cardStores, loading } = useHomeStoreCards(12);
 
-  /** マスタ */
+  /** masters */
   const masters = useHomeMasters();
 
   const storeTypes = useMemo<GenericMaster[]>(() => {
@@ -40,8 +49,32 @@ export default function HomePage() {
     );
   }, [masters.genericMasters]);
 
-  /** フィルタ状態 */
-  const filter = useHomeFilterState(masters.externalLabelMap);
+  /** key → table Map（復元の核） */
+  const keyToTableMap = useMemo(() => {
+    const map = new Map<string, string>();
+    masters.genericMasters.forEach((m) => {
+      map.set(m.key, m.table);
+    });
+    return map;
+  }, [masters.genericMasters]);
+
+  /** URL → 店舗タイプ復元 */
+  useEffect(() => {
+    if (!storeTypes.length) return;
+
+    const found = urlFilters.find((f) =>
+      storeTypes.some((t) => t.key === f),
+    );
+
+    setStoreTypeKey(found ?? null);
+  }, [urlFilters, storeTypes]);
+
+  /** フィルタ state（URL 起点） */
+  const filter = useHomeFilterState(masters.externalLabelMap, {
+    initialKeys: urlFilters,
+    keyToTableMap,
+  });
+
   const {
     selectedKeys,
     selectedLabels,
@@ -49,7 +82,7 @@ export default function HomePage() {
     ...setters
   } = filter;
 
-  /** 件数表示 */
+  /** 件数計算 */
   const { stores: searchStores } = useStoresForSearch();
   const { filteredStores } = useStoreFilters(searchStores, {
     filters: storeTypeKey
@@ -57,27 +90,25 @@ export default function HomePage() {
       : selectedKeys,
   });
 
+  /** 全クリア */
   const handleClearAll = () => {
     handleClear();
     setClearKey((v) => v + 1);
     setStoreTypeKey(null);
+    router.replace('/');
   };
 
-  /**
-   * ✅ URL は filters=key のみ
-   */
+  /** 検索実行 */
   const handleGoToStores = () => {
     const params = new URLSearchParams();
 
-    if (storeTypeKey) {
-      params.append('filters', storeTypeKey);
-    }
-
+    if (storeTypeKey) params.append('filters', storeTypeKey);
     selectedKeys.forEach((k) => params.append('filters', k));
 
     router.push(`/stores?${params.toString()}`);
   };
 
+  /** チップ → セクションスクロール */
   const handleClickFilter = (label: string) => {
     const section = masters.labelToSectionMap.get(label);
     if (!section) return;
@@ -87,6 +118,21 @@ export default function HomePage() {
       block: 'start',
     });
   };
+
+  /** SearchBar 表示ラベル */
+  const displayLabels = useMemo(() => {
+    const labels: string[] = [];
+
+    if (storeTypeKey) {
+      const typeLabel = storeTypes.find(
+        (t) => t.key === storeTypeKey,
+      )?.label;
+      if (typeLabel) labels.push(typeLabel);
+    }
+
+    labels.push(...selectedLabels);
+    return labels;
+  }, [storeTypeKey, storeTypes, selectedLabels]);
 
   return (
     <>
@@ -108,7 +154,7 @@ export default function HomePage() {
         <CommentSlider />
       </div>
 
-      {/* 店舗タイプ（✅ 修正ここ） */}
+      {/* 店舗タイプ */}
       <StoreTypeFilter
         storeTypes={storeTypes}
         activeTypeKey={storeTypeKey}
@@ -124,7 +170,7 @@ export default function HomePage() {
 
       {/* 検索バー */}
       <SearchBar
-        selectedFilters={selectedLabels}
+        selectedFilters={displayLabels}
         onClear={handleClearAll}
         onSearch={handleGoToStores}
         count={filteredStores.length}

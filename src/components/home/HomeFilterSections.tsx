@@ -8,12 +8,12 @@ type Props = {
   clearKey: number;
   sectionRefs: React.MutableRefObject<Record<string, HTMLElement | null>>;
 
-  setPrefectureIds: (v: string[]) => void;
-  setCityIds: (v: string[]) => void;
+  setPrefectureKeys: (v: string[]) => void;
+  setCityKeys: (v: string[]) => void;
 
   setCustomerKeys?: (v: string[]) => void;
   setAtmosphereKeys?: (v: string[]) => void;
-  setSizeKey?: (v: string[]) => void;
+  setSizeKeys?: (v: string[]) => void;
   setDrinkKeys?: (v: string[]) => void;
   setPriceRangeKeys?: (v: string[]) => void;
   setPaymentMethodKeys?: (v: string[]) => void;
@@ -47,12 +47,12 @@ export default function HomeFilterSections(props: Props) {
     clearKey,
     sectionRefs,
 
-    setPrefectureIds,
-    setCityIds,
+    setPrefectureKeys,
+    setCityKeys,
 
     setCustomerKeys,
     setAtmosphereKeys,
-    setSizeKey,
+    setSizeKeys,
     setDrinkKeys,
     setPriceRangeKeys,
     setPaymentMethodKeys,
@@ -68,11 +68,11 @@ export default function HomeFilterSections(props: Props) {
   // エリア変更
   // =========================
   const handleCityChange = useCallback(
-    (prefIds: string[], cityIds: string[]) => {
-      setPrefectureIds(prefIds);
-      setCityIds(cityIds);
+    (prefKeys: string[], cityKeys: string[]) => {
+      setPrefectureKeys(prefKeys);
+      setCityKeys(cityKeys);
     },
-    [setPrefectureIds, setCityIds],
+    [setPrefectureKeys, setCityKeys],
   );
 
   // =========================
@@ -100,13 +100,13 @@ export default function HomeFilterSections(props: Props) {
       type: 'generic',
       table: 'sizes',
       columns: 3,
-      onChange: setSizeKey,
+      onChange: setSizeKeys,
     },
     {
       key: 'ドリンク',
       type: 'drink',
       table: 'drinks',
-      columns: 3, // ※ 実際の列数は variant 側で制御
+      columns: 3,
       onChange: setDrinkKeys,
     },
     {

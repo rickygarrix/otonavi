@@ -11,7 +11,7 @@ import { ChevronsUpDown, Check } from 'lucide-react';
 
 type Props = {
   clearKey: number;
-  onChange: (prefectureIds: string[], cityIds: string[]) => void;
+  onChange: (prefectureKeys: string[], cityKeys: string[]) => void;
 };
 
 type OpenMenu = 'pref' | 'city' | null;
@@ -222,17 +222,19 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
     setSelectedPrefecture(p);
     setSelectedCity(null);
     setOpenMenu(null);
-    onChange([p.id], []);
+    onChange([p.name], []);
   };
+
 
   const selectCity = (c: City) => {
     setSelectedCity(c);
     setOpenMenu(null);
     onChange(
-      selectedPrefecture ? [selectedPrefecture.id] : [],
-      [c.id],
+      selectedPrefecture ? [selectedPrefecture.name] : [],
+      [c.name],
     );
   };
+
 
   const clearPrefecture = () => {
     setSelectedPrefecture(null);
@@ -245,10 +247,11 @@ export default function AreaSelector({ clearKey, onChange }: Props) {
     setSelectedCity(null);
     setOpenMenu(null);
     onChange(
-      selectedPrefecture ? [selectedPrefecture.id] : [],
+      selectedPrefecture ? [selectedPrefecture.name] : [],
       [],
     );
   };
+
 
   /* =========================
      Styles

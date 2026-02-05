@@ -42,14 +42,9 @@ export default function StoresClient() {
   const displayLabels = useMemo(() => {
     if (mastersLoading) return [];
 
-    const labels: string[] = [];
-
-    selectedFilters.forEach((key) => {
-      const label = labelMap.get(key);
-      if (label) labels.push(label);
-    });
-
-    return labels;
+    return selectedFilters.map(
+      (key) => labelMap.get(key) ?? key
+    );
   }, [mastersLoading, selectedFilters, labelMap]);
 
   const isReady =

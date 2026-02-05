@@ -119,16 +119,18 @@ export function useHomeMasters() {
     };
   }, []);
 
-  const externalLabelMap = useMemo(() => {
-    const map = new Map<string, string>();
+const externalLabelMap = useMemo(() => {
+  const map = new Map<string, string>();
 
-    prefectures.forEach((p) => map.set(p.id, p.name));
-    cities.forEach((a) => map.set(a.id, a.name));
-    drinkMasters.forEach((d) => map.set(d.key, d.label));
-    genericMasters.forEach((v) => map.set(v.key, v.label));
+  prefectures.forEach((p) => map.set(p.name, p.name));
+  cities.forEach((c) => map.set(c.name, c.name));
 
-    return map;
-  }, [prefectures, cities, drinkMasters, genericMasters]);
+  drinkMasters.forEach((d) => map.set(d.key, d.label));
+  genericMasters.forEach((v) => map.set(v.key, v.label));
+
+  return map;
+}, [prefectures, cities, drinkMasters, genericMasters]);
+
 
   const labelToSectionMap = useMemo(() => {
     const map = new Map<string, string>();

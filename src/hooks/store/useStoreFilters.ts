@@ -1,4 +1,3 @@
-// src/hooks/store/useStoreFilters.ts
 'use client';
 
 import { useMemo } from 'react';
@@ -18,10 +17,16 @@ export function useStoreFilters(
     if (!filters.length) return stores;
 
     return stores.filter((store) => {
+      /**
+       * 店舗が持つ「検索可能な全キー」
+       */
       const storeKeys = [
-        store.venue_type_key,   // ★ venue_type も filters に統合
-        store.prefecture_id,
-        store.city_id,
+        store.venue_type_key,
+
+        // ★ エリア
+        store.prefecture_key,
+        store.city_key,
+
         store.price_range_key,
         store.size_key,
 
@@ -35,7 +40,7 @@ export function useStoreFilters(
         ...store.smoking_keys,
         ...store.toilet_keys,
         ...store.other_keys,
-      ].filter(Boolean);
+      ].filter(Boolean) as string[];
 
       // AND 条件
       return filters.every((f) => storeKeys.includes(f));

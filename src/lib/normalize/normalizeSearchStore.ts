@@ -38,15 +38,18 @@ export function normalizeSearchStore(raw: SearchStoreRow): SearchStore {
     name: raw.name,
     kana: raw.kana,
 
+    // ===== エリア =====
     prefecture_id: raw.prefectures?.id ?? null,
     prefecture_label: raw.prefectures?.name ?? null,
+    prefecture_key: raw.prefectures?.name ?? null, // ★ filters 用
 
     city_id: raw.cities?.id ?? null,
     city_label: raw.cities?.name ?? null,
+    city_key: raw.cities?.name ?? null, // ★ filters 用
 
-    // ★ ここが最重要
-    venue_type_id: raw.venue_types?.id ?? null,      // 表示・既存用
-    venue_type_key: raw.venue_types?.key ?? null,    // ← filters 用
+    // ===== 店舗タイプ =====
+    venue_type_id: raw.venue_types?.id ?? null,
+    venue_type_key: raw.venue_types?.key ?? null,
     type_label: raw.venue_types?.label ?? null,
 
     status_key: raw.statuses?.key ?? 'normal',
