@@ -6,13 +6,17 @@ import type { HomeStore } from '@/types/store';
 import Footer from '@/components/ui/Footer';
 import BackToHomeButton from '@/components/ui/BackToHomeButton';
 
-import StoreImageCarousel from '@/components/store/StoreImageCarousel';
+import StoreGalleryCarousel from '@/components/store/StoreGalleryCarousel';
 import StoreBasicInfo from '@/components/store/StoreBasicInfo';
 import StoreAccess from '@/components/store/StoreAccess';
 import StoreOpenHours from '@/components/store/StoreOpenHours';
 import StoreDetailSections from '@/components/store/StoreDetailSections';
 import StoreDetailMedia from './StoreDetailMedia';
 import { StoreDetailDivider } from './StoreDetailDivider';
+
+/* =========================
+   Utils
+========================= */
 
 const join = (v?: string[]) => (v && v.length > 0 ? v.join(', ') : null);
 
@@ -28,10 +32,18 @@ const formatPaymentMethods = (labels?: string[], otherText?: string | null) => {
   return labels.join(', ');
 };
 
+/* =========================
+   Props
+========================= */
+
 type Props = {
   store: HomeStore;
-  onMainImageLoaded?: () => void; // ★ 追加
+  onMainImageLoaded?: () => void;
 };
+
+/* =========================
+   Component
+========================= */
 
 export default function StoreDetailView({ store, onMainImageLoaded }: Props) {
   const router = useRouter();
@@ -46,7 +58,10 @@ export default function StoreDetailView({ store, onMainImageLoaded }: Props) {
     {
       order: 60,
       label: '支払い方法',
-      value: formatPaymentMethods(store.payment_method_labels, store.payment_method_other),
+      value: formatPaymentMethods(
+        store.payment_method_labels,
+        store.other_payment_method,
+      ),
     },
     { order: 70, label: 'イベントの傾向', value: join(store.event_trend_labels) },
     { order: 80, label: '荷物預かり', value: join(store.baggage_labels) },
@@ -65,7 +80,7 @@ export default function StoreDetailView({ store, onMainImageLoaded }: Props) {
   return (
     <div className="bg-white">
       <main>
-        <StoreImageCarousel
+        <StoreGalleryCarousel
           storeId={store.id}
           storeName={store.name}
           onMainImageLoaded={onMainImageLoaded}
@@ -87,13 +102,10 @@ export default function StoreDetailView({ store, onMainImageLoaded }: Props) {
           </>
         )}
 
-        {(store.store_awards?.length > 0 || store.store_media_mentions?.length > 0) && (
+        {store.hasMentions && (
           <>
             <StoreDetailDivider />
-            <StoreDetailMedia
-              awards={store.store_awards}
-              mediaMentions={store.store_media_mentions}
-            />
+            <StoreDetailMedia mentions={store.mentions} />
           </>
         )}
 
@@ -108,7 +120,7 @@ export default function StoreDetailView({ store, onMainImageLoaded }: Props) {
       <StoreDetailDivider />
 
       <div className="p-10">
-        <BackToHomeButton onClick={() => router.push(query ? `/stores?${query}` : '/stores')} />
+        <BackToHomeButton />
       </div>
 
       <Footer />

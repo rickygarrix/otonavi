@@ -4,14 +4,17 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { SearchStore } from '@/types/store';
+import type { SearchStoreRow } from '@/types/store-db';
 import { normalizeSearchStore } from '@/lib/normalize/normalizeSearchStore';
 
-type Options = {
+type UseStoresForSearchOptions = {
   enabled?: boolean;
 };
 
-export function useStoresForSearch(options?: Options) {
-  const enabled = options?.enabled ?? true;
+export function useStoresForSearch(
+  options: UseStoresForSearchOptions = {}
+) {
+  const { enabled = true } = options;
 
   const [stores, setStores] = useState<SearchStore[]>([]);
   const [loading, setLoading] = useState(enabled);
@@ -31,34 +34,47 @@ export function useStoresForSearch(options?: Options) {
         .from('stores')
         .select(
           `
-          *,
-          prefectures ( id, name_ja ),
+          id,
+          slug,
+          name,
+          kana,
+          updated_at,
+
+          status_id,
+          statuses:statuses!stores_status_id_fkey ( key ),
+
+          prefectures ( id, name ),
           cities ( id, name ),
-          store_types ( id, label ),
+          venue_types ( id, key, label ),
 
-          price_range_definitions ( key, label ),
-          size_definitions ( key, label ),
+          price_ranges ( key ),
+          sizes ( key ),
 
-          store_customers ( customer_definitions ( key, label ) ),
-          store_atmospheres ( atmosphere_definitions ( key, label ) ),
-          store_drinks ( drink_definitions ( key, label, display_order ) ),
-          store_baggage ( baggage_definitions ( key, label ) ),
-          store_toilet ( toilet_definitions ( key, label ) ),
-          store_smoking ( smoking_definitions ( key, label ) ),
-          store_environment ( environment_definitions ( key, label ) ),
-          store_other ( other_definitions ( key, label ) ),
-          store_event_trends ( event_trend_definitions ( key, label ) ),
-          store_payment_methods ( payment_method_definitions ( key, label ) ),
+          store_audience_types ( audience_types ( key ) ),
+          store_atmospheres ( atmospheres ( key ) ),
+          store_drinks ( drinks ( key ) ),
+          store_luggages ( luggages ( key ) ),
+          store_toilets ( toilets ( key ) ),
+          store_smoking_policies ( smoking_policies ( key ) ),
+          store_environments ( environments ( key ) ),
+          store_amenities ( amenities ( key ) ),
+          store_event_trends ( event_trends ( key ) ),
+          store_payment_methods ( payment_methods ( key ) ),
 
-          store_images ( image_url, order_num )
-        `,
+          store_galleries (
+            gallery_url,
+            sort_order
+          )
+          `
         )
         .eq('is_active', true)
-        .order('updated_at', { ascending: false });
+        .order('updated_at', { ascending: false })
+        .returns<SearchStoreRow[]>();
 
       if (!mounted) return;
 
       if (error || !data) {
+        console.error('useStoresForSearch error:', error);
         setStores([]);
         setLoading(false);
         return;
@@ -69,6 +85,7 @@ export function useStoresForSearch(options?: Options) {
     };
 
     load();
+
     return () => {
       mounted = false;
     };

@@ -1,55 +1,53 @@
 'use client';
 
 import { useMemo } from 'react';
-import type { StoreAward, StoreMediaMention } from '@/types/store';
+import type { StoreMention } from '@/types/store';
 
 type Props = {
-  awards?: StoreAward[] | null;
-  mediaMentions?: StoreMediaMention[] | null;
+  mentions?: StoreMention[] | null;
 };
 
-type AchievementItem = {
+type MentionItem = {
   id: string;
   text: string;
 };
 
-export default function StoreDetailMedia({ awards, mediaMentions }: Props) {
+export default function StoreDetailMedia({ mentions }: Props) {
   const grouped = useMemo(() => {
-    const map = new Map<number, AchievementItem[]>();
+    const map = new Map<number, MentionItem[]>();
 
-    awards?.forEach((a) => {
-      if (!a.year) return;
-      if (!map.has(a.year)) map.set(a.year, []);
-      map.get(a.year)!.push({
-        id: `award-${a.id}`,
-        text: a.title,
-      });
-    });
-
-    mediaMentions?.forEach((m) => {
+    mentions?.forEach((m) => {
       if (!m.year) return;
-      if (!map.has(m.year)) map.set(m.year, []);
+
+      if (!map.has(m.year)) {
+        map.set(m.year, []);
+      }
+
       map.get(m.year)!.push({
-        id: `media-${m.id}`,
-        text: m.media_name,
+        id: m.id,
+        text: m.text,
       });
     });
 
     return map;
-  }, [awards, mediaMentions]);
+  }, [mentions]);
 
-  if (grouped.size === 0) return null;
+  if (!mentions || grouped.size === 0) return null;
 
   const years = Array.from(grouped.keys()).sort((a, b) => b - a);
 
   return (
-    <section className="text-dark-4 flex flex-col gap-4 p-4 text-sm">
-      <h2 className="text-dark-5 py-0.5 text-lg font-bold tracking-widest">受賞歴／メディア掲載</h2>
+    <section className="flex flex-col gap-4 p-4 text-sm text-dark-4">
+      <h2 className="py-0.5 text-lg font-bold tracking-widest text-dark-5">
+        掲載・受賞実績
+      </h2>
 
       <div className="flex flex-col gap-6">
         {years.map((year) => (
           <div key={year} className="flex flex-col gap-2">
-            <span className="text-dark-1 text-[10px] font-bold">{year}</span>
+            <span className="text-[10px] font-bold text-dark-1">
+              {year}
+            </span>
 
             <ul className="flex flex-col gap-2">
               {grouped.get(year)!.map((item) => (

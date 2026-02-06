@@ -1,3 +1,12 @@
+import type { Metadata } from 'next';
+import { staticMeta } from '@/lib/metadata';
+
+export const metadata: Metadata = staticMeta({
+  title: '利用規約',
+  path: '/terms',
+  description: 'オトナビの利用規約です。',
+});
+
 export default function TermsPage() {
   return (
     <>

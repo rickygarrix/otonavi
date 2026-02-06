@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import HomeStoreCard from '../home/HomeStoreCard';
 import type { HomeStoreLite } from '@/types/store';
 
@@ -9,8 +8,6 @@ type Props = {
 };
 
 export default function HomeLatestStores({ stores }: Props) {
-  const router = useRouter();
-
   const latestStores = [...stores]
     .sort(
       (a, b) =>
@@ -31,8 +28,7 @@ export default function HomeLatestStores({ stores }: Props) {
         {latestStores.map((store) => (
           <li
             key={store.id}
-            onClick={() => router.push(`/stores/${store.id}`)}
-            className="flex-1 cursor-pointer"
+            className="flex-1"
           >
             <HomeStoreCard store={store} />
           </li>

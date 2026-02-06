@@ -16,34 +16,54 @@ export function useHomeStoreCards(limit = 12) {
 
     const load = async () => {
       setLoading(true);
+      setError(null);
 
       const { data, error } = await supabase
         .from('stores')
         .select(
           `
           id,
+          slug,
           name,
           updated_at,
 
-          prefectures:prefecture_id ( id, name_ja ),
-          cities:city_id ( id, name ),
-          store_types:store_type_id ( id, label ),
+          prefectures:prefecture_id (
+            id,
+            name
+          ),
+          cities:city_id (
+            id,
+            name
+          ),
+          venue_types:venue_type_id (
+            id,
+            label
+          ),
 
-          store_images (
-            image_url,
-            order_num
-          )
-        `,
+         statuses:statuses!stores_status_id_fkey ( key ),
+
+         store_galleries (
+            id,
+            gallery_url,
+            sort_order
+          )`
         )
         .eq('is_active', true)
-        .returns<StoreRow[]>()
         .order('updated_at', { ascending: false })
-        .limit(limit);
+        .limit(limit)
+        .returns<StoreRow[]>();
 
       if (!mounted) return;
 
-      if (error || !data) {
-        setError(error ?? new Error('Failed to load home store cards'));
+      if (error) {
+        console.error('useHomeStoreCards error:', error);
+        setError(error);
+        setStores([]);
+        setLoading(false);
+        return;
+      }
+
+      if (!data) {
         setStores([]);
         setLoading(false);
         return;
@@ -54,10 +74,15 @@ export function useHomeStoreCards(limit = 12) {
     };
 
     load();
+
     return () => {
       mounted = false;
     };
   }, [limit]);
 
-  return { stores, loading, error };
+  return {
+    stores,
+    loading,
+    error,
+  };
 }

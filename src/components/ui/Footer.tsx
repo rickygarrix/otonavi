@@ -23,30 +23,14 @@ export default function Footer({ hasFixedBottom }: FooterProps) {
       {/* メニュー */}
       <nav>
         <ul>
-          {/* ===== LP（今は非表示） ===== */}
-          {/*
-          <li>
-            <FooterLink href="/lp">オトナビとは？</FooterLink>
-          </li>
-          */}
-
-          <li>
-            <FooterLink href="/contact">お問い合わせ</FooterLink>
-          </li>
-
-          <li>
-            <FooterLink href="/terms">利用規約</FooterLink>
-          </li>
-
-          <li>
-            <FooterLink href="/privacy">プライバシーポリシー</FooterLink>
-          </li>
+          <li><FooterLink href="/about">オトナビとは？</FooterLink></li>
+          <li><FooterLink href="/contact">お問い合わせ</FooterLink></li>
+          <li><FooterLink href="/terms">利用規約</FooterLink></li>
+          <li><FooterLink href="/privacy">プライバシーポリシー</FooterLink></li>
 
           {/* ===== 特定商取引法（今は非表示） ===== */}
           {/*
-          <li>
-            <FooterLink href="/disclosure">特定商取引法に基づく表記</FooterLink>
-          </li>
+          <li><FooterLink href="/disclosure">特定商取引法に基づく表記</FooterLink></li>
           */}
         </ul>
       </nav>
