@@ -67,7 +67,7 @@ export default function GenericSelector({
   ========================= */
   useEffect(() => {
     const load = async () => {
-      const query = supabase
+      const { data, error } = await supabase
         .from(table)
         .select(
           enableHint
@@ -75,16 +75,15 @@ export default function GenericSelector({
             : 'id, key, label, sort_order',
         )
         .eq('is_active', true)
-        .order('sort_order', { ascending: true });
-
-      const { data, error } = await query;
+        .order('sort_order', { ascending: true })
+        .returns<MasterRow[]>();
 
       if (error) {
         console.error(`GenericSelector load error (${table})`, error);
         return;
       }
 
-      setItems((data ?? []) as MasterRow[]);
+      setItems(data ?? []);
     };
 
     load();

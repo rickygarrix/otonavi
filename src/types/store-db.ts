@@ -4,6 +4,7 @@ import type { DefinitionKV } from './common';
 export type IdLabelRow = {
   id: string;
   label: string;
+  key?: string | null;
 };
 
 export type IdNameRow = {

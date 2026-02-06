@@ -120,9 +120,7 @@ export default function StoreDetailView({ store, onMainImageLoaded }: Props) {
       <StoreDetailDivider />
 
       <div className="p-10">
-        <BackToHomeButton
-          onClick={() => router.push(query ? `/stores?${query}` : '/stores')}
-        />
+        <BackToHomeButton />
       </div>
 
       <Footer />

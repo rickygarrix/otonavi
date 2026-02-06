@@ -71,7 +71,7 @@ export default function StoresClient() {
       </ul>
 
       <div className="p-10">
-        <BackToHomeButton onClick={() => router.push(`/?${params}`)} />
+        <BackToHomeButton />
       </div>
 
       <Footer />

@@ -5,15 +5,15 @@ import AreaSelector from '@/components/selectors/AreaSelector';
 import GenericSelector from '@/components/selectors/GenericSelector';
 
 type Props = {
+  clearKey: number; // ← これを追加
   sectionRefs: React.MutableRefObject<Record<string, HTMLElement | null>>;
 
   prefectureKeys: string[];
   cityKeys: string[];
-  setPrefectureKeys: (v: string[]) => void;
-  setCityKeys: (v: string[]) => void;
 
   customerKeys: string[];
   atmosphereKeys: string[];
+  environmentKeys: string[];
   sizeKeys: string[];
   drinkKeys: string[];
   priceRangeKeys: string[];
@@ -22,11 +22,14 @@ type Props = {
   baggageKeys: string[];
   smokingKeys: string[];
   toiletKeys: string[];
-  environmentKeys: string[];
   otherKeys: string[];
+
+  setPrefectureKeys: (v: string[]) => void;
+  setCityKeys: (v: string[]) => void;
 
   setCustomerKeys: (v: string[]) => void;
   setAtmosphereKeys: (v: string[]) => void;
+  setEnvironmentKeys: (v: string[]) => void;
   setSizeKeys: (v: string[]) => void;
   setDrinkKeys: (v: string[]) => void;
   setPriceRangeKeys: (v: string[]) => void;
@@ -35,7 +38,6 @@ type Props = {
   setBaggageKeys: (v: string[]) => void;
   setSmokingKeys: (v: string[]) => void;
   setToiletKeys: (v: string[]) => void;
-  setEnvironmentKeys: (v: string[]) => void;
   setOtherKeys: (v: string[]) => void;
 };
 
@@ -55,6 +57,7 @@ type FilterConfig =
 
 export default function HomeFilterSections(props: Props) {
   const {
+    clearKey,
     sectionRefs,
 
     prefectureKeys,
@@ -230,6 +233,7 @@ export default function HomeFilterSections(props: Props) {
                 エリア
               </h3>
               <AreaSelector
+                clearKey={clearKey}
                 prefectureKeys={prefectureKeys}
                 cityKeys={cityKeys}
                 onChange={handleCityChange}
