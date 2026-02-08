@@ -4,64 +4,80 @@ import type { SearchStoreRow } from '@/types/store-db';
 import type { SearchStore } from '@/types/store';
 import { normalizeSearchStore } from '@/lib/normalize/normalizeSearchStore';
 
+/**
+ * DB 検索用パラメータ
+ * - filters はフロント側（useStoreFilters）で使用するため含めない
+ */
 export type SearchParams = {
-  filters?: string[];
   storeTypeId?: string | null;
   prefectureId?: string | null;
   cityIds?: string[];
 };
 
+/**
+ * 店舗検索（DB 取得レイヤー）
+ * - 業態 / エリアのみを DB で絞る
+ * - 属性フィルタ（OR / AND）はフロントで処理
+ */
 export async function searchStores({
-  filters = [],
   storeTypeId,
   prefectureId = null,
   cityIds = [],
 }: SearchParams): Promise<SearchStore[]> {
-let query = supabase
-  .from('stores')
-  .select(
-    `
-    id,
-    slug,
-    name,
-    kana,
-    updated_at,
+  let query = supabase
+    .from('stores')
+    .select(
+      `
+      id,
+      slug,
+      name,
+      kana,
+      updated_at,
 
-    prefecture_id,
-    city_id,
-    venue_type_id,
-    status_id,
+      prefecture_id,
+      city_id,
+      venue_type_id,
+      status_id,
 
-    statuses:statuses!stores_status_id_fkey ( key ),  -- ★ ここが重要
+      statuses:statuses!stores_status_id_fkey ( key ),
 
-    prefectures ( id, name ),
-    cities ( id, name ),
-    venue_types ( id, label ),
+      prefectures ( id, name ),
+      cities ( id, name ),
+      venue_types ( id, label ),
 
-    price_ranges ( key ),
-    sizes ( key ),
+      price_ranges ( key ),
+      sizes ( key ),
 
-    store_audience_types ( audience_types ( key ) ),
-    store_atmospheres ( atmospheres ( key ) ),
-    store_drinks ( drinks ( key ) ),
-    store_luggages ( luggages ( key ) ),
-    store_toilets ( toilets ( key ) ),
-    store_smoking_policies ( smoking_policies ( key ) ),
-    store_environments ( environments ( key ) ),
-    store_amenities ( amenities ( key ) ),
-    store_event_trends ( event_trends ( key ) ),
-    store_payment_methods ( payment_methods ( key ) ),
+      store_audience_types ( audience_types ( key ) ),
+      store_atmospheres ( atmospheres ( key ) ),
+      store_drinks ( drinks ( key ) ),
+      store_luggages ( luggages ( key ) ),
+      store_toilets ( toilets ( key ) ),
+      store_smoking_policies ( smoking_policies ( key ) ),
+      store_environments ( environments ( key ) ),
+      store_amenities ( amenities ( key ) ),
+      store_event_trends ( event_trends ( key ) ),
+      store_payment_methods ( payment_methods ( key ) ),
 
-    store_galleries (
-      gallery_url,
-      sort_order
+      store_galleries (
+        gallery_url,
+        sort_order
+      )
+      `
     )
-    `
-  )
-  .eq('is_active', true);
+    .eq('is_active', true);
 
-  if (storeTypeId) query = query.eq('venue_type_id', storeTypeId);
-  if (prefectureId) query = query.eq('prefecture_id', prefectureId);
+  // =========================
+  // 条件付与（DB で絞る範囲）
+  // =========================
+  if (storeTypeId) {
+    query = query.eq('venue_type_id', storeTypeId);
+  }
+
+  if (prefectureId) {
+    query = query.eq('prefecture_id', prefectureId);
+  }
+
   if (prefectureId && cityIds.length > 0) {
     query = query.in('city_id', cityIds);
   }

@@ -4,9 +4,10 @@ import type { SearchStore } from '@/types/store';
 
 /**
  * 検索用 店舗取得パラメータ
+ * ※ filters はフロント側（useStoreFilters）で使用するため、
+ *   DB 取得層では受け取らない
  */
 export type FetchStoresForSearchParams = {
-  filters: string[];
   storeTypeId: string | null;
   prefectureId?: string | null;
   cityIds?: string[];
@@ -14,15 +15,15 @@ export type FetchStoresForSearchParams = {
 
 /**
  * 検索条件から店舗一覧を取得（SearchStore 用）
+ * - DB では大枠（業態・エリア）のみ絞る
+ * - 詳細フィルタ（filters）はフロントで処理
  */
 export async function fetchStoresForSearch({
-  filters,
   storeTypeId,
   prefectureId = null,
   cityIds = [],
 }: FetchStoresForSearchParams): Promise<SearchStore[]> {
   return await searchStores({
-    filters,
     storeTypeId,
     prefectureId,
     cityIds,

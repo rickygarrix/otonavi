@@ -16,7 +16,6 @@ type Props = {
 };
 
 type OpenMenu = 'pref' | 'city' | null;
-const MENU_ID = { pref: 'pref-menu', city: 'city-menu' } as const;
 
 /* =========================
    Small Components
@@ -64,8 +63,6 @@ function OptionRow({
 function Selector({
   label,
   selected,
-  menuId,
-  open,
   onClick,
   disabled,
   outerUnselected,
@@ -75,8 +72,6 @@ function Selector({
 }: {
   label: string;
   selected: boolean;
-  menuId: string;
-  open: boolean;
   onClick: () => void;
   disabled?: boolean;
   outerUnselected: string;
@@ -137,8 +132,6 @@ export default function AreaSelector({
     cities.find((c) => c.key === selectedCityKey) ?? null;
 
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
-
-  const hasCities = cities.length > 0;
 
   /* =========================
      🔥 外側クリックで閉じる
@@ -282,8 +275,6 @@ export default function AreaSelector({
         <Selector
           label={selectedPrefecture?.name ?? '都道府県'}
           selected={!!selectedPrefecture}
-          menuId={MENU_ID.pref}
-          open={openMenu === 'pref'}
           onClick={() =>
             setOpenMenu((v) => (v === 'pref' ? null : 'pref'))
           }
@@ -319,8 +310,6 @@ export default function AreaSelector({
         <Selector
           label={selectedCity?.name ?? '市区町村'}
           selected={!!selectedCity}
-          menuId={MENU_ID.city}
-          open={openMenu === 'city'}
           disabled={!selectedPrefecture}
           onClick={() =>
             setOpenMenu((v) => (v === 'city' ? null : 'city'))
