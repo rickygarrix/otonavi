@@ -1,55 +1,54 @@
 'use client';
 
 import type { HomeStore } from '@/types/store';
+import { MapPin } from 'lucide-react';
 
-function GoogleMapEmbed({ store }: { store: HomeStore }) {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+/* =========================
+   Utils
+========================= */
+function isAppleDevice() {
+  if (typeof navigator === 'undefined') return false;
 
-  if (!apiKey) {
-    console.warn('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY が設定されていません');
-    return null;
-  }
-
-  if (!store.place_id) {
-    // Place ID が無い店舗は地図を出さない
-    return null;
-  }
-
-  const q = `place_id:${store.place_id}`;
-  const embedUrl = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(
-    q
-  )}`;
+  const ua = navigator.userAgent.toLowerCase();
 
   return (
-    <div className="my-2 overflow-hidden rounded-lg shadow-sm">
-      <iframe
-        src={embedUrl}
-        className="h-112 w-full"
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
-        allowFullScreen
-        title="Google Map"
-      />
-    </div>
+    ua.includes('iphone') ||
+    ua.includes('ipad') ||
+    ua.includes('macintosh')
   );
 }
+function buildMapUrl(store: HomeStore) {
+  const name = store.name;
+  const address = store.address ?? '';
+  const destination = encodeURIComponent(`${name} ${address}`);
+
+  // Apple Maps：現在地 → 徒歩
+  if (isAppleDevice()) {
+    return `https://maps.apple.com/?daddr=${destination}&dirflg=w`;
+  }
+
+  // Google Maps：現在地 → 徒歩
+  return `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=walking`;
+}
+
+/* =========================
+   Component
+========================= */
 
 type Props = {
   store: HomeStore;
 };
 
-/**
- * 店舗アクセス情報 + Google Map
- */
 export default function StoreAccess({ store }: Props) {
-
-  if (!store.access && !store.address && !store.place_id) {
+  if (!store.access && !store.address) {
     return null;
   }
 
+  const mapUrl = buildMapUrl(store);
+
   return (
-    <section className="text-dark-4 flex flex-col gap-4 p-4 text-sm">
-      <h2 className="text-dark-5 py-0.5 text-lg font-bold tracking-widest">
+    <section className="flex flex-col gap-4 p-4 text-sm text-dark-4">
+      <h2 className="py-0.5 text-lg font-bold tracking-widest text-dark-5">
         アクセス
       </h2>
 
@@ -61,11 +60,23 @@ export default function StoreAccess({ store }: Props) {
         )}
       </div>
 
-      {/* ② 地図（Place ID のみ） */}
-      <GoogleMapEmbed store={store} />
+      {/* ② 地図を開くボタン */}
+      {mapUrl && (
+        <a
+          href={mapUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex h-12 items-center justify-center gap-2 rounded-lg bg-Brand-Light-1 px-4 text-sm text-Brand-Dark-5 transition hover:bg-Brand-Light-2"
+        >
+          <MapPin className="h-4 w-4" />
+          <span>地図を開く</span>
+        </a>
+      )}
 
       {/* ③ アクセス説明 */}
-      {store.access && <p className="whitespace-pre-line">{store.access}</p>}
+      {store.access && (
+        <p className="whitespace-pre-line">{store.access}</p>
+      )}
     </section>
   );
 }
