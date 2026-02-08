@@ -28,10 +28,20 @@ function extractKeys(list: unknown, defKey: string): string[] {
     .filter((k): k is string => typeof k === 'string');
 }
 
+/**
+ * ギャラリー画像選択
+ * - sort_order 昇順
+ * - なければ /noshop.svg
+ */
 function selectImage(
-  store_galleries: SearchStoreRow['store_galleries'],
+  store_galleries: {
+    gallery_url: string | null;
+    sort_order: number | null;
+  }[] | null,
 ): string {
-  if (!store_galleries?.length) return '/noshop.svg';
+  if (!store_galleries || store_galleries.length === 0) {
+    return '/noshop.svg';
+  }
 
   const sorted = [...store_galleries].sort(
     (a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999),
@@ -50,20 +60,23 @@ function selectImage(
 export function normalizeSearchStore(
   raw: SearchStoreRow,
 ): SearchStore {
+  const prefectureKey = raw.prefectures?.key ?? null;
+  const cityKey = raw.cities?.key ?? null;
+
   return {
     id: raw.id,
     slug: raw.slug,
     name: raw.name,
     kana: raw.kana,
 
-    /* ===== エリア（素 key） ===== */
+    /* ===== エリア ===== */
     prefecture_id: raw.prefectures?.id ?? null,
     prefecture_label: raw.prefectures?.name ?? null,
-    prefecture_key: raw.prefectures?.key ?? null,
+    prefecture_key: prefectureKey,
 
     city_id: raw.cities?.id ?? null,
     city_label: raw.cities?.name ?? null,
-    city_key: raw.cities?.key ?? null,
+    city_key: cityKey,
 
     /* ===== 店舗タイプ ===== */
     venue_type_id: raw.venue_types?.id ?? null,
@@ -87,7 +100,7 @@ export function normalizeSearchStore(
       ? `sizes:${raw.sizes.key}`
       : null,
 
-    /* ===== M2M マスタ ===== */
+    /* ===== M2M ===== */
     customer_keys: extractKeys(raw.store_audience_types, 'audience_types'),
     atmosphere_keys: extractKeys(raw.store_atmospheres, 'atmospheres'),
     environment_keys: extractKeys(raw.store_environments, 'environments'),
