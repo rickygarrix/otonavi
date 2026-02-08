@@ -51,7 +51,6 @@ export default function HomePage() {
     const map = new Map<string, string>();
 
     masters.genericMasters.forEach((m) => {
-      // m.key = "sizes:medium"
       const rawKey = m.key.split(':')[1];
       map.set(rawKey, m.table);
     });
@@ -74,6 +73,7 @@ export default function HomePage() {
   const filter = useHomeFilterState(masters.externalLabelMap, {
     initialKeys: urlFilters,
     keyToTableMap,
+    cityMap: masters.cityMap,
   });
 
   const {

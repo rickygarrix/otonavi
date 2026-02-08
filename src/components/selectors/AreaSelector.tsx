@@ -268,7 +268,7 @@ export default function AreaSelector({
         />
 
         {openMenu === 'pref' && (
-          <div className="absolute top-12 left-0 z-20 max-h-100 w-full overflow-y-auto rounded-2xl border bg-white/40 p-2 shadow-lg backdrop-blur-lg">
+          <div className="absolute top-12 left-0 z-20 max-h-100 w-full overflow-y-auto rounded-2xl bg-white/40 p-2 shadow-lg backdrop-blur-lg">
             <OptionRow
               label="都道府県を選択"
               selected={!selectedPrefecture}
