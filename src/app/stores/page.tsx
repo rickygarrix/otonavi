@@ -30,7 +30,7 @@ export async function generateMetadata({
 
 export default function StoresPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<div />}>
       <StoresClient />
     </Suspense>
   );

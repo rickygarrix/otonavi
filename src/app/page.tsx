@@ -3,8 +3,9 @@ import HomePage from './home/HomePage';
 
 export default function Page() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<div />}>
       <HomePage />
     </Suspense>
+
   );
 }

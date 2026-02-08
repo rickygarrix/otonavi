@@ -21,8 +21,9 @@ const MENU_ID = { pref: 'pref-menu', city: 'city-menu' } as const;
 
 type OptionRowProps = {
   label: string;
-  selected: boolean;
-  onClick: () => void;
+  selected?: boolean;
+  onClick?: () => void;
+  variant?: 'option' | 'header';
 };
 
 type SelectorProps = {
@@ -42,23 +43,32 @@ type SelectorProps = {
    Small Components
 ========================= */
 
-function OptionRow({ label, selected, onClick }: OptionRowProps) {
+function OptionRow({
+  label,
+  selected = false,
+  onClick,
+  variant = 'option',
+}: OptionRowProps) {
+  const isHeader = variant === 'header';
+
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={isHeader}
       className={`
         flex h-12 w-full items-center gap-2 rounded-xs px-2 text-start
         transition-colors
-        active:bg-black/3
-        ${selected
-          ? 'bg-black/5 font-semibold text-dark-5'
-          : 'text-gray-4 hover:bg-black/3'
+        ${isHeader
+          ? 'cursor-default text-xs font-semibold text-gray-3'
+          : selected
+            ? 'bg-black/5 font-semibold text-dark-5'
+            : 'text-gray-4 hover:bg-black/3'
         }
       `}
     >
       <Check
-        className={`h-4 w-4 shrink-0 transition-opacity ${selected ? 'opacity-100' : 'opacity-0'
+        className={`h-4 w-4 shrink-0 ${isHeader ? 'opacity-0' : selected ? 'opacity-100' : 'opacity-0'
           }`}
         strokeWidth={2}
       />
@@ -126,6 +136,8 @@ export default function AreaSelector({
   const openCity = openMenu === 'city';
   const isAnyOpen = openMenu !== null;
 
+  const hasCities = cities.length > 0;
+
   /* =========================
      Reset
   ========================= */
@@ -140,35 +152,33 @@ export default function AreaSelector({
   ========================= */
   useEffect(() => {
     const loadPrefectures = async () => {
-      // ① stores から使用中 prefecture_id を取得
-      const { data: storePrefs, error: storeError } = await supabase
+      const { data: storePrefs, error } = await supabase
         .from('stores')
         .select('prefecture_id')
         .not('prefecture_id', 'is', null);
 
-      if (storeError) {
-        console.error('stores prefecture load error:', storeError);
+      if (error) {
+        console.error('stores prefecture load error:', error);
         return;
       }
 
       const usedPrefectureIds = Array.from(
-        new Set((storePrefs ?? []).map((s) => s.prefecture_id))
+        new Set((storePrefs ?? []).map((s) => s.prefecture_id)),
       );
 
-      if (usedPrefectureIds.length === 0) {
+      if (!usedPrefectureIds.length) {
         setPrefectures([]);
         return;
       }
 
-      // ② prefectures を絞り込み
-      const { data, error } = await supabase
+      const { data, error: prefError } = await supabase
         .from('prefectures')
         .select('id, name, sort_order')
         .in('id', usedPrefectureIds)
         .order('sort_order', { ascending: true });
 
-      if (error) {
-        console.error('prefectures load error:', error);
+      if (prefError) {
+        console.error('prefectures load error:', prefError);
         return;
       }
 
@@ -178,27 +188,46 @@ export default function AreaSelector({
     loadPrefectures();
   }, []);
 
-  const isTokyo = selectedPrefecture?.name === '東京都';
-
   /* =========================
-     Cities (東京のみ)
+     Cities（都道府県ベース）
   ========================= */
   useEffect(() => {
-    if (!isTokyo || !selectedPrefecture) {
+    if (!selectedPrefecture) {
       setCities([]);
       setSelectedCity(null);
       return;
     }
 
     const loadCities = async () => {
-      const { data, error } = await supabase
-        .from('cities')
-        .select('id, name, sort_order')
+      const { data: storeCities, error } = await supabase
+        .from('stores')
+        .select('city_id')
         .eq('prefecture_id', selectedPrefecture.id)
-        .order('sort_order', { ascending: true });
+        .not('city_id', 'is', null);
 
       if (error) {
-        console.error('cities load error:', error);
+        console.error('stores city load error:', error);
+        return;
+      }
+
+      const usedCityIds = Array.from(
+        new Set((storeCities ?? []).map((s) => s.city_id)),
+      );
+
+      if (!usedCityIds.length) {
+        setCities([]);
+        setSelectedCity(null);
+        return;
+      }
+
+      const { data, error: cityError } = await supabase
+        .from('cities')
+        .select('id, name, sort_order, key')
+        .in('id', usedCityIds)
+        .order('sort_order', { ascending: true });
+
+      if (cityError) {
+        console.error('cities load error:', cityError);
         return;
       }
 
@@ -206,44 +235,47 @@ export default function AreaSelector({
     };
 
     loadCities();
-  }, [isTokyo, selectedPrefecture]);
+  }, [selectedPrefecture]);
 
   /* =========================
-   URL / 外部 state → 選択状態の同期
-========================= */
+     URL / 外部 state 同期
+  ========================= */
   useEffect(() => {
     if (!prefectures.length) return;
 
-    const pref = prefectures.find(
-      (p) => p.name === prefectureKeys[0]
-    ) ?? null;
-
+    const pref =
+      prefectures.find((p) => p.name === prefectureKeys[0]) ?? null;
     setSelectedPrefecture(pref);
   }, [prefectureKeys, prefectures]);
 
   useEffect(() => {
     if (!cities.length) return;
 
-    const city = cities.find(
-      (c) => c.name === cityKeys[0]
-    ) ?? null;
-
+    const city = cities.find((c) => c.name === cityKeys[0]) ?? null;
     setSelectedCity(city);
   }, [cityKeys, cities]);
 
+  const isTokyo = selectedPrefecture?.name === '東京都';
+
   /* =========================
      Classification
-     sort_order <= 23 => 東京23区
   ========================= */
   const wards = useMemo(
-    () => cities.filter((c) => c.sort_order <= 23),
-    [cities],
+    () =>
+      isTokyo
+        ? cities.filter((c) => c.sort_order <= 23)
+        : [],
+    [cities, isTokyo],
   );
 
   const others = useMemo(
-    () => cities.filter((c) => c.sort_order > 23),
-    [cities],
+    () =>
+      isTokyo
+        ? cities.filter((c) => c.sort_order > 23)
+        : cities,
+    [cities, isTokyo],
   );
+
 
   /* =========================
      Handlers
@@ -255,7 +287,6 @@ export default function AreaSelector({
     onChange([p.name], []);
   };
 
-
   const selectCity = (c: City) => {
     setSelectedCity(c);
     setOpenMenu(null);
@@ -264,7 +295,6 @@ export default function AreaSelector({
       [c.name],
     );
   };
-
 
   const clearPrefecture = () => {
     setSelectedPrefecture(null);
@@ -282,7 +312,6 @@ export default function AreaSelector({
     );
   };
 
-
   /* =========================
      Styles
   ========================= */
@@ -297,7 +326,6 @@ export default function AreaSelector({
   ========================= */
   return (
     <div className="relative flex w-full text-sm">
-      {/* Scrim */}
       {isAnyOpen && (
         <button
           type="button"
@@ -326,22 +354,12 @@ export default function AreaSelector({
         />
 
         {openPref && (
-          <div
-            id={MENU_ID.pref}
-            className="
-              absolute top-12 left-0 z-20
-              max-h-100 w-full overflow-y-auto
-              rounded-2xl border border-gray-1
-              bg-white/40 p-2
-              shadow-lg backdrop-blur-lg
-            "
-          >
+          <div className="absolute top-12 left-0 z-20 max-h-100 w-full overflow-y-auto rounded-2xl border border-gray-1 bg-white/40 p-2 shadow-lg backdrop-blur-lg">
             <OptionRow
               label="都道府県を選択"
               selected={selectedPrefecture === null}
               onClick={clearPrefecture}
             />
-
             {prefectures.map((p) => (
               <OptionRow
                 key={p.id}
@@ -354,18 +372,17 @@ export default function AreaSelector({
         )}
       </div>
 
-      {/* City (東京のみ表示) */}
+      {/* City */}
       <div
-        className={`relative flex-1 ${isTokyo ? 'visible' : 'invisible'
-          }`}
-        aria-hidden={!isTokyo}
+        className={`relative flex-1 ${hasCities ? 'visible' : 'invisible'}`}
+        aria-hidden={!hasCities}
       >
         <Selector
           label={selectedCity?.name ?? '市区町村'}
           selected={selectedCity !== null}
           menuId={MENU_ID.city}
           open={openCity}
-          disabled={!isTokyo}
+          disabled={!hasCities}
           onClick={() =>
             setOpenMenu((v) => (v === 'city' ? null : 'city'))
           }
@@ -378,24 +395,14 @@ export default function AreaSelector({
         />
 
         {openCity && (
-          <div
-            id={MENU_ID.city}
-            className="
-              absolute top-12 left-0 z-20
-              h-100 w-full overflow-y-auto
-              rounded-2xl border border-gray-1
-              bg-white/40 p-2
-              text-gray-4
-              shadow-lg backdrop-blur-lg
-            "
-          >
+          <div className="absolute top-12 left-0 z-20 max-h-100 w-full overflow-y-auto rounded-2xl border border-gray-1 bg-white/40 p-2 shadow-lg backdrop-blur-lg">
             <OptionRow
               label="市区町村を選択"
               selected={selectedCity === null}
               onClick={clearCity}
             />
 
-            {wards.length > 0 && (
+            {isTokyo && wards.length > 0 && (
               <>
                 <div className="p-2 text-xs font-semibold">
                   東京23区
@@ -413,9 +420,11 @@ export default function AreaSelector({
 
             {others.length > 0 && (
               <>
-                <div className="mt-2 border-t border-gray-1 px-2 pt-6 pb-2 text-xs font-semibold">
-                  その他
-                </div>
+                {isTokyo && (
+                  <div className="mt-2 border-t border-gray-1 px-2 pt-6 pb-2 text-xs font-semibold">
+                    その他
+                  </div>
+                )}
                 {others.map((c) => (
                   <OptionRow
                     key={c.id}
@@ -426,6 +435,7 @@ export default function AreaSelector({
                 ))}
               </>
             )}
+
           </div>
         )}
       </div>
