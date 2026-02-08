@@ -19,12 +19,15 @@ export function useStoreFilters(
     return stores.filter((store) => {
       /* =========================
          ① フィルタ分離
+         - エリア: ":" なし
+         - 属性:   ":" あり
       ========================= */
       const areaFilters = filters.filter((f) => !f.includes(':'));
       const attributeFilters = filters.filter((f) => f.includes(':'));
 
       /* =========================
-         ② 属性キー
+         ② 店舗が持つ属性キー一覧
+         （すべて table:key 形式）
       ========================= */
       const attributeKeys = [
         store.venue_type_key,
@@ -43,32 +46,41 @@ export function useStoreFilters(
       ].filter(Boolean) as string[];
 
       /* =========================
-         ③ エリア判定【修正版】
+         ③ エリア判定
          ルール：
-         - areaFilters.length >= 2 → city モード
-         - areaFilters.length === 1 → prefecture モード
+         - 2個以上 → city モード
+         - 1個     → prefecture モード
       ========================= */
       let matchArea = true;
 
       if (areaFilters.length >= 2) {
-        // ✅ 市区町村モード
         matchArea =
           typeof store.city_key === 'string' &&
           areaFilters.includes(store.city_key);
       } else if (areaFilters.length === 1) {
-        // ✅ 都道府県モード
         matchArea =
           typeof store.prefecture_key === 'string' &&
           areaFilters.includes(store.prefecture_key);
       }
 
       /* =========================
-         ④ 属性判定（AND）
+         ④ 属性判定
+         ルール：
+         - 同一 table 内 → OR
+         - table 間      → AND
       ========================= */
       const matchAttributes =
         attributeFilters.length === 0 ||
-        attributeFilters.every((f) =>
-          attributeKeys.includes(f),
+        Object.entries(
+          attributeFilters.reduce<Record<string, string[]>>((acc, f) => {
+            const [table] = f.split(':');
+            acc[table] ??= [];
+            acc[table].push(f);
+            return acc;
+          }, {}),
+        ).every(([, group]) =>
+          // 同一カテゴリ内は OR
+          group.some((f) => attributeKeys.includes(f)),
         );
 
       return matchArea && matchAttributes;
