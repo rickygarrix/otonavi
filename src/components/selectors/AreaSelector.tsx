@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Prefecture, City } from '@/types/location';
 import { ChevronsUpDown, Check } from 'lucide-react';
@@ -47,7 +47,8 @@ function OptionRow({
           ? 'cursor-default text-xs font-semibold text-gray-3'
           : selected
             ? 'bg-black/5 font-semibold text-dark-5'
-            : 'text-gray-4 hover:bg-black/3'}
+            : 'text-gray-4 hover:bg-black/3'
+        }
       `}
     >
       <Check
@@ -86,11 +87,12 @@ function Selector({
   return (
     <button
       type="button"
-      aria-expanded={open}
-      aria-controls={menuId}
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
       disabled={disabled}
-      className="h-12 w-full p-1"
+      className={`
+    h-12 w-full p-1
+    ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+  `}
     >
       <div
         className={`h-full overflow-hidden rounded-full p-px ${selected ? outerSelected : outerUnselected
@@ -117,6 +119,8 @@ export default function AreaSelector({
   cityKeys,
   onChange,
 }: Props) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
   const [prefectures, setPrefectures] = useState<Prefecture[]>([]);
   const [cities, setCities] = useState<City[]>([]);
 
@@ -125,12 +129,36 @@ export default function AreaSelector({
 
   const selectedPrefecture =
     prefectures.find((p) => p.key === selectedPrefKey) ?? null;
+  const isTokyo = selectedPrefecture?.key === 'tokyo';
+
+  const wards = cities.filter((c) => c.sort_order <= 23);
+  const others = cities.filter((c) => c.sort_order > 23);
   const selectedCity =
     cities.find((c) => c.key === selectedCityKey) ?? null;
 
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
 
   const hasCities = cities.length > 0;
+
+  /* =========================
+     🔥 外側クリックで閉じる
+  ========================= */
+  useEffect(() => {
+    if (!openMenu) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setOpenMenu(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () =>
+      document.removeEventListener('mousedown', handleClickOutside);
+  }, [openMenu]);
 
   /* =========================
      Prefectures
@@ -248,7 +276,7 @@ export default function AreaSelector({
      UI
   ========================= */
   return (
-    <div className="relative flex w-full text-sm">
+    <div ref={containerRef} className="relative flex w-full text-sm">
       {/* Prefecture */}
       <div className="relative flex-1">
         <Selector
@@ -287,13 +315,13 @@ export default function AreaSelector({
       </div>
 
       {/* City */}
-      <div className={`relative flex-1 ${hasCities ? 'visible' : 'invisible'}`}>
+      <div className="relative flex-1">
         <Selector
           label={selectedCity?.name ?? '市区町村'}
           selected={!!selectedCity}
           menuId={MENU_ID.city}
           open={openMenu === 'city'}
-          disabled={!hasCities}
+          disabled={!selectedPrefecture}
           onClick={() =>
             setOpenMenu((v) => (v === 'city' ? null : 'city'))
           }
@@ -306,20 +334,56 @@ export default function AreaSelector({
         />
 
         {openMenu === 'city' && (
-          <div className="absolute top-12 left-0 z-20 max-h-100 w-full overflow-y-auto rounded-2xl border bg-white/40 p-2 shadow-lg backdrop-blur-lg">
+          <div className="absolute top-12 left-0 z-20 max-h-100 w-full overflow-y-auto rounded-2xl bg-white/40 p-2 shadow-lg backdrop-blur-lg">
             <OptionRow
               label="市区町村を選択"
               selected={!selectedCity}
               onClick={clearCity}
             />
-            {cities.map((c) => (
-              <OptionRow
-                key={c.key}
-                label={c.name}
-                selected={c.key === selectedCityKey}
-                onClick={() => selectCity(c)}
-              />
-            ))}
+            {isTokyo ? (
+              <>
+                {wards.length > 0 && (
+                  <>
+                    <div className="px-2 pt-2 pb-1 text-xs font-semibold text-gray-5">
+                      東京23区
+                    </div>
+                    {wards.map((c) => (
+                      <OptionRow
+                        key={c.key}
+                        label={c.name}
+                        selected={c.key === selectedCityKey}
+                        onClick={() => selectCity(c)}
+                      />
+                    ))}
+                  </>
+                )}
+
+                {others.length > 0 && (
+                  <>
+                    <div className="mt-2 border-t border-gray-1 px-2 pt-4 pb-1 text-xs font-semibold text-gray-5">
+                      その他
+                    </div>
+                    {others.map((c) => (
+                      <OptionRow
+                        key={c.key}
+                        label={c.name}
+                        selected={c.key === selectedCityKey}
+                        onClick={() => selectCity(c)}
+                      />
+                    ))}
+                  </>
+                )}
+              </>
+            ) : (
+              cities.map((c) => (
+                <OptionRow
+                  key={c.key}
+                  label={c.name}
+                  selected={c.key === selectedCityKey}
+                  onClick={() => selectCity(c)}
+                />
+              ))
+            )}
           </div>
         )}
       </div>
