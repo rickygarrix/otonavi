@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useMemo } from 'react';
 
 import Header from '@/components/ui/Header';
@@ -14,7 +14,6 @@ import { useHomeMasters } from '@/hooks/home';
 import { useSearchStore } from '@/stores/searchStore';
 
 export default function StoresClient() {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   /** URL（raw key） */
@@ -51,16 +50,15 @@ export default function StoresClient() {
     return map;
   }, [masters.genericMasters]);
 
-  /** 🔥 検索用フィルタ（full key） */
   /** 🔥 検索用フィルタ（raw + full 混在） */
-  const filterKeys = useMemo(() => {
-    return selectedFilters.map((rawKey) => {
-      // fullKey が存在すれば使う（属性）
-      const fullKey = keyToFullKeyMap.get(rawKey);
-      // なければ rawKey（エリア）
-      return fullKey ?? rawKey;
-    });
-  }, [selectedFilters, keyToFullKeyMap]);
+  const filterKeys = useMemo(
+    () =>
+      selectedFilters.map((rawKey) => {
+        const fullKey = keyToFullKeyMap.get(rawKey);
+        return fullKey ?? rawKey; // エリアは rawKey
+      }),
+    [selectedFilters, keyToFullKeyMap],
+  );
 
   /** 検索実行 */
   const { filteredStores } = useStoreFilters(baseStores, {

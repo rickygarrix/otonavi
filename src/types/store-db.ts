@@ -9,11 +9,19 @@ export type IdLabelRow = {
 
 export type IdNameRow = {
   id: string;
+  key: string;
   name: string;
 };
 
 export type PrefectureRow = {
   id: string;
+  key: string;
+  name: string;
+};
+
+export type CityRow = {
+  id: string;
+  key: string;
   name: string;
 };
 

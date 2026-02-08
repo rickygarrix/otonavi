@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Prefecture, City } from '@/types/location';
 import { ChevronsUpDown, Check } from 'lucide-react';
@@ -10,33 +10,13 @@ import { ChevronsUpDown, Check } from 'lucide-react';
 ========================= */
 
 type Props = {
-  prefectureKeys: string[]; // key
-  cityKeys: string[];       // key
+  prefectureKeys: string[];
+  cityKeys: string[];
   onChange: (prefectureKeys: string[], cityKeys: string[]) => void;
 };
 
 type OpenMenu = 'pref' | 'city' | null;
 const MENU_ID = { pref: 'pref-menu', city: 'city-menu' } as const;
-
-type OptionRowProps = {
-  label: string;
-  selected?: boolean;
-  onClick?: () => void;
-  variant?: 'option' | 'header';
-};
-
-type SelectorProps = {
-  label: string;
-  selected: boolean;
-  menuId: string;
-  open: boolean;
-  onClick: () => void;
-  disabled?: boolean;
-  outerUnselected: string;
-  outerSelected: string;
-  innerUnselected: string;
-  innerSelected: string;
-};
 
 /* =========================
    Small Components
@@ -47,7 +27,12 @@ function OptionRow({
   selected = false,
   onClick,
   variant = 'option',
-}: OptionRowProps) {
+}: {
+  label: string;
+  selected?: boolean;
+  onClick?: () => void;
+  variant?: 'option' | 'header';
+}) {
   const isHeader = variant === 'header';
 
   return (
@@ -86,7 +71,18 @@ function Selector({
   outerSelected,
   innerUnselected,
   innerSelected,
-}: SelectorProps) {
+}: {
+  label: string;
+  selected: boolean;
+  menuId: string;
+  open: boolean;
+  onClick: () => void;
+  disabled?: boolean;
+  outerUnselected: string;
+  outerSelected: string;
+  innerUnselected: string;
+  innerSelected: string;
+}) {
   return (
     <button
       type="button"
@@ -117,7 +113,6 @@ function Selector({
 ========================= */
 
 export default function AreaSelector({
-  clearKey,
   prefectureKeys,
   cityKeys,
   onChange,
@@ -125,7 +120,6 @@ export default function AreaSelector({
   const [prefectures, setPrefectures] = useState<Prefecture[]>([]);
   const [cities, setCities] = useState<City[]>([]);
 
-  // key ベース state
   const [selectedPrefKey, setSelectedPrefKey] = useState<string | null>(null);
   const [selectedCityKey, setSelectedCityKey] = useState<string | null>(null);
 
@@ -135,16 +129,11 @@ export default function AreaSelector({
     cities.find((c) => c.key === selectedCityKey) ?? null;
 
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
-  const openPref = openMenu === 'pref';
-  const openCity = openMenu === 'city';
-  const isAnyOpen = openMenu !== null;
 
   const hasCities = cities.length > 0;
 
-
-
   /* =========================
-     Prefectures (店舗がある県のみ)
+     Prefectures
   ========================= */
   useEffect(() => {
     const load = async () => {
@@ -172,7 +161,7 @@ export default function AreaSelector({
   }, []);
 
   /* =========================
-     Cities（都道府県ベース）
+     Cities
   ========================= */
   useEffect(() => {
     if (!selectedPrefecture) {
@@ -207,7 +196,7 @@ export default function AreaSelector({
   }, [selectedPrefecture]);
 
   /* =========================
-     URL / 外部 state 同期（key）
+     外部 state 同期
   ========================= */
   useEffect(() => {
     setSelectedPrefKey(prefectureKeys[0] ?? null);
@@ -217,25 +206,8 @@ export default function AreaSelector({
     setSelectedCityKey(cityKeys[0] ?? null);
   }, [cityKeys]);
 
-  const isTokyo = selectedPrefecture?.name === '東京都';
-
   /* =========================
-     Classification
-  ========================= */
-  const wards = useMemo(
-    () =>
-      isTokyo ? cities.filter((c) => c.sort_order <= 23) : [],
-    [cities, isTokyo],
-  );
-
-  const others = useMemo(
-    () =>
-      isTokyo ? cities.filter((c) => c.sort_order > 23) : cities,
-    [cities, isTokyo],
-  );
-
-  /* =========================
-     Handlers（key）
+     Handlers
   ========================= */
   const selectPrefecture = (p: Prefecture) => {
     setSelectedPrefKey(p.key);
@@ -277,22 +249,13 @@ export default function AreaSelector({
   ========================= */
   return (
     <div className="relative flex w-full text-sm">
-      {isAnyOpen && (
-        <button
-          type="button"
-          aria-label="close"
-          className="fixed inset-0 z-10 cursor-default"
-          onClick={() => setOpenMenu(null)}
-        />
-      )}
-
       {/* Prefecture */}
       <div className="relative flex-1">
         <Selector
           label={selectedPrefecture?.name ?? '都道府県'}
           selected={!!selectedPrefecture}
           menuId={MENU_ID.pref}
-          open={openPref}
+          open={openMenu === 'pref'}
           onClick={() =>
             setOpenMenu((v) => (v === 'pref' ? null : 'pref'))
           }
@@ -304,8 +267,8 @@ export default function AreaSelector({
           }}
         />
 
-        {openPref && (
-          <div className="absolute top-12 left-0 z-20 max-h-100 w-full overflow-y-auto rounded-2xl border border-gray-1 bg-white/40 p-2 shadow-lg backdrop-blur-lg">
+        {openMenu === 'pref' && (
+          <div className="absolute top-12 left-0 z-20 max-h-100 w-full overflow-y-auto rounded-2xl border bg-white/40 p-2 shadow-lg backdrop-blur-lg">
             <OptionRow
               label="都道府県を選択"
               selected={!selectedPrefecture}
@@ -324,15 +287,12 @@ export default function AreaSelector({
       </div>
 
       {/* City */}
-      <div
-        className={`relative flex-1 ${hasCities ? 'visible' : 'invisible'}`}
-        aria-hidden={!hasCities}
-      >
+      <div className={`relative flex-1 ${hasCities ? 'visible' : 'invisible'}`}>
         <Selector
           label={selectedCity?.name ?? '市区町村'}
           selected={!!selectedCity}
           menuId={MENU_ID.city}
-          open={openCity}
+          open={openMenu === 'city'}
           disabled={!hasCities}
           onClick={() =>
             setOpenMenu((v) => (v === 'city' ? null : 'city'))
@@ -345,47 +305,21 @@ export default function AreaSelector({
           }}
         />
 
-        {openCity && (
-          <div className="absolute top-12 left-0 z-20 max-h-100 w-full overflow-y-auto rounded-2xl border border-gray-1 bg-white/40 p-2 shadow-lg backdrop-blur-lg">
+        {openMenu === 'city' && (
+          <div className="absolute top-12 left-0 z-20 max-h-100 w-full overflow-y-auto rounded-2xl border bg-white/40 p-2 shadow-lg backdrop-blur-lg">
             <OptionRow
               label="市区町村を選択"
               selected={!selectedCity}
               onClick={clearCity}
             />
-
-            {isTokyo && wards.length > 0 && (
-              <>
-                <div className="p-2 text-xs font-semibold">
-                  東京23区
-                </div>
-                {wards.map((c) => (
-                  <OptionRow
-                    key={c.key}
-                    label={c.name}
-                    selected={c.key === selectedCityKey}
-                    onClick={() => selectCity(c)}
-                  />
-                ))}
-              </>
-            )}
-
-            {others.length > 0 && (
-              <>
-                {isTokyo && (
-                  <div className="mt-2 border-t border-gray-1 px-2 pt-6 pb-2 text-xs font-semibold">
-                    その他
-                  </div>
-                )}
-                {others.map((c) => (
-                  <OptionRow
-                    key={c.key}
-                    label={c.name}
-                    selected={c.key === selectedCityKey}
-                    onClick={() => selectCity(c)}
-                  />
-                ))}
-              </>
-            )}
+            {cities.map((c) => (
+              <OptionRow
+                key={c.key}
+                label={c.name}
+                selected={c.key === selectedCityKey}
+                onClick={() => selectCity(c)}
+              />
+            ))}
           </div>
         )}
       </div>

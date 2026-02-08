@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
 import type { HomeStore } from '@/types/store';
 
 import Footer from '@/components/ui/Footer';
@@ -20,7 +19,10 @@ import { StoreDetailDivider } from './StoreDetailDivider';
 
 const join = (v?: string[]) => (v && v.length > 0 ? v.join(', ') : null);
 
-const formatPaymentMethods = (labels?: string[], otherText?: string | null) => {
+const formatPaymentMethods = (
+  labels?: string[],
+  otherText?: string | null,
+) => {
   if (!labels || labels.length === 0) return null;
 
   const hasOther = labels.includes('その他');
@@ -45,10 +47,10 @@ type Props = {
    Component
 ========================= */
 
-export default function StoreDetailView({ store, onMainImageLoaded }: Props) {
-  const router = useRouter();
-  const query = useSearchParams().toString();
-
+export default function StoreDetailView({
+  store,
+  onMainImageLoaded,
+}: Props) {
   const detailItems: [string, string][] = [
     { order: 10, label: '客層', value: join(store.customer_labels) },
     { order: 20, label: '雰囲気', value: join(store.atmosphere_labels) },
@@ -71,7 +73,9 @@ export default function StoreDetailView({ store, onMainImageLoaded }: Props) {
     { order: 120, label: 'その他', value: join(store.other_labels) },
   ]
     .filter(
-      (item): item is { order: number; label: string; value: string } =>
+      (
+        item,
+      ): item is { order: number; label: string; value: string } =>
         typeof item.value === 'string' && item.value.trim().length > 0,
     )
     .sort((a, b) => a.order - b.order)

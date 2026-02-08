@@ -18,7 +18,7 @@ type M2MRow = Record<string, DefinitionRef | undefined>;
 
 /**
  * M2M 用
- * table:key 形式で正規化
+ * relation.key を配列で取得
  */
 function extractKeys(list: unknown, defKey: string): string[] {
   if (!Array.isArray(list)) return [];
@@ -56,14 +56,14 @@ export function normalizeSearchStore(
     name: raw.name,
     kana: raw.kana,
 
-    /* ===== エリア（例外：素 key） ===== */
+    /* ===== エリア（素 key） ===== */
     prefecture_id: raw.prefectures?.id ?? null,
     prefecture_label: raw.prefectures?.name ?? null,
-    prefecture_key: raw.prefectures?.key ?? null, // ← table 付けない
+    prefecture_key: raw.prefectures?.key ?? null,
 
     city_id: raw.cities?.id ?? null,
     city_label: raw.cities?.name ?? null,
-    city_key: raw.cities?.key ?? null, // ← table 付けない
+    city_key: raw.cities?.key ?? null,
 
     /* ===== 店舗タイプ ===== */
     venue_type_id: raw.venue_types?.id ?? null,
@@ -88,56 +88,16 @@ export function normalizeSearchStore(
       : null,
 
     /* ===== M2M マスタ ===== */
-    customer_keys: extractKeys(
-      raw.store_audience_types,
-      'audience_types',
-      'audience_types',
-    ),
-    atmosphere_keys: extractKeys(
-      raw.store_atmospheres,
-      'atmospheres',
-      'atmospheres',
-    ),
-    environment_keys: extractKeys(
-      raw.store_environments,
-      'environments',
-      'environments',
-    ),
-    drink_keys: extractKeys(
-      raw.store_drinks,
-      'drinks',
-      'drinks',
-    ),
-    payment_method_keys: extractKeys(
-      raw.store_payment_methods,
-      'payment_methods',
-      'payment_methods',
-    ),
-    event_trend_keys: extractKeys(
-      raw.store_event_trends,
-      'event_trends',
-      'event_trends',
-    ),
-    baggage_keys: extractKeys(
-      raw.store_luggages,
-      'luggages',
-      'luggages',
-    ),
-    smoking_keys: extractKeys(
-      raw.store_smoking_policies,
-      'smoking_policies',
-      'smoking_policies',
-    ),
-    toilet_keys: extractKeys(
-      raw.store_toilets,
-      'toilets',
-      'toilets',
-    ),
-    other_keys: extractKeys(
-      raw.store_amenities,
-      'amenities',
-      'amenities',
-    ),
+    customer_keys: extractKeys(raw.store_audience_types, 'audience_types'),
+    atmosphere_keys: extractKeys(raw.store_atmospheres, 'atmospheres'),
+    environment_keys: extractKeys(raw.store_environments, 'environments'),
+    drink_keys: extractKeys(raw.store_drinks, 'drinks'),
+    payment_method_keys: extractKeys(raw.store_payment_methods, 'payment_methods'),
+    event_trend_keys: extractKeys(raw.store_event_trends, 'event_trends'),
+    baggage_keys: extractKeys(raw.store_luggages, 'luggages'),
+    smoking_keys: extractKeys(raw.store_smoking_policies, 'smoking_policies'),
+    toilet_keys: extractKeys(raw.store_toilets, 'toilets'),
+    other_keys: extractKeys(raw.store_amenities, 'amenities'),
 
     updated_at: raw.updated_at,
   };

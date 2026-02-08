@@ -5,14 +5,14 @@ import type { SearchStore } from '@/types/store';
 import { normalizeSearchStore } from '@/lib/normalize/normalizeSearchStore';
 
 export type SearchParams = {
-  filters: string[];
-  storeTypeId: string | null;
+  filters?: string[];
+  storeTypeId?: string | null;
   prefectureId?: string | null;
   cityIds?: string[];
 };
 
 export async function searchStores({
-  filters,
+  filters = [],
   storeTypeId,
   prefectureId = null,
   cityIds = [],

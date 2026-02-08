@@ -1,11 +1,11 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import AreaSelector from '@/components/selectors/AreaSelector';
 import GenericSelector from '@/components/selectors/GenericSelector';
 
 type Props = {
-  clearKey: number; // ← これを追加
+
   sectionRefs: React.MutableRefObject<Record<string, HTMLElement | null>>;
 
   prefectureKeys: string[];
@@ -57,7 +57,6 @@ type FilterConfig =
 
 export default function HomeFilterSections(props: Props) {
   const {
-    clearKey,
     sectionRefs,
 
     prefectureKeys,
@@ -67,6 +66,7 @@ export default function HomeFilterSections(props: Props) {
 
     customerKeys,
     atmosphereKeys,
+    environmentKeys,
     sizeKeys,
     drinkKeys,
     priceRangeKeys,
@@ -75,11 +75,11 @@ export default function HomeFilterSections(props: Props) {
     baggageKeys,
     smokingKeys,
     toiletKeys,
-    environmentKeys,
     otherKeys,
 
     setCustomerKeys,
     setAtmosphereKeys,
+    setEnvironmentKeys,
     setSizeKeys,
     setDrinkKeys,
     setPriceRangeKeys,
@@ -88,7 +88,6 @@ export default function HomeFilterSections(props: Props) {
     setBaggageKeys,
     setSmokingKeys,
     setToiletKeys,
-    setEnvironmentKeys,
     setOtherKeys,
   } = props;
 
@@ -100,122 +99,107 @@ export default function HomeFilterSections(props: Props) {
     [setPrefectureKeys, setCityKeys],
   );
 
-  const FILTERS: FilterConfig[] = useMemo(
-    () => [
-      { key: 'エリア', type: 'city' },
+  // 🔥 useMemo 不要（定義オブジェクト）
+  const FILTERS: FilterConfig[] = [
+    { key: 'エリア', type: 'city' },
 
-      {
-        key: '客層',
-        type: 'generic',
-        table: 'audience_types',
-        columns: 2,
-        value: customerKeys,
-        onChange: setCustomerKeys,
-      },
-      {
-        key: '雰囲気',
-        type: 'generic',
-        table: 'atmospheres',
-        columns: 3,
-        value: atmosphereKeys,
-        onChange: setAtmosphereKeys,
-      },
-      {
-        key: '広さ',
-        type: 'generic',
-        table: 'sizes',
-        columns: 3,
-        value: sizeKeys,
-        onChange: setSizeKeys,
-      },
-      {
-        key: 'ドリンク',
-        type: 'drink',
-        table: 'drinks',
-        columns: 3,
-        value: drinkKeys,
-        onChange: setDrinkKeys,
-      },
-      {
-        key: '価格帯',
-        type: 'generic',
-        table: 'price_ranges',
-        columns: 3,
-        value: priceRangeKeys,
-        onChange: setPriceRangeKeys,
-      },
-      {
-        key: '支払い方法',
-        type: 'generic',
-        table: 'payment_methods',
-        columns: 2,
-        value: paymentMethodKeys,
-        onChange: setPaymentMethodKeys,
-      },
-      {
-        key: 'イベントの傾向',
-        type: 'generic',
-        table: 'event_trends',
-        columns: 3,
-        value: eventTrendKeys,
-        onChange: setEventTrendKeys,
-      },
-      {
-        key: '荷物預かり',
-        type: 'generic',
-        table: 'luggages',
-        columns: 2,
-        value: baggageKeys,
-        onChange: setBaggageKeys,
-      },
-      {
-        key: '喫煙',
-        type: 'generic',
-        table: 'smoking_policies',
-        columns: 3,
-        value: smokingKeys,
-        onChange: setSmokingKeys,
-      },
-      {
-        key: 'トイレ',
-        type: 'generic',
-        table: 'toilets',
-        columns: 3,
-        value: toiletKeys,
-        onChange: setToiletKeys,
-      },
-      {
-        key: '周辺環境',
-        type: 'generic',
-        table: 'environments',
-        columns: 2,
-        value: environmentKeys,
-        onChange: setEnvironmentKeys,
-      },
-      {
-        key: 'その他',
-        type: 'generic',
-        table: 'amenities',
-        columns: 2,
-        value: otherKeys,
-        onChange: setOtherKeys,
-      },
-    ],
-    [
-      customerKeys,
-      atmosphereKeys,
-      sizeKeys,
-      drinkKeys,
-      priceRangeKeys,
-      paymentMethodKeys,
-      eventTrendKeys,
-      baggageKeys,
-      smokingKeys,
-      toiletKeys,
-      environmentKeys,
-      otherKeys,
-    ],
-  );
+    {
+      key: '客層',
+      type: 'generic',
+      table: 'audience_types',
+      columns: 2,
+      value: customerKeys,
+      onChange: setCustomerKeys,
+    },
+    {
+      key: '雰囲気',
+      type: 'generic',
+      table: 'atmospheres',
+      columns: 3,
+      value: atmosphereKeys,
+      onChange: setAtmosphereKeys,
+    },
+    {
+      key: '広さ',
+      type: 'generic',
+      table: 'sizes',
+      columns: 3,
+      value: sizeKeys,
+      onChange: setSizeKeys,
+    },
+    {
+      key: 'ドリンク',
+      type: 'drink',
+      table: 'drinks',
+      columns: 3,
+      value: drinkKeys,
+      onChange: setDrinkKeys,
+    },
+    {
+      key: '価格帯',
+      type: 'generic',
+      table: 'price_ranges',
+      columns: 3,
+      value: priceRangeKeys,
+      onChange: setPriceRangeKeys,
+    },
+    {
+      key: '支払い方法',
+      type: 'generic',
+      table: 'payment_methods',
+      columns: 2,
+      value: paymentMethodKeys,
+      onChange: setPaymentMethodKeys,
+    },
+    {
+      key: 'イベントの傾向',
+      type: 'generic',
+      table: 'event_trends',
+      columns: 3,
+      value: eventTrendKeys,
+      onChange: setEventTrendKeys,
+    },
+    {
+      key: '荷物預かり',
+      type: 'generic',
+      table: 'luggages',
+      columns: 2,
+      value: baggageKeys,
+      onChange: setBaggageKeys,
+    },
+    {
+      key: '喫煙',
+      type: 'generic',
+      table: 'smoking_policies',
+      columns: 3,
+      value: smokingKeys,
+      onChange: setSmokingKeys,
+    },
+    {
+      key: 'トイレ',
+      type: 'generic',
+      table: 'toilets',
+      columns: 3,
+      value: toiletKeys,
+      onChange: setToiletKeys,
+    },
+    {
+      key: '周辺環境',
+      type: 'generic',
+      table: 'environments',
+      columns: 2,
+      value: environmentKeys,
+      onChange: setEnvironmentKeys,
+    },
+    {
+      key: 'その他',
+      type: 'generic',
+      table: 'amenities',
+      columns: 2,
+      value: otherKeys,
+      onChange: setOtherKeys,
+    },
+  ];
 
   return (
     <div className="pb-10">
@@ -233,7 +217,6 @@ export default function HomeFilterSections(props: Props) {
                 エリア
               </h3>
               <AreaSelector
-                clearKey={clearKey}
                 prefectureKeys={prefectureKeys}
                 cityKeys={cityKeys}
                 onChange={handleCityChange}

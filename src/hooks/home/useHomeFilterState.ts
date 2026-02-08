@@ -11,7 +11,14 @@ export function useHomeFilterState(
   externalLabelMap?: Map<string, string>,
   options?: Options,
 ) {
-  const initialKeys = options?.initialKeys ?? [];
+  /* =========================
+     options 正規化（★重要）
+  ========================= */
+  const initialKeys = useMemo(
+    () => options?.initialKeys ?? [],
+    [options?.initialKeys],
+  );
+
   const keyToTableMap = options?.keyToTableMap;
 
   // ===== エリア =====
@@ -36,43 +43,43 @@ export function useHomeFilterState(
      URL → state 復元（key完全準拠）
   ========================= */
   useEffect(() => {
-  if (!keyToTableMap) return;
+    if (!keyToTableMap) return;
+    if (initialKeys.length === 0) return;
 
-  const byTable: Record<string, string[]> = {};
+    const byTable: Record<string, string[]> = {};
 
-  initialKeys.forEach((rawKey) => {
-    const table = keyToTableMap.get(rawKey);
+    initialKeys.forEach((rawKey) => {
+      const table = keyToTableMap.get(rawKey);
 
-    // ===== エリア（raw key のまま）=====
-    if (!table) {
-      // prefecture or city
-      if (!byTable.prefectures) byTable.prefectures = [];
-      byTable.prefectures.push(rawKey);
-      return;
-    }
+      // ===== エリア（raw key のまま）=====
+      if (!table) {
+        if (!byTable.prefectures) byTable.prefectures = [];
+        byTable.prefectures.push(rawKey);
+        return;
+      }
 
-    // ===== 属性（fullKey）=====
-    const fullKey = `${table}:${rawKey}`;
-    if (!byTable[table]) byTable[table] = [];
-    byTable[table].push(fullKey);
-  });
+      // ===== 属性（fullKey）=====
+      const fullKey = `${table}:${rawKey}`;
+      if (!byTable[table]) byTable[table] = [];
+      byTable[table].push(fullKey);
+    });
 
-  setPrefectureKeys(byTable.prefectures ?? []);
-  setCityKeys(byTable.cities ?? []);
+    setPrefectureKeys(byTable.prefectures ?? []);
+    setCityKeys(byTable.cities ?? []);
 
-  setCustomerKeys(byTable.audience_types ?? []);
-  setAtmosphereKeys(byTable.atmospheres ?? []);
-  setEnvironmentKeys(byTable.environments ?? []);
-  setSizeKeys(byTable.sizes ?? []);
-  setDrinkKeys(byTable.drinks ?? []);
-  setPriceRangeKeys(byTable.price_ranges ?? []);
-  setPaymentMethodKeys(byTable.payment_methods ?? []);
-  setEventTrendKeys(byTable.event_trends ?? []);
-  setBaggageKeys(byTable.luggages ?? []);
-  setSmokingKeys(byTable.smoking_policies ?? []);
-  setToiletKeys(byTable.toilets ?? []);
-  setOtherKeys(byTable.amenities ?? []);
-}, [initialKeys, keyToTableMap]);
+    setCustomerKeys(byTable.audience_types ?? []);
+    setAtmosphereKeys(byTable.atmospheres ?? []);
+    setEnvironmentKeys(byTable.environments ?? []);
+    setSizeKeys(byTable.sizes ?? []);
+    setDrinkKeys(byTable.drinks ?? []);
+    setPriceRangeKeys(byTable.price_ranges ?? []);
+    setPaymentMethodKeys(byTable.payment_methods ?? []);
+    setEventTrendKeys(byTable.event_trends ?? []);
+    setBaggageKeys(byTable.luggages ?? []);
+    setSmokingKeys(byTable.smoking_policies ?? []);
+    setToiletKeys(byTable.toilets ?? []);
+    setOtherKeys(byTable.amenities ?? []);
+  }, [initialKeys, keyToTableMap]);
 
   /* =========================
      filters 用

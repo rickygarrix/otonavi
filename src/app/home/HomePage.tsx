@@ -34,9 +34,6 @@ export default function HomePage() {
   /** 店舗タイプ */
   const [storeTypeKey, setStoreTypeKey] = useState<string | null>(null);
 
-  /** clear 用 */
-  const [clearKey, setClearKey] = useState(0);
-
   /** 最新店舗 */
   const { stores: cardStores, loading } = useHomeStoreCards(12);
 
@@ -97,7 +94,6 @@ export default function HomePage() {
   /** 全クリア */
   const handleClearAll = () => {
     handleClear();
-    setClearKey((v) => v + 1);
     setStoreTypeKey(null);
     router.replace('/', { scroll: false });
   };
@@ -173,7 +169,6 @@ export default function HomePage() {
       />
 
       <HomeFilterSections
-        clearKey={clearKey}
         sectionRefs={sectionRefs}
         {...setters}
       />
