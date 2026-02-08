@@ -6,16 +6,24 @@ import type { GenericMaster } from '@/types/master';
 
 type Props = {
   storeTypes: GenericMaster[];
-  activeTypeKey: string | null;        // ← key を使う
+  activeTypeKey: string | null; // venue_types:club
   onChange: (key: string | null) => void;
 };
 
+/**
+ * venue_types の key 部分だけで判定する
+ */
 const ICON_MAP: Record<string, LucideIcon> = {
   club: Headphones,
   bar: Disc3,
   livehouse: MicVocal,
   other: Music,
 };
+
+function getVenueTypeKey(fullKey: string): string {
+  // venue_types:club → club
+  return fullKey.split(':')[1] ?? fullKey;
+}
 
 export default function StoreTypeFilter({
   storeTypes,
@@ -24,20 +32,27 @@ export default function StoreTypeFilter({
 }: Props) {
   return (
     <div className="sticky top-0 z-50 p-4">
-      <div className="bg-light-1/90 border-gray-2/40 flex h-14 items-center rounded-full border backdrop-blur-sm">
+      <div className="flex h-14 items-center rounded-full border border-gray-2/40 bg-light-1/90 backdrop-blur-sm">
         {storeTypes.map((t) => {
-          const isActive = activeTypeKey === t.key;   // ← key で比較
-          const Icon = ICON_MAP[t.key] ?? Music;
+          const isActive = activeTypeKey === t.key;
+
+          const venueKey = getVenueTypeKey(t.key);
+          const Icon = ICON_MAP[venueKey] ?? Music;
 
           return (
             <button
-              key={t.key}                              // ← key を使う
+              key={t.key}
+              type="button"
               onClick={() => onChange(isActive ? null : t.key)}
-              className={`active:bg-blue-3/5 flex h-full flex-1 flex-col items-center justify-center gap-1 rounded-full pt-1 duration-200 active:scale-110 ${isActive ? 'bg-blue-3/10 text-blue-4' : 'text-dark-3'
-                }`}
+              className={`flex h-full flex-1 flex-col items-center justify-center gap-1 rounded-full pt-1 transition
+                active:scale-110 active:bg-blue-3/5
+                ${isActive ? 'bg-blue-3/10 text-blue-4' : 'text-dark-3'}
+              `}
             >
               <Icon className="h-6 w-6" strokeWidth={1.4} />
-              <span className="text-[10px]">{t.label}</span>
+              <span className="text-[10px] leading-none">
+                {t.label}
+              </span>
             </button>
           );
         })}

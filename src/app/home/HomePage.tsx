@@ -97,13 +97,19 @@ export default function HomePage() {
     setStoreTypeKey(null);
     router.replace('/', { scroll: false });
   };
+  const deflateKey = (k: string) =>
+    k.includes(':') ? k.split(':')[1] : k;
 
-  /** 検索実行 */
   const handleGoToStores = () => {
     const params = new URLSearchParams();
 
-    if (storeTypeKey) params.append('filters', storeTypeKey);
-    selectedKeys.forEach((k) => params.append('filters', k));
+    if (storeTypeKey) {
+      params.append('filters', deflateKey(storeTypeKey));
+    }
+
+    selectedKeys.forEach((k) =>
+      params.append('filters', deflateKey(k))
+    );
 
     router.push(`/stores?${params.toString()}`);
   };

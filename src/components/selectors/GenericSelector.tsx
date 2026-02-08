@@ -32,7 +32,7 @@ type Props = SingleProps | MultiProps;
 
 type MasterRow = {
   id: string;
-  key: string;
+  key: string; // ← DB 上の素 key
   label: string;
   sort_order: number | null;
   hint?: string | null;
@@ -91,22 +91,23 @@ export default function GenericSelector({
 
   /* =========================
      Selection helpers
+     - key は必ず table:key
   ========================= */
-  const isSelected = (key: string) =>
+  const isSelected = (fullKey: string) =>
     selection === 'single'
-      ? value === key
-      : value.includes(key);
+      ? value === fullKey
+      : value.includes(fullKey);
 
-  const toggle = (key: string) => {
+  const toggle = (fullKey: string) => {
     if (!onChange) return;
 
     if (selection === 'single') {
-      onChange(value === key ? null : key);
+      onChange(value === fullKey ? null : fullKey);
     } else {
       onChange(
-        value.includes(key)
-          ? value.filter((v) => v !== key)
-          : [...value, key],
+        value.includes(fullKey)
+          ? value.filter((v) => v !== fullKey)
+          : [...value, fullKey],
       );
     }
   };
@@ -131,17 +132,20 @@ export default function GenericSelector({
   const renderList = (list: MasterRow[], cols: 2 | 3) => (
     <ul className={`grid ${cols === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
       {list.map((item) => {
+        // ★ 正規 key（URL / state / filter と完全一致）
+        const fullKey = `${table}:${item.key}`;
+
         const chip = (
           <Chip
             label={item.label}
-            selected={isSelected(item.key)}
+            selected={isSelected(fullKey)}
             hinted={enableHint && !!item.hint}
-            onChange={() => toggle(item.key)}
+            onChange={() => toggle(fullKey)}
           />
         );
 
         return (
-          <li key={item.key}>
+          <li key={fullKey}>
             {enableHint && item.hint ? (
               <Tooltip content={item.hint}>{chip}</Tooltip>
             ) : (

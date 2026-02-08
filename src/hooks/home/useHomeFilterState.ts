@@ -32,39 +32,44 @@ export function useHomeFilterState(
   const [toiletKeys, setToiletKeys] = useState<string[]>([]);
   const [otherKeys, setOtherKeys] = useState<string[]>([]);
 
-  /** URL → state 復元（完全版） */
+  /* =========================
+     URL → state 復元（key完全準拠）
+  ========================= */
   useEffect(() => {
-    if (!initialKeys.length || !keyToTableMap) return;
+  if (!keyToTableMap) return;
 
-    // エリア（name ベース）
-    setPrefectureKeys(initialKeys.filter((k) => k.endsWith('都') || k.endsWith('県')));
-    setCityKeys(initialKeys.filter((k) => k.endsWith('区') || k.endsWith('市')));
+  const byTable: Record<string, string[]> = {};
 
-    const byTable: Record<string, string[]> = {};
+initialKeys.forEach((rawKey) => {
+  const table = keyToTableMap.get(rawKey);
+  if (!table) return;
 
-    initialKeys.forEach((k) => {
-      const table = keyToTableMap.get(k);
-      if (!table) return;
+  const fullKey = `${table}:${rawKey}`;
 
-      if (!byTable[table]) byTable[table] = [];
-      byTable[table].push(k);
-    });
+  if (!byTable[table]) byTable[table] = [];
+  byTable[table].push(fullKey); // ← ここが重要
+});
 
-    setCustomerKeys(byTable['audience_types'] ?? []);
-    setAtmosphereKeys(byTable['atmospheres'] ?? []);
-    setEnvironmentKeys(byTable['environments'] ?? []);
-    setSizeKeys(byTable['sizes'] ?? []);
-    setDrinkKeys(byTable['drinks'] ?? []);
-    setPriceRangeKeys(byTable['price_ranges'] ?? []);
-    setPaymentMethodKeys(byTable['payment_methods'] ?? []);
-    setEventTrendKeys(byTable['event_trends'] ?? []);
-    setBaggageKeys(byTable['luggages'] ?? []);
-    setSmokingKeys(byTable['smoking_policies'] ?? []);
-    setToiletKeys(byTable['toilets'] ?? []);
-    setOtherKeys(byTable['amenities'] ?? []);
-  }, [initialKeys, keyToTableMap]);
+  setPrefectureKeys(byTable['prefectures'] ?? []);
+  setCityKeys(byTable['cities'] ?? []);
 
-  /** filters 用 */
+  setCustomerKeys(byTable['audience_types'] ?? []);
+  setAtmosphereKeys(byTable['atmospheres'] ?? []);
+  setEnvironmentKeys(byTable['environments'] ?? []);
+  setSizeKeys(byTable['sizes'] ?? []);
+  setDrinkKeys(byTable['drinks'] ?? []);
+  setPriceRangeKeys(byTable['price_ranges'] ?? []);
+  setPaymentMethodKeys(byTable['payment_methods'] ?? []);
+  setEventTrendKeys(byTable['event_trends'] ?? []);
+  setBaggageKeys(byTable['luggages'] ?? []);
+  setSmokingKeys(byTable['smoking_policies'] ?? []);
+  setToiletKeys(byTable['toilets'] ?? []);
+  setOtherKeys(byTable['amenities'] ?? []);
+}, [initialKeys, keyToTableMap]);
+
+  /* =========================
+     filters 用
+  ========================= */
   const selectedKeys = useMemo(
     () => [
       ...prefectureKeys,

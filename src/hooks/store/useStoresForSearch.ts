@@ -43,8 +43,8 @@ export function useStoresForSearch(
           status_id,
           statuses:statuses!stores_status_id_fkey ( key ),
 
-          prefectures ( id, name ),
-          cities ( id, name ),
+          prefectures ( id, key, name ),
+          cities ( id, key, name ),
           venue_types ( id, key, label ),
 
           price_ranges ( key ),

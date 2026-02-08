@@ -5,6 +5,10 @@ import { supabase } from '@/lib/supabase';
 import type { Prefecture, City } from '@/types/location';
 import type { DrinkDefinition, GenericMaster } from '@/types/master';
 
+/* =========================
+   Const
+========================= */
+
 const TABLE_TO_SECTION: Record<string, string> = {
   venue_types: '店舗タイプ',
   event_trends: 'イベントの傾向',
@@ -27,28 +31,27 @@ type GenericMasterRow = {
   sort_order: number;
 };
 
+/* =========================
+   Generic masters
+========================= */
+
 async function loadGenericMasters(): Promise<Map<string, GenericMaster>> {
   const map = new Map<string, GenericMaster>();
 
   await Promise.all(
     Object.keys(TABLE_TO_SECTION).map(async (table) => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from(table)
         .select('id, key, label, sort_order')
         .eq('is_active', true)
         .order('sort_order', { ascending: true });
-
-      if (error) {
-        console.error(`loadGenericMasters error: ${table}`, error);
-        return;
-      }
 
       (data as GenericMasterRow[] | null)?.forEach((item) => {
         const mapKey = `${table}:${item.key}`;
 
         map.set(mapKey, {
           id: item.id,
-          key: item.key,
+          key: mapKey,
           label: item.label,
           table,
           sort_order: item.sort_order,
@@ -60,13 +63,22 @@ async function loadGenericMasters(): Promise<Map<string, GenericMaster>> {
   return map;
 }
 
+/* =========================
+   Hook
+========================= */
+
 export function useHomeMasters() {
   const [loading, setLoading] = useState(true);
 
   const [prefectures, setPrefectures] = useState<Prefecture[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [drinkMasters, setDrinkMasters] = useState<DrinkDefinition[]>([]);
-  const [genericMasters, setGenericMasters] = useState<Map<string, GenericMaster>>(new Map());
+  const [genericMasters, setGenericMasters] =
+    useState<Map<string, GenericMaster>>(new Map());
+
+  /* =========================
+     Fetch
+  ========================= */
 
   useEffect(() => {
     let mounted = true;
@@ -76,17 +88,17 @@ export function useHomeMasters() {
 
       try {
         const [
-          { data: prefData, error: prefError },
-          { data: cityData, error: cityError },
-          { data: drinkData, error: drinkError },
+          { data: prefData },
+          { data: cityData },
+          { data: drinkData },
         ] = await Promise.all([
           supabase
             .from('prefectures')
-            .select('id, name,sort_order')
+            .select('id, key, name, sort_order')
             .order('sort_order', { ascending: true }),
           supabase
             .from('cities')
-            .select('id, name, sort_order')
+            .select('id, key, name, sort_order')
             .order('sort_order', { ascending: true }),
           supabase
             .from('drinks')
@@ -94,10 +106,6 @@ export function useHomeMasters() {
             .eq('is_active', true)
             .order('sort_order', { ascending: true }),
         ]);
-
-        if (prefError) console.error('prefectures load error:', prefError);
-        if (cityError) console.error('cities load error:', cityError);
-        if (drinkError) console.error('drinks load error:', drinkError);
 
         const genericMap = await loadGenericMasters();
 
@@ -113,24 +121,32 @@ export function useHomeMasters() {
     };
 
     load();
-
     return () => {
       mounted = false;
     };
   }, []);
 
-const externalLabelMap = useMemo(() => {
-  const map = new Map<string, string>();
+  /* =========================
+     externalLabelMap
+     - key → 表示名
+  ========================= */
 
-  prefectures.forEach((p) => map.set(p.name, p.name));
-  cities.forEach((c) => map.set(c.name, c.name));
+  const externalLabelMap = useMemo(() => {
+    const map = new Map<string, string>();
 
-  drinkMasters.forEach((d) => map.set(d.key, d.label));
-  genericMasters.forEach((v) => map.set(v.key, v.label));
+    // ✅ エリアも key ベース
+    prefectures.forEach((p) => map.set(p.key, p.name));
+    cities.forEach((c) => map.set(c.key, c.name));
 
-  return map;
-}, [prefectures, cities, drinkMasters, genericMasters]);
+    drinkMasters.forEach((d) => map.set(d.key, d.label));
+    genericMasters.forEach((v) => map.set(v.key, v.label));
 
+    return map;
+  }, [prefectures, cities, drinkMasters, genericMasters]);
+
+  /* =========================
+     label → section
+  ========================= */
 
   const labelToSectionMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -141,15 +157,19 @@ const externalLabelMap = useMemo(() => {
     });
 
     prefectures.forEach((p) => map.set(p.name, 'エリア'));
-    cities.forEach((a) => map.set(a.name, 'エリア'));
+    cities.forEach((c) => map.set(c.name, 'エリア'));
     drinkMasters.forEach((d) => map.set(d.label, 'ドリンク'));
 
     return map;
   }, [genericMasters, prefectures, cities, drinkMasters]);
 
+  /* =========================
+     City map (key lookup)
+  ========================= */
+
   const cityMap = useMemo(() => {
     const map = new Map<string, City>();
-    cities.forEach((a) => map.set(a.name, a));
+    cities.forEach((c) => map.set(c.key, c));
     return map;
   }, [cities]);
 
