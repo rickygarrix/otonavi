@@ -52,10 +52,14 @@ export default function StoresClient() {
   }, [masters.genericMasters]);
 
   /** 🔥 検索用フィルタ（full key） */
+  /** 🔥 検索用フィルタ（raw + full 混在） */
   const filterKeys = useMemo(() => {
-    return selectedFilters
-      .map((rawKey) => keyToFullKeyMap.get(rawKey))
-      .filter((v): v is string => !!v);
+    return selectedFilters.map((rawKey) => {
+      // fullKey が存在すれば使う（属性）
+      const fullKey = keyToFullKeyMap.get(rawKey);
+      // なければ rawKey（エリア）
+      return fullKey ?? rawKey;
+    });
   }, [selectedFilters, keyToFullKeyMap]);
 
   /** 検索実行 */

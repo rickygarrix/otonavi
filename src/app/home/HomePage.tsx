@@ -52,9 +52,13 @@ export default function HomePage() {
   /** key → table Map */
   const keyToTableMap = useMemo(() => {
     const map = new Map<string, string>();
+
     masters.genericMasters.forEach((m) => {
-      map.set(m.key, m.table);
+      // m.key = "sizes:medium"
+      const rawKey = m.key.split(':')[1];
+      map.set(rawKey, m.table);
     });
+
     return map;
   }, [masters.genericMasters]);
 
@@ -127,6 +131,8 @@ export default function HomePage() {
 
   /** SearchBar 表示ラベル */
   const displayLabels = useMemo(() => {
+    if (!masters.externalLabelMap.size) return [];
+
     const labels: string[] = [];
 
     if (storeTypeKey) {
@@ -138,7 +144,7 @@ export default function HomePage() {
 
     labels.push(...selectedLabels);
     return labels;
-  }, [storeTypeKey, storeTypes, selectedLabels]);
+  }, [storeTypeKey, storeTypes, selectedLabels, masters.externalLabelMap]);
 
   return (
     <>

@@ -17,19 +17,15 @@ export function useStoreFilters(
     if (!filters.length) return stores;
 
     return stores.filter((store) => {
-      /**
-       * 店舗が持つ「検索可能な全キー」
-       */
-      const storeKeys = [
+      // ① 分離
+      const areaFilters = filters.filter((f) => !f.includes(':'));
+      const attributeFilters = filters.filter((f) => f.includes(':'));
+
+      // ② 属性キー
+      const attributeKeys = [
         store.venue_type_key,
-
-        // ★ エリア
-        store.prefecture_key,
-        store.city_key,
-
         store.price_range_key,
         store.size_key,
-
         ...store.customer_keys,
         ...store.atmosphere_keys,
         ...store.environment_keys,
@@ -42,8 +38,22 @@ export function useStoreFilters(
         ...store.other_keys,
       ].filter(Boolean) as string[];
 
-      // AND 条件
-      return filters.every((f) => storeKeys.includes(f));
+      // ③ エリア判定（OR）
+      const matchArea =
+        areaFilters.length === 0 ||
+        areaFilters.some(
+          (f) =>
+            f === store.prefecture_key ||
+            f === store.city_key
+        );
+
+      // ④ 属性判定（AND）
+      const matchAttributes =
+        attributeFilters.every((f) =>
+          attributeKeys.includes(f)
+        );
+
+      return matchArea && matchAttributes;
     });
   }, [stores, filters]);
 

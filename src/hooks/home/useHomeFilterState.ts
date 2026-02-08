@@ -40,31 +40,38 @@ export function useHomeFilterState(
 
   const byTable: Record<string, string[]> = {};
 
-initialKeys.forEach((rawKey) => {
-  const table = keyToTableMap.get(rawKey);
-  if (!table) return;
+  initialKeys.forEach((rawKey) => {
+    const table = keyToTableMap.get(rawKey);
 
-  const fullKey = `${table}:${rawKey}`;
+    // ===== エリア（raw key のまま）=====
+    if (!table) {
+      // prefecture or city
+      if (!byTable.prefectures) byTable.prefectures = [];
+      byTable.prefectures.push(rawKey);
+      return;
+    }
 
-  if (!byTable[table]) byTable[table] = [];
-  byTable[table].push(fullKey); // ← ここが重要
-});
+    // ===== 属性（fullKey）=====
+    const fullKey = `${table}:${rawKey}`;
+    if (!byTable[table]) byTable[table] = [];
+    byTable[table].push(fullKey);
+  });
 
-  setPrefectureKeys(byTable['prefectures'] ?? []);
-  setCityKeys(byTable['cities'] ?? []);
+  setPrefectureKeys(byTable.prefectures ?? []);
+  setCityKeys(byTable.cities ?? []);
 
-  setCustomerKeys(byTable['audience_types'] ?? []);
-  setAtmosphereKeys(byTable['atmospheres'] ?? []);
-  setEnvironmentKeys(byTable['environments'] ?? []);
-  setSizeKeys(byTable['sizes'] ?? []);
-  setDrinkKeys(byTable['drinks'] ?? []);
-  setPriceRangeKeys(byTable['price_ranges'] ?? []);
-  setPaymentMethodKeys(byTable['payment_methods'] ?? []);
-  setEventTrendKeys(byTable['event_trends'] ?? []);
-  setBaggageKeys(byTable['luggages'] ?? []);
-  setSmokingKeys(byTable['smoking_policies'] ?? []);
-  setToiletKeys(byTable['toilets'] ?? []);
-  setOtherKeys(byTable['amenities'] ?? []);
+  setCustomerKeys(byTable.audience_types ?? []);
+  setAtmosphereKeys(byTable.atmospheres ?? []);
+  setEnvironmentKeys(byTable.environments ?? []);
+  setSizeKeys(byTable.sizes ?? []);
+  setDrinkKeys(byTable.drinks ?? []);
+  setPriceRangeKeys(byTable.price_ranges ?? []);
+  setPaymentMethodKeys(byTable.payment_methods ?? []);
+  setEventTrendKeys(byTable.event_trends ?? []);
+  setBaggageKeys(byTable.luggages ?? []);
+  setSmokingKeys(byTable.smoking_policies ?? []);
+  setToiletKeys(byTable.toilets ?? []);
+  setOtherKeys(byTable.amenities ?? []);
 }, [initialKeys, keyToTableMap]);
 
   /* =========================
