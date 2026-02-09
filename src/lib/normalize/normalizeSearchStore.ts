@@ -104,7 +104,8 @@ export function normalizeSearchStore(
     customer_keys: extractKeys(raw.store_audience_types, 'audience_types'),
     atmosphere_keys: extractKeys(raw.store_atmospheres, 'atmospheres'),
     environment_keys: extractKeys(raw.store_environments, 'environments'),
-    drink_keys: extractKeys(raw.store_drinks, 'drinks'),
+    drink_keys: extractKeys(raw.store_drinks, 'drinks')
+    .map((k) => `drinks:${k}`),
     payment_method_keys: extractKeys(raw.store_payment_methods, 'payment_methods'),
     event_trend_keys: extractKeys(raw.store_event_trends, 'event_trends'),
     baggage_keys: extractKeys(raw.store_luggages, 'luggages'),

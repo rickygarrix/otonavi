@@ -138,7 +138,9 @@ export function useHomeMasters() {
     prefectures.forEach((p) => map.set(p.key, p.name));
     cities.forEach((c) => map.set(c.key, c.name));
 
-    drinkMasters.forEach((d) => map.set(d.key, d.label));
+    drinkMasters.forEach((d) =>
+     map.set(`drinks:${d.key}`, d.label),
+    );
     genericMasters.forEach((v) => map.set(v.key, v.label));
 
     return map;

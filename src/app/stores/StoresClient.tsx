@@ -43,12 +43,20 @@ export default function StoresClient() {
   /** rawKey → fullKey 変換 Map */
   const keyToFullKeyMap = useMemo(() => {
     const map = new Map<string, string>();
+
+    // generic masters
     masters.genericMasters.forEach((m) => {
       const rawKey = m.key.split(':')[1];
       map.set(rawKey, m.key);
     });
+
+    // 🔥 drinks masters
+    masters.drinkMasters.forEach((d) => {
+      map.set(d.key, `drinks:${d.key}`);
+    });
+
     return map;
-  }, [masters.genericMasters]);
+  }, [masters.genericMasters, masters.drinkMasters]);
 
   /** 🔥 検索用フィルタ（raw + full 混在） */
   const filterKeys = useMemo(

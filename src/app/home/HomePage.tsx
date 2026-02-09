@@ -47,16 +47,23 @@ export default function HomePage() {
   }, [masters.genericMasters]);
 
   /** key → table Map */
+  /** key → table Map */
   const keyToTableMap = useMemo(() => {
     const map = new Map<string, string>();
 
+    // generic masters
     masters.genericMasters.forEach((m) => {
       const rawKey = m.key.split(':')[1];
       map.set(rawKey, m.table);
     });
 
+    // 🔥 drinks masters を追加
+    masters.drinkMasters.forEach((d) => {
+      map.set(d.key, 'drinks');
+    });
+
     return map;
-  }, [masters.genericMasters]);
+  }, [masters.genericMasters, masters.drinkMasters]);
 
   /** URL → 店舗タイプ復元 */
   useEffect(() => {
