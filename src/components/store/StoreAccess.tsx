@@ -52,7 +52,7 @@ export default function StoreAccess({ store }: Props) {
         アクセス
       </h2>
 
-      {/* ① 住所 */}
+      {/* 住所 */}
       <div>
         {store.postcode && <p>〒{store.postcode}</p>}
         {store.address && (
@@ -60,22 +60,22 @@ export default function StoreAccess({ store }: Props) {
         )}
       </div>
 
-      {/* ② 地図を開くボタン */}
+      {/* アクセス説明 */}
+      {store.access && (
+        <p className="whitespace-pre-line">{store.access}</p>
+      )}
+
+      {/* 地図を開くボタン */}
       {mapUrl && (
         <a
           href={mapUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex h-12 items-center justify-center gap-2 rounded-lg bg-Brand-Light-1 px-4 text-sm text-Brand-Dark-5 transition hover:bg-Brand-Light-2"
+          className="flex h-12 items-center justify-center gap-2 rounded-lg bg-light-1 px-4 text-sm transition hover:bg-light-2"
         >
-          <MapPin className="h-4 w-4" />
+          <MapPin className="h-4 w-4" strokeWidth={1.2} />
           <span>地図を開く</span>
         </a>
-      )}
-
-      {/* ③ アクセス説明 */}
-      {store.access && (
-        <p className="whitespace-pre-line">{store.access}</p>
       )}
     </section>
   );
