@@ -1,0 +1,48 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "otonavi-r2-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-02-05",
+
+  "observability": {
+    "enabled": true
+  },
+
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+
+  /**
+   * R2 Buckets
+   */
+  "r2_buckets": [
+    {
+      "binding": "R2_STAGING",
+      "bucket_name": "staging"
+    }
+  ]
+
+  /**
+   * Smart Placement
+   */
+  // "placement": { "mode": "smart" }
+
+  /**
+   * Environment Variables
+   */
+  // "vars": { "MY_VARIABLE": "production_value" }
+
+  /**
+   * Static Assets
+   */
+  // "assets": { "directory": "./public/", "binding": "ASSETS" }
+
+  /**
+   * Service Bindings
+   */
+  // "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
+}
