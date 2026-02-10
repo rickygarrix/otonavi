@@ -11,9 +11,6 @@ import SearchBar from '@/components/home/SearchBar';
 import Footer from '@/components/ui/Footer';
 import HomeFilterSections from '@/components/home/HomeFilterSections';
 
-import Button from '@/components/ui/Button';
-import { ArrowLeft, ArrowRight, Search, House } from 'lucide-react';
-
 import { useHomeStoreCards, useHomeMasters, useHomeFilterState } from '@/hooks/home';
 import { useStoresForSearch, useStoreFilters } from '@/hooks/store';
 
