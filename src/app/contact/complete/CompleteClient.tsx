@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { House } from 'lucide-react';
 
 import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
+import { Button } from '@/components/ui/button';
 
 type ContactForm = {
   name: string;
@@ -70,12 +72,7 @@ export default function CompleteClient() {
           </p>
 
           <div className="mt-4 flex gap-4">
-            <button
-              onClick={() => router.push('/')}
-              className="from-dark-3 border-dark-4 to-dark-2 text-light-1 shadow-dark-3/50 flex h-12 flex-2 items-center justify-center gap-2 rounded-lg border bg-linear-to-t text-sm shadow-xs transition active:scale-102 active:shadow-md"
-            >
-              ホームへ
-            </button>
+            <Button onClick={() => router.push('/')} label="ホームへ" leftIcon={House} />
           </div>
         </section>
 

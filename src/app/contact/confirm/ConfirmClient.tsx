@@ -6,6 +6,7 @@ import { Check, Eraser, Send } from 'lucide-react';
 
 import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
+import { Button } from '@/components/ui/button';
 
 type ContactForm = {
   name: string;
@@ -163,27 +164,18 @@ export default function ConfirmClient() {
 
           {/* ボタン */}
           <div className="mt-4 flex gap-4">
-            <button
-              type="button"
+            <Button
               onClick={() => router.back()}
-              className="from-light-2 to-light-1 border-light-4 text-dark-4 active:shadow-dark-1/20 flex h-12 flex-1 items-center justify-center gap-2 rounded-lg border bg-linear-to-t text-sm transition active:scale-102 active:shadow-sm"
-            >
-              書き直す
-              <Eraser className="h-4 w-4" strokeWidth={1.2} />
-            </button>
-
-            <button
-              type="button"
-              disabled={!agreed || sending}
+              priority="secondary"
+              label="書き直す"
+              rightIcon={Eraser}
+            />
+            <Button
               onClick={submit}
-              className={`from-dark-3 border-dark-4 to-dark-2 text-light-1 shadow-dark-3/50 flex h-12 flex-1 items-center justify-center gap-2 rounded-lg border bg-linear-to-t text-sm shadow-xs transition ${!agreed || sending
-                ? 'cursor-not-allowed opacity-40 backdrop-blur-lg'
-                : 'active:scale-102 active:shadow-md'
-                }`}
-            >
-              {sending ? '送信中…' : '送信'}
-              <Send className="h-4 w-4" strokeWidth={1.2} />
-            </button>
+              label={sending ? '送信中…' : '送信'}
+              rightIcon={Send}
+              disabled={!agreed || sending}
+            />
           </div>
         </form>
       </main>

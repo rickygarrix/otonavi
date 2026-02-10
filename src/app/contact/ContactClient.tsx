@@ -7,6 +7,7 @@ import { ArrowRight } from 'lucide-react';
 
 import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
+import { Button } from '@/components/ui/button';
 
 type ContactForm = {
   name: string;
@@ -158,17 +159,13 @@ export default function ContactClient() {
           </div>
 
           {/* 確認ボタン */}
-
           <div className="mt-4 flex gap-4">
-            <button
-              type="button"
-              disabled={!isValid}
+            <Button
               onClick={handleConfirm}
-              className={`from-dark-3 border-dark-4 to-dark-2 text-light-1 shadow-dark-3/50 flex h-12 flex-2 items-center justify-center gap-2 rounded-lg border bg-linear-to-t text-sm shadow-xs transition active:scale-102 active:shadow-md ${!isValid ? 'opacity-40' : ''}`}
-            >
-              内容確認へ
-              <ArrowRight className="h-4 w-4" strokeWidth={1.2} />
-            </button>
+              label="内容確認へ"
+              rightIcon={ArrowRight}
+              disabled={!isValid}
+            />
           </div>
         </div>
       </main>
