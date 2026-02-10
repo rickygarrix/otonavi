@@ -1,6 +1,7 @@
 'use client';
 
 import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 type Props = {
   selectedFilters: string[];
@@ -44,22 +45,15 @@ export default function FixedSearchBar({
 
         {/* 検索ボタン */}
         <div className="flex gap-2 px-4 py-2">
-          <button
-            onClick={onClear}
-            className="bg-light-1 text-dark-5 active:bg-light-2 active:shadow-dark-1/20 h-12 flex-1 rounded-lg text-sm transition active:scale-102 active:shadow-sm"
-          >
-            すべてクリア
-          </button>
+          <Button onClick={onClear} priority="tertiary" label="すべてクリア" className="flex-1" />
 
-          <button
+          <Button
             onClick={!isDisabled ? onSearch : undefined}
             disabled={isDisabled}
-            className={`from-dark-3 border-dark-4 to-dark-2 text-light-1 shadow-dark-3/50 flex h-12 flex-2 items-center justify-center gap-2 rounded-lg border bg-linear-to-t text-sm shadow-xs transition active:scale-102 active:shadow-md ${isDisabled ? 'cursor-not-allowed opacity-40 backdrop-blur-lg' : ''
-              }`}
-          >
-            <Search className="h-4 w-4" strokeWidth={1.2} />
-            {searchLabel}
-          </button>
+            label={searchLabel}
+            leftIcon={Search}
+            className="flex-2"
+          />
         </div>
       </div>
     </div>

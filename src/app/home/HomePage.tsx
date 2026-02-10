@@ -11,11 +11,7 @@ import SearchBar from '@/components/home/SearchBar';
 import Footer from '@/components/ui/Footer';
 import HomeFilterSections from '@/components/home/HomeFilterSections';
 
-import {
-  useHomeStoreCards,
-  useHomeMasters,
-  useHomeFilterState,
-} from '@/hooks/home';
+import { useHomeStoreCards, useHomeMasters, useHomeFilterState } from '@/hooks/home';
 import { useStoresForSearch, useStoreFilters } from '@/hooks/store';
 
 import type { GenericMaster } from '@/types/master';
@@ -26,10 +22,7 @@ export default function HomePage() {
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
   /** URL filters */
-  const urlFilters = useMemo(
-    () => searchParams.getAll('filters'),
-    [searchParams],
-  );
+  const urlFilters = useMemo(() => searchParams.getAll('filters'), [searchParams]);
 
   /** 店舗タイプ */
   const [storeTypeKey, setStoreTypeKey] = useState<string | null>(null);
@@ -41,9 +34,7 @@ export default function HomePage() {
   const masters = useHomeMasters();
 
   const storeTypes = useMemo<GenericMaster[]>(() => {
-    return Array.from(masters.genericMasters.values()).filter(
-      (m) => m.table === 'venue_types',
-    );
+    return Array.from(masters.genericMasters.values()).filter((m) => m.table === 'venue_types');
   }, [masters.genericMasters]);
 
   /** key → table Map */
@@ -69,9 +60,7 @@ export default function HomePage() {
   useEffect(() => {
     if (!storeTypes.length) return;
 
-    const found = urlFilters.find((f) =>
-      storeTypes.some((t) => t.key === f),
-    );
+    const found = urlFilters.find((f) => storeTypes.some((t) => t.key === f));
 
     setStoreTypeKey(found ?? null);
   }, [urlFilters, storeTypes]);
@@ -83,19 +72,12 @@ export default function HomePage() {
     cityMap: masters.cityMap,
   });
 
-  const {
-    selectedKeys,
-    selectedLabels,
-    handleClear,
-    ...setters
-  } = filter;
+  const { selectedKeys, selectedLabels, handleClear, ...setters } = filter;
 
   /** 件数計算 */
   const { stores: searchStores } = useStoresForSearch();
   const { filteredStores } = useStoreFilters(searchStores, {
-    filters: storeTypeKey
-      ? [storeTypeKey, ...selectedKeys]
-      : selectedKeys,
+    filters: storeTypeKey ? [storeTypeKey, ...selectedKeys] : selectedKeys,
   });
 
   /** 全クリア */
@@ -104,8 +86,7 @@ export default function HomePage() {
     setStoreTypeKey(null);
     router.replace('/', { scroll: false });
   };
-  const deflateKey = (k: string) =>
-    k.includes(':') ? k.split(':')[1] : k;
+  const deflateKey = (k: string) => (k.includes(':') ? k.split(':')[1] : k);
 
   const handleGoToStores = () => {
     const params = new URLSearchParams();
@@ -114,9 +95,7 @@ export default function HomePage() {
       params.append('filters', deflateKey(storeTypeKey));
     }
 
-    selectedKeys.forEach((k) =>
-      params.append('filters', deflateKey(k))
-    );
+    selectedKeys.forEach((k) => params.append('filters', deflateKey(k)));
 
     router.push(`/stores?${params.toString()}`);
   };
@@ -139,9 +118,7 @@ export default function HomePage() {
     const labels: string[] = [];
 
     if (storeTypeKey) {
-      const typeLabel = storeTypes.find(
-        (t) => t.key === storeTypeKey,
-      )?.label;
+      const typeLabel = storeTypes.find((t) => t.key === storeTypeKey)?.label;
       if (typeLabel) labels.push(typeLabel);
     }
 
@@ -152,10 +129,8 @@ export default function HomePage() {
   return (
     <>
       {/* ヒーロー */}
-      <div className="relative flex h-146 flex-col items-center gap-10 overflow-hidden bg-[url('/background-sp@2x.png')] bg-cover bg-center px-4 pt-20 text-light-3">
-        <p className="text-[10px] tracking-widest">
-          夜の音楽をもっと楽しむための音箱ナビ
-        </p>
+      <div className="text-light-3 relative flex h-146 flex-col items-center gap-10 overflow-hidden bg-[url('/background-sp@2x.png')] bg-cover bg-center px-4 pt-20">
+        <p className="text-[10px] tracking-widest">夜の音楽をもっと楽しむための音箱ナビ</p>
 
         <Image
           src="/logo-white.svg"
@@ -175,10 +150,7 @@ export default function HomePage() {
         onChange={setStoreTypeKey}
       />
 
-      <HomeFilterSections
-        sectionRefs={sectionRefs}
-        {...setters}
-      />
+      <HomeFilterSections sectionRefs={sectionRefs} {...setters} />
 
       <SearchBar
         selectedFilters={displayLabels}
