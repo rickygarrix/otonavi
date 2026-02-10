@@ -23,24 +23,24 @@ function buildMapUrl(store: HomeStore) {
   const address = store.address ?? '';
   const query = encodeURIComponent(`${name} ${address}`);
 
-  // iOS / macOS → Apple Maps ネイティブ（ピン表示・店名あり）
+  // iOS / macOS → Apple Maps ネイティブ
   if (isAppleDevice()) {
     return `maps://?q=${encodeURIComponent(name)}&address=${encodeURIComponent(address)}`;
   }
 
-  // Android → Google Maps アプリ強制起動（ピン表示）
+  // Android → Google Maps アプリ
   if (isAndroid()) {
-    return `intent://maps.google.com/maps?q=${query}#Intent;scheme=https;package=com.google.android.apps.maps;end`;
+    return `intent://maps.google.com/maps?q=${query}` +
+           `#Intent;scheme=https;package=com.google.android.apps.maps;end`;
   }
 
-  // Windows / その他 → Google Maps Web
+  // PC / その他 → Google Maps Web
   return `https://www.google.com/maps/search/?api=1&query=${query}`;
 }
 
 /* =========================
    Component
 ========================= */
-
 type Props = {
   store: HomeStore;
 };
@@ -54,24 +54,28 @@ export default function StoreAccess({ store }: Props) {
 
   return (
     <section className="text-dark-4 flex flex-col gap-4 p-4 text-sm">
-      <h2 className="text-dark-5 py-0.5 text-lg font-bold tracking-widest">アクセス</h2>
+      <h2 className="text-dark-5 py-0.5 text-lg font-bold tracking-widest">
+        アクセス
+      </h2>
 
-      {/* 店名＋住所（ここで認知を完結させる） */}
+      {/* 店名＋住所 */}
       <div className="flex flex-col gap-1">
         <p className="text-dark-5 font-bold">{store.name}</p>
         {store.postcode && <p>〒{store.postcode}</p>}
-        {store.address && <p className="whitespace-pre-line">{store.address}</p>}
+        {store.address && (
+          <p className="whitespace-pre-line">{store.address}</p>
+        )}
       </div>
 
       {/* アクセス説明 */}
-      {store.access && <p className="whitespace-pre-line">{store.access}</p>}
+      {store.access && (
+        <p className="whitespace-pre-line">{store.access}</p>
+      )}
 
-      {/* 地図を開く */}
+      {/* 地図を開く（同一タブ） */}
       {mapUrl && (
         <LinkButton
           href={mapUrl}
-          target="_blank"
-          rel="noopener noreferrer"
           priority="secondary"
           label="地図を開く"
           leftIcon={MapPin}
