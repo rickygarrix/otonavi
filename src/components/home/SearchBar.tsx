@@ -1,7 +1,7 @@
 'use client';
 
 import { Search } from 'lucide-react';
-import Button from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 
 type Props = {
   selectedFilters: string[];
