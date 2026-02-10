@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { staticMeta } from '@/lib/metadata';
 import { zenMaru, zenKaku } from '@/lib/fonts';

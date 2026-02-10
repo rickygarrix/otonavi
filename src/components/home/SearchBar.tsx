@@ -19,7 +19,9 @@ export default function FixedSearchBar({
   onClickFilter,
 }: Props) {
   const isDisabled = count === 0;
-  const searchLabel = isDisabled ? '音箱が見つかりません😢' : `${count}件を検索`;
+  const searchLabel = isDisabled
+    ? '音箱が見つかりません😢'
+    : `${count}件を検索`;
   const hasFilters = selectedFilters.length > 0;
 
   return (
@@ -27,7 +29,11 @@ export default function FixedSearchBar({
       <div className="border-light-2 m-auto w-full max-w-105 border-t bg-white">
         {/* 選択中リスト */}
         <div
-          className={`scrollbar-none overflow-hidden transition-all duration-300 ease-in-out ${hasFilters ? 'max-h-12 opacity-100' : 'pointer-events-none max-h-0 opacity-0'}`}
+          className={`scrollbar-none overflow-hidden transition-all duration-300 ease-in-out ${
+            hasFilters
+              ? 'max-h-12 opacity-100'
+              : 'pointer-events-none max-h-0 opacity-0'
+          }`}
           aria-hidden={!hasFilters}
         >
           <div className="flex h-11 gap-1 overflow-x-auto px-4 pt-4 pb-2 whitespace-nowrap">
@@ -45,10 +51,18 @@ export default function FixedSearchBar({
 
         {/* 検索ボタン */}
         <div className="flex gap-2 px-4 py-2">
-          <Button onClick={onClear} priority="tertiary" label="すべてクリア" className="flex-1" />
+          <Button
+            onClick={onClear}
+            priority="tertiary"
+            label="すべてクリア"
+            className="flex-1"
+          />
 
           <Button
-            onClick={!isDisabled ? onSearch : undefined}
+            onClick={() => {
+              if (isDisabled) return;
+              onSearch();
+            }}
             disabled={isDisabled}
             label={searchLabel}
             leftIcon={Search}
