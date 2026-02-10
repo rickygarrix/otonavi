@@ -45,12 +45,7 @@ export default function FixedSearchBar({
 
         {/* 検索ボタン */}
         <div className="flex gap-2 px-4 py-2">
-          <Button
-            onClick={onClear}
-            priority="tertiary"
-            label="すべてクリア"
-            className="flex-1"
-          ></Button>
+          <Button onClick={onClear} priority="tertiary" label="すべてクリア" className="flex-1" />
 
           <Button
             onClick={!isDisabled ? onSearch : undefined}
@@ -58,7 +53,7 @@ export default function FixedSearchBar({
             label={searchLabel}
             leftIcon={Search}
             className="flex-2"
-          ></Button>
+          />
         </div>
       </div>
     </div>

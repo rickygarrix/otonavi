@@ -19,11 +19,6 @@ export default function BackToHomeButton() {
   };
 
   return (
-    <Button
-      onClick={handleClick}
-      priority="secondary"
-      label="別の条件で探す"
-      leftIcon={Search}
-    ></Button>
+    <Button onClick={handleClick} priority="secondary" label="別の条件で探す" leftIcon={Search} />
   );
 }
