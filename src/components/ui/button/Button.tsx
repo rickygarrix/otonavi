@@ -36,9 +36,9 @@ export default function Button({
         .filter(Boolean)
         .join(' ')}
     >
-      {LeftIcon && <LeftIcon className="h-4 w-4" aria-hidden="true" />}
+      {LeftIcon && <LeftIcon className="h-4 w-4" strokeWidth={1.4} aria-hidden="true" />}
       <span className="truncate">{label}</span>
-      {RightIcon && <RightIcon className="h-4 w-4" aria-hidden="true" />}
+      {RightIcon && <RightIcon className="h-4 w-4" strokeWidth={1.4} aria-hidden="true" />}
     </button>
   );
 }
