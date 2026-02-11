@@ -1,13 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import type { Prefecture, City } from '@/types/master';
-import type { DrinkDefinition, GenericMaster } from '@/types/master';
+import { supabase } from '@/lib/infra';
+import type { Prefecture, City, DrinkDefinition, GenericMaster } from '@/types/master';
 
-/* =========================
-   Const
-========================= */
 const TABLE_TO_SECTION: Record<string, string> = {
   venue_types: '店舗タイプ',
   event_trends: 'イベントの傾向',
@@ -23,9 +19,6 @@ const TABLE_TO_SECTION: Record<string, string> = {
   atmospheres: '雰囲気',
 };
 
-/* =========================
-   Hook
-========================= */
 export function useHomeMasters() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<{
@@ -42,11 +35,9 @@ export function useHomeMasters() {
 
   useEffect(() => {
     let mounted = true;
-
     (async () => {
       setLoading(true);
       try {
-        // 1. 基本マスタと全汎用マスタを同時に fetch (完全並列)
         const [prefRes, cityRes, drinkRes, ...genericResponses] = await Promise.all([
           supabase.from('prefectures').select('id, key, name, sort_order').order('sort_order'),
           supabase.from('cities').select('id, key, name, sort_order').order('sort_order'),
@@ -58,11 +49,9 @@ export function useHomeMasters() {
 
         if (!mounted) return;
 
-        // 2. 汎用マスタの Map 構築
         const generics = new Map<string, GenericMaster>();
         Object.keys(TABLE_TO_SECTION).forEach((table, index) => {
-          const res = genericResponses[index];
-          res.data?.forEach((item: any) => {
+          genericResponses[index].data?.forEach((item: any) => {
             const mapKey = `${table}:${item.key}`;
             generics.set(mapKey, { ...item, key: mapKey, table });
           });
@@ -78,45 +67,47 @@ export function useHomeMasters() {
         if (mounted) setLoading(false);
       }
     })();
-
     return () => { mounted = false; };
   }, []);
 
-  /* =========================
-     Computed Maps (useMemo でスッキリ統合)
-  ========================= */
+  /** 計算済みマッピング */
+  const masters = useMemo(() => {
+    const externalLabelMap = new Map<string, string>();
+    const labelToSectionMap = new Map<string, string>();
+    const keyToTableMap = new Map<string, string>();
+    const cityMap = new Map<string, City>();
 
-  // key → ラベル (表示名)
-  const externalLabelMap = useMemo(() => {
-    const map = new Map<string, string>();
-    data.prefectures.forEach(p => map.set(p.key, p.name));
-    data.cities.forEach(c => map.set(c.key, c.name));
-    data.drinks.forEach(d => map.set(`drinks:${d.key}`, d.label));
-    data.generics.forEach(v => map.set(v.key, v.label));
-    return map;
+    // 店舗タイプ抽出
+    const storeTypes = Array.from(data.generics.values()).filter(m => m.table === 'venue_types');
+
+    // マスタを回して各Mapを構築
+    data.prefectures.forEach(p => {
+      externalLabelMap.set(p.key, p.name);
+      labelToSectionMap.set(p.name, 'エリア');
+    });
+    data.cities.forEach(c => {
+      externalLabelMap.set(c.key, c.name);
+      labelToSectionMap.set(c.name, 'エリア');
+      cityMap.set(c.key, c);
+    });
+    data.drinks.forEach(d => {
+      const fullKey = `drinks:${d.key}`;
+      externalLabelMap.set(fullKey, d.label);
+      labelToSectionMap.set(d.label, 'ドリンク');
+      keyToTableMap.set(d.key, 'drinks');
+    });
+    data.generics.forEach(v => {
+      externalLabelMap.set(v.key, v.label);
+      labelToSectionMap.set(v.label, TABLE_TO_SECTION[v.table]);
+      keyToTableMap.set(v.key.split(':')[1], v.table);
+    });
+
+    return { externalLabelMap, labelToSectionMap, keyToTableMap, cityMap, storeTypes };
   }, [data]);
-
-  // ラベル → セクション名 (逆引き用)
-  const labelToSectionMap = useMemo(() => {
-    const map = new Map<string, string>();
-    data.generics.forEach(({ label, table }) => map.set(label, TABLE_TO_SECTION[table]));
-    data.prefectures.forEach(p => map.set(p.name, 'エリア'));
-    data.cities.forEach(c => map.set(c.name, 'エリア'));
-    data.drinks.forEach(d => map.set(d.label, 'ドリンク'));
-    return map;
-  }, [data]);
-
-  const cityMap = useMemo(() => {
-    const map = new Map<string, City>();
-    data.cities.forEach(c => map.set(c.key, c));
-    return map;
-  }, [data.cities]);
 
   return {
     loading,
-    externalLabelMap,
-    labelToSectionMap,
-    cityMap,
+    ...masters,
     genericMasters: data.generics,
     drinkMasters: data.drinks,
   };

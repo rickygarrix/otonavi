@@ -13,105 +13,92 @@ import HomeFilterSections from '@/components/home/HomeFilterSections';
 
 import { useHomeFilterState } from '@/hooks/home/useHomeFilterState';
 import { useHomeMasters } from '@/hooks/home/useHomeMasters';
-import { useStores } from '@/hooks/store/useStores'; // 統合フック
+import { useStores } from '@/hooks/store/useStores';
 import { useStoreFilters } from '@/hooks/store/useStoreFilters';
-
-import type { GenericMaster } from '@/types/master';
 
 export default function HomePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
+  // 1. データ取得
+  const masters = useHomeMasters();
+  const { stores: allStores, loading } = useStores({ limit: 12 });
   const urlFilters = useMemo(() => searchParams.getAll('filters'), [searchParams]);
 
+  // 2. 状態管理
   const [storeTypeKey, setStoreTypeKey] = useState<string | null>(null);
-
-  /** 1. 統合フックで最新12件を取得 */
-  const { stores: allStores, loading } = useStores({ limit: 12 });
-
-  const masters = useHomeMasters();
-
-  const storeTypes = useMemo<GenericMaster[]>(() => {
-    return Array.from(masters.genericMasters.values()).filter((m) => m.table === 'venue_types');
-  }, [masters.genericMasters]);
-
-  const keyToTableMap = useMemo(() => {
-    const map = new Map<string, string>();
-    masters.genericMasters.forEach((m) => {
-      const rawKey = m.key.split(':')[1];
-      map.set(rawKey, m.table);
-    });
-    masters.drinkMasters.forEach((d) => {
-      map.set(d.key, 'drinks');
-    });
-    return map;
-  }, [masters.genericMasters, masters.drinkMasters]);
-
-  useEffect(() => {
-    if (!storeTypes.length) return;
-    const found = urlFilters.find((f) => storeTypes.some((t) => t.key === f));
-    setStoreTypeKey(found ?? null);
-  }, [urlFilters, storeTypes]);
-
   const filter = useHomeFilterState(masters.externalLabelMap, {
     initialKeys: urlFilters,
-    keyToTableMap,
+    keyToTableMap: masters.keyToTableMap,
     cityMap: masters.cityMap,
   });
 
   const { selectedKeys, selectedLabels, handleClear, ...setters } = filter;
 
-  /** 2. 件数計算用の全件取得（フィルタ用） */
+  // 3. 複雑なUIロジック（店舗タイプ同期など）
+  useEffect(() => {
+    if (!masters.storeTypes.length) return;
+    const found = urlFilters.find((f) => masters.storeTypes.some((t) => t.key === f));
+    setStoreTypeKey(found ?? null);
+  }, [urlFilters, masters.storeTypes]);
+
+  // 4. 件数計算
   const { stores: fetchStores } = useStores();
   const { filteredStores } = useStoreFilters(fetchStores, {
     filters: storeTypeKey ? [storeTypeKey, ...selectedKeys] : selectedKeys,
   });
 
+  // 5. ハンドラー
   const handleClearAll = () => {
     handleClear();
     setStoreTypeKey(null);
     router.replace('/', { scroll: false });
   };
 
-  const deflateKey = (k: string) => (k.includes(':') ? k.split(':')[1] : k);
-
   const handleGoToStores = () => {
     const params = new URLSearchParams();
-    if (storeTypeKey) params.append('filters', deflateKey(storeTypeKey));
-    selectedKeys.forEach((k) => params.append('filters', deflateKey(k)));
+    const deflate = (k: string) => k.includes(':') ? k.split(':')[1] : k;
+
+    if (storeTypeKey) params.append('filters', deflate(storeTypeKey));
+    selectedKeys.forEach((k) => params.append('filters', deflate(k)));
     router.push(`/stores?${params.toString()}`);
   };
 
   const handleClickFilter = (label: string) => {
     const section = masters.labelToSectionMap.get(label);
-    if (!section) return;
-    sectionRefs.current[section]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (section) sectionRefs.current[section]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const displayLabels = useMemo(() => {
-    if (!masters.externalLabelMap.size) return [];
-    const labels: string[] = [];
-    if (storeTypeKey) {
-      const typeLabel = storeTypes.find((t) => t.key === storeTypeKey)?.label;
-      if (typeLabel) labels.push(typeLabel);
-    }
-    labels.push(...selectedLabels);
-    return labels;
-  }, [storeTypeKey, storeTypes, selectedLabels, masters.externalLabelMap]);
+const displayLabels = useMemo(() => {
+  // マスタデータがまだ空、あるいは読み込み中の場合は、
+  // 中途半端な key を出さないよう空配列を返す
+  if (masters.loading || !masters.externalLabelMap.size) return [];
+
+  const labels = [];
+
+  // 店舗タイプ
+  if (storeTypeKey) {
+    const typeLabel = masters.storeTypes.find((t) => t.key === storeTypeKey)?.label;
+    if (typeLabel) labels.push(typeLabel);
+  }
+  labels.push(...selectedLabels);
+
+  return labels;
+}, [masters.loading, masters.externalLabelMap, storeTypeKey, masters.storeTypes, selectedLabels]);
 
   return (
     <>
       <div className="text-light-3 relative flex h-146 flex-col items-center gap-10 overflow-hidden bg-[url('/background-sp@2x.png')] bg-cover bg-center px-4 pt-20">
         <p className="text-[10px] tracking-widest">夜の音楽をもっと楽しむための音箱ナビ</p>
         <Image src="/logo-white.svg" alt="オトナビ" width={200} height={60} className="drop-shadow-lg" />
-        {/* 最新12件（allStores）を表示 */}
         {!loading && <HomeLatestStores stores={allStores} />}
         <CommentSlider />
       </div>
 
-      <StoreTypeFilter storeTypes={storeTypes} activeTypeKey={storeTypeKey} onChange={setStoreTypeKey} />
+      <StoreTypeFilter storeTypes={masters.storeTypes} activeTypeKey={storeTypeKey} onChange={setStoreTypeKey} />
       <HomeFilterSections sectionRefs={sectionRefs} {...setters} />
+
       <SearchBar
         selectedFilters={displayLabels}
         onClear={handleClearAll}

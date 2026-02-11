@@ -1,44 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { fetchStoreBySlug } from '@/lib/api/store';
+import { useState, useEffect } from 'react';
 import type { HomeStore } from '@/types/store';
 import StoreDetailView from '@/components/store/StoreDetailView';
 import Header from '@/components/ui/Header';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
-export default function StoreClient({ slug }: { slug: string }) {
-  const [store, setStore] = useState<HomeStore | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [imageLoaded, setImageLoaded] = useState(false);
+export default function StoreClient({ store }: { store: any }) {
+  // 画像があるかチェック
+  const hasImages = (store.store_galleries?.length ?? 0) > 0;
 
-  useEffect(() => {
-    if (!slug) return;
+  // 画像がない場合は最初から「画像読み込み完了」の状態にする
+  const [imageLoaded, setImageLoaded] = useState(!hasImages);
 
-    const load = async () => {
-      setLoading(true);
-      const data = await fetchStoreBySlug(slug);
-      setStore(data);
-      setLoading(false);
-    };
+  // マウント後のチラつき防止（任意）
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-    load();
-  }, [slug]);
+  if (!mounted) return null;
 
   return (
     <div className="relative -mt-20 bg-white">
-      {/* データ取得中、またはメイン画像が読み込まれるまでローディングを表示 */}
-      {(loading || !imageLoaded) && <LoadingOverlay />}
+      {/* メイン画像が読み込まれるまでオーバーレイを表示 */}
+      {!imageLoaded && <LoadingOverlay />}
 
-      {store && (
-        <>
-          <Header variant="title" title={store.name} />
-          <StoreDetailView
-            store={store}
-            onMainImageLoaded={() => setImageLoaded(true)}
-          />
-        </>
-      )}
+      <Header variant="title" title={store.name} />
+
+      <StoreDetailView
+        store={store}
+        onMainImageLoaded={() => setImageLoaded(true)}
+      />
     </div>
   );
 }

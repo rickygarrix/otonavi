@@ -15,52 +15,64 @@ const STATUS_BADGE_MAP = {
 } as const;
 
 export default function StoreBasicInfo({ store }: Props) {
-  // ステータス情報の安全な取得
-  const status = store.status_key ? STATUS_BADGE_MAP[store.status_key as keyof typeof STATUS_BADGE_MAP] : null;
+  // ステータスの判定を強化
+  const statusKey = store.status_key as keyof typeof STATUS_BADGE_MAP;
+  const status = STATUS_BADGE_MAP[statusKey] || null;
 
-  // SNSボタンの設定を一括管理
+  // SNSリンク
   const snsLinks = [
     { href: store.official_site_url, img: '/web@2x.png', alt: '公式サイト' },
     { href: store.instagram_url, img: '/instagram@2x.png', alt: 'Instagram' },
     { href: store.x_url, img: '/x@2x.png', alt: 'X' },
     { href: store.facebook_url, img: '/facebook@2x.png', alt: 'Facebook' },
     { href: store.tiktok_url, img: '/tiktok@2x.png', alt: 'TikTok' },
-  ].filter(link => link.href); // URLがあるものだけ残す
+  ].filter(link => !!link.href);
+
+  // 表示用テキストの優先順位付け（labelが空の場合の対策）
+  const pref = store.prefecture_label || store.prefecture_name;
+  const city = store.city_label || store.city_name;
+  const type = store.type_label || store.venue_type;
 
   return (
     <div className={`flex flex-col gap-4 p-4 text-center ${store.id === 'default' ? 'mt-20' : 'mt-8'}`}>
 
-      {/* ===== ステータス + ロケーション ===== */}
-      <div className="flex flex-wrap items-center justify-center text-xs text-dark-2">
+      {/* ステータス + ロケーション */}
+      <div className="flex flex-wrap items-center justify-center text-xs text-dark-2 min-h-[24px]">
         {status && (
-          <div className="pr-2 inline-flex flex-col justify-center items-center">
-            <div className={`px-2 py-1 rounded-[99px] inline-flex justify-center items-center ${status.bg}`}>
-              <span className={`${status.text} text-xs leading-3`}>{status.label}</span>
+          <div className="pr-2 inline-flex items-center">
+            <div className={`px-2 py-1 rounded-full inline-flex items-center ${status.bg}`}>
+              <span className={`${status.text} text-[10px] leading-none font-bold whitespace-nowrap`}>
+                {status.label}
+              </span>
             </div>
           </div>
         )}
-        <span>{store.prefecture_label}</span>
-        <span>{store.city_label}</span>
-        <span className="mx-1">・</span>
-        <span>{store.type_label}</span>
+
+        {/* エリア・タイプの表示（データがある場合のみドットを出す） */}
+        <div className="flex items-center gap-1">
+          {pref && <span>{pref}</span>}
+          {city && <span>{city}</span>}
+          {(pref || city) && type && <span className="mx-1 opacity-50">・</span>}
+          {type && <span>{type}</span>}
+        </div>
       </div>
 
-      {/* ===== 店舗名 ===== */}
-      <div className="flex flex-col gap-2 font-bold">
-        <h1 className="text-2xl leading-[1.5]">{store.name}</h1>
+      {/* 店舗名 */}
+      <div className="flex flex-col gap-1.5">
+        <h1 className="text-2xl font-bold leading-tight text-dark-5">{store.name}</h1>
         {store.kana && (
-          <p className="text-dark-3 text-[10px] leading-[1.5] tracking-widest">{store.kana}</p>
+          <p className="text-dark-3 text-[10px] tracking-[0.15em]">{store.kana}</p>
         )}
       </div>
 
-      {/* ===== 説明文 ===== */}
+      {/* 説明文 */}
       {store.description && (
-        <p className="text-dark-2 text-xs whitespace-pre-line leading-relaxed">
+        <p className="text-dark-2 text-xs whitespace-pre-line leading-relaxed px-2">
           {store.description}
         </p>
       )}
 
-      {/* ===== シェア (SNSボタン) ===== */}
+      {/* SNSリンク */}
       <div className="flex items-center justify-center gap-2 py-2">
         {snsLinks.map((link) => (
           <ShareButton key={link.alt} href={link.href!} image={link.img} alt={link.alt} />
@@ -72,7 +84,12 @@ export default function StoreBasicInfo({ store }: Props) {
 
 function ShareButton({ href, image, alt }: { href: string; image: string; alt: string }) {
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="relative h-14 w-14 transition-opacity active:opacity-70">
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="relative h-14 w-14 transition-transform active:scale-95 hover:opacity-80"
+    >
       <Image src={image} alt={alt} fill className="object-contain" />
     </a>
   );

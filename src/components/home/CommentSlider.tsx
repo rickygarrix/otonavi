@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/lib/infra"
 
 type Comment = {
   id: number
@@ -49,7 +49,7 @@ export default function CommentSlider() {
 
   return (
     <div className="relative w-full h-8 flex items-center justify-center text-[10px] tracking-widest overflow-hidden">
-      
+
       <div
         className={`absolute ease-in-out
           ${phase === "stay"
@@ -60,7 +60,7 @@ export default function CommentSlider() {
       >
         {next}
       </div>
-      
+
       <div
         className={`absolute ease-in-out
           ${phase === "stay"

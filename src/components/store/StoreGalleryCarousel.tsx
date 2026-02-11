@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/infra';
 
 type Props = {
   storeId: string;
@@ -35,6 +35,7 @@ export default function StoreGalleryCarousel({
       .then(({ data, error }) => {
         if (error) {
           console.error('store_galleries load error', error);
+          // エラー時もローディングを解除する
           onMainImageLoaded?.();
           return;
         }
@@ -42,6 +43,7 @@ export default function StoreGalleryCarousel({
         const imgs = data ?? [];
         setImages(imgs);
 
+        // 画像が1枚もない場合も即座にローディングを解除する
         if (imgs.length === 0) {
           onMainImageLoaded?.();
         }
@@ -49,6 +51,7 @@ export default function StoreGalleryCarousel({
   }, [storeId, onMainImageLoaded]);
 
   if (images.length === 0) {
+    // 画像がない場合は高さを確保せず、最小限のスペーサーを返す
     return <div className="h-20" />;
   }
 
@@ -72,6 +75,13 @@ export default function StoreGalleryCarousel({
               className="object-cover"
               priority={index === 0}
               onLoadingComplete={() => {
+                // 1枚目の画像が読み込まれたら通知
+                if (index === 0) {
+                  onMainImageLoaded?.();
+                }
+              }}
+              onError={() => {
+                // 画像が破損している場合も通知（無限ロード防止）
                 if (index === 0) {
                   onMainImageLoaded?.();
                 }
@@ -81,19 +91,15 @@ export default function StoreGalleryCarousel({
         ))}
       </div>
 
+      {/* インジケーター */}
       <div className="absolute inset-x-0 bottom-0 flex h-6 items-center justify-center gap-1">
         {images.map((_, i) => {
           const diff = Math.abs(i - current);
           const bg =
-            diff === 0
-              ? 'bg-white/80'
-              : diff === 1
-                ? 'bg-white/60'
-                : diff === 2
-                  ? 'bg-white/50'
-                  : diff === 3
-                    ? 'bg-white/40'
-                    : 'bg-white/30';
+            diff === 0 ? 'bg-white/80' :
+            diff === 1 ? 'bg-white/60' :
+            diff === 2 ? 'bg-white/50' :
+            diff === 3 ? 'bg-white/40' : 'bg-white/30';
           const width = diff === 0 ? 'w-2' : 'w-1';
 
           return (

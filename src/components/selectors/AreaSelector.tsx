@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/infra';
 import type { Prefecture, City } from '@/types/master';
 import { ChevronsUpDown, Check } from 'lucide-react';
 

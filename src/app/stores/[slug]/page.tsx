@@ -1,104 +1,64 @@
-// src/app/stores/[slug]/page.tsx
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import StoreClient from './storeClient';
 import { SITE_URL, SITE_DESC } from '@/lib/metadata';
-import { getSupabaseServer } from '@/lib/supabase';
+import { fetchStoreBySlug } from '@/lib/api/store'; // 修正済みのAPI関数をインポート
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
-export async function generateMetadata(
-  { params }: Props
-): Promise<Metadata> {
+/**
+ * Metadata生成用
+ * ※ fetchStoreBySlug は内部でキャッシュ(Request Memoization)されるため、
+ * Page本体と2回呼んでもパフォーマンス上の問題はありません。
+ */
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = getSupabaseServer();
+  const store = await fetchStoreBySlug(slug);
 
-  const { data } = await supabase
-    .from('stores')
-    .select(`
-      name,
-      slug,
-      description,
-      store_galleries (
-        gallery_url,
-        sort_order
-      )
-    `)
-    .eq('slug', slug)
-    .maybeSingle();
-
-  // =========================
-  // 店舗が見つからない場合
-  // =========================
-  if (!data) {
-    const fallbackOgp = `${SITE_URL}/ogp.png`;
-
-    return {
-      title: 'オトナビ',
-      description: SITE_DESC,
-
-      openGraph: {
-        title: 'オトナビ',
-        description: SITE_DESC,
-        url: `${SITE_URL}/stores/${slug}`,
-        images: [fallbackOgp],
-      },
-
-      twitter: {
-        card: 'summary_large_image',
-        title: 'オトナビ',
-        description: SITE_DESC,
-        images: [fallbackOgp],
-      },
-    };
+  if (!store) {
+    return { title: '店舗が見つかりません' };
   }
 
-  // =========================
-  // OGP画像選定ロジック
-  // =========================
-  const sortedGalleries =
-    data.store_galleries
-      ?.slice()
-      .sort((a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999));
-
-  const firstGalleryUrl = sortedGalleries?.[0]?.gallery_url ?? null;
-
-  // SVGはOGP非対応なので除外
+  // OGP画像選定（正規化済みの gallery_url を使用）
+  const firstGalleryUrl = store.gallery_url;
   const isValidOgpImage =
-    typeof firstGalleryUrl === 'string' &&
+    firstGalleryUrl &&
+    firstGalleryUrl !== '/noshop.svg' &&
     !firstGalleryUrl.endsWith('.svg');
 
-  // 最終的に使うOGP画像
-  const ogpImage = isValidOgpImage
-    ? firstGalleryUrl
-    : `${SITE_URL}/ogp.png`;
+  const ogpImage = isValidOgpImage ? firstGalleryUrl : `${SITE_URL}/ogp.png`;
 
-  // =========================
-  // Metadata 本体
-  // =========================
   return {
-    title: data.name, // ← baseMetadata の template により「店名｜オトナビ」になる
-
-    description: data.description ?? SITE_DESC,
-
+    title: store.name,
+    description: store.description ?? SITE_DESC,
     openGraph: {
-      title: data.name,
-      description: data.description ?? SITE_DESC,
-      url: `${SITE_URL}/stores/${data.slug}`,
+      title: store.name,
+      description: store.description ?? SITE_DESC,
+      url: `${SITE_URL}/stores/${store.slug}`,
       images: [ogpImage],
     },
-
     twitter: {
       card: 'summary_large_image',
-      title: data.name,
-      description: data.description ?? SITE_DESC,
       images: [ogpImage],
     },
   };
 }
 
+/**
+ * 店舗詳細 サーバーコンポーネント
+ */
 export default async function Page({ params }: Props) {
   const { slug } = await params;
-  return <StoreClient slug={slug} />;
+
+  // API層の修正済み関数を呼び出すことで、
+  // ステータス、エリア、タグ、実績(mentions)がすべて正規化された状態で取得されます
+  const store = await fetchStoreBySlug(slug);
+
+  if (!store) {
+    notFound();
+  }
+
+  return <StoreClient store={store} />;
 }
