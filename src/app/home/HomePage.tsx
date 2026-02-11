@@ -25,7 +25,6 @@ export default function HomePage() {
   const { stores: allStores, loading } = useStores({ limit: 12 });
   const urlFilters = useMemo(() => searchParams.getAll('filters'), [searchParams]);
 
-  // 店舗タイプ専用のステート
   const [storeTypeKey, setStoreTypeKey] = useState<string | null>(null);
 
   const filter = useHomeFilterState(masters.externalLabelMap, {
@@ -36,7 +35,6 @@ export default function HomePage() {
 
   const { selectedKeys, selectedLabels, filterMap, handleClear, ...setters } = filter;
 
-  // URLから戻った時の復元ロジック（単一選択を保証）
   useEffect(() => {
     if (masters.loading || !masters.storeTypes.length) return;
 
@@ -48,7 +46,6 @@ export default function HomePage() {
     setStoreTypeKey(foundType ? foundType.key : null);
   }, [urlFilters, masters.storeTypes, masters.loading]);
 
-  // 件数計算：storeTypeKey は常に1つだけ配列に含める
   const { stores: fetchStores } = useStores();
   const { filteredStores } = useStoreFilters(fetchStores, {
     filters: storeTypeKey ? [storeTypeKey, ...selectedKeys] : selectedKeys,
@@ -60,17 +57,14 @@ export default function HomePage() {
     router.replace('/', { scroll: false });
   };
 
-  // 検索実行時の遷移処理
   const handleGoToStores = () => {
     const params = new URLSearchParams();
     const deflate = (k: string) => k.includes(':') ? k.split(':')[1] : k;
 
-    // 1. 店舗タイプを最初に入れる（1つのみ）
     if (storeTypeKey) {
       params.append('filters', deflate(storeTypeKey));
     }
 
-    // 2. その他の属性（店舗タイプと重複するキーは除外して追加）
     selectedKeys.forEach((k) => {
       const isStoreType = masters.storeTypes.some(t => t.key === k);
       if (!isStoreType) {
@@ -86,18 +80,26 @@ export default function HomePage() {
     if (section) sectionRefs.current[section]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  // ---------------------------------------------------------
+  // 修正箇所: 型を string[] と明示
+  // ---------------------------------------------------------
   const displayLabels = useMemo(() => {
     if (masters.loading || !masters.externalLabelMap.size) return [];
-    const labels = [];
+
+    const labels: string[] = []; // 型アノテーションを追加
+
     if (storeTypeKey) {
       const typeLabel = masters.externalLabelMap.get(storeTypeKey);
       if (typeLabel) labels.push(typeLabel);
     }
-    // 店舗タイプ以外のラベルのみを合成
+
     selectedLabels.forEach(label => {
       const isStoreTypeLabel = masters.storeTypes.some(t => t.label === label);
-      if (!isStoreTypeLabel && !labels.includes(label)) labels.push(label);
+      if (!isStoreTypeLabel && !labels.includes(label)) {
+        labels.push(label);
+      }
     });
+
     return labels;
   }, [masters.loading, masters.externalLabelMap, storeTypeKey, selectedLabels, masters.storeTypes]);
 
@@ -110,7 +112,6 @@ export default function HomePage() {
         <CommentSlider />
       </div>
 
-      {/* onChange 時は引数で渡ってきた key で上書きすることで単一選択を維持 */}
       <StoreTypeFilter
         storeTypes={masters.storeTypes}
         activeTypeKey={storeTypeKey}
