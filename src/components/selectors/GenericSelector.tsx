@@ -16,15 +16,28 @@ type MasterRow = {
   hint?: string | null;
 };
 
-type Props = {
+// 単一選択と複数選択で value と onChange の型を連動させる
+type SelectionProps =
+  | {
+      selection: 'single';
+      value: string | null;
+      onChange?: (val: string | null) => void;
+    }
+  | {
+      selection: 'multi';
+      value: string[];
+      onChange?: (val: string[]) => void;
+    };
+
+// 共通のProps定義
+type CommonProps = {
   title: string;
   table: string;
-  selection: 'single' | 'multi';
-  value: any; // string | null または string[]
-  onChange?: (val: any) => void;
   columns?: 2 | 3;
   variant?: 'default' | 'drink';
 };
+
+type Props = CommonProps & SelectionProps;
 
 /* =========================
    Main Component
@@ -37,29 +50,40 @@ export default function GenericSelector({
   // ヒントを有効にするテーブル定義
   const enableHint = ['sizes', 'price_ranges', 'luggages', 'smoking_policies'].includes(table);
 
-  useEffect(() => {
+ useEffect(() => {
     (async () => {
       const { data } = await supabase
         .from(table)
         .select(`id, key, label, sort_order${enableHint ? ', hint' : ''}`)
         .eq('is_active', true)
-        .order('sort_order', { ascending: true });
+        .order('sort_order', { ascending: true })
+        // 型推論のエラーを回避するために戻り値の型を明示
+        .returns<MasterRow[]>();
+
       setItems(data ?? []);
     })();
   }, [table, enableHint]);
 
-  // 選択ロジックの共通化
+  // 選択ロジック
+ // 選択ロジック
   const handleToggle = (key: string) => {
     if (!onChange) return;
     const fullKey = `${table}:${key}`;
 
     if (selection === 'single') {
-      onChange(value === fullKey ? null : fullKey);
+      // single用のonChangeであることを明示して呼び出す
+      const changeFn = onChange as (val: string | null) => void;
+      changeFn(value === fullKey ? null : fullKey);
     } else {
-      const next = value.includes(fullKey)
-        ? value.filter((v: string) => v !== fullKey)
-        : [...value, fullKey];
-      onChange(next);
+      // multi用の値を作成
+      const currentValues = value as string[];
+      const next = currentValues.includes(fullKey)
+        ? currentValues.filter((v) => v !== fullKey)
+        : [...currentValues, fullKey];
+
+      // multi用のonChangeであることを明示して呼び出す
+      const changeFn = onChange as (val: string[]) => void;
+      changeFn(next);
     }
   };
 
@@ -80,7 +104,9 @@ export default function GenericSelector({
           <ul key={idx} className={`grid ${group.cols === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
             {group.list.map((item) => {
               const fullKey = `${table}:${item.key}`;
-              const isSelected = selection === 'single' ? value === fullKey : value.includes(fullKey);
+              const isSelected = selection === 'single'
+                ? value === fullKey
+                : (value as string[]).includes(fullKey);
 
               const chip = (
                 <Chip

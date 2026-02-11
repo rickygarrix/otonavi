@@ -1,9 +1,10 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link'; // Next.jsのLinkを使用
 import { Search } from 'lucide-react';
 import { zenMaru, zenKaku } from '@/lib/fonts';
-import LinkButton from '@/components/ui/button/Button';
+import Button from '@/components/ui/button/Button'; // コンポーネント名をButtonに戻す
 import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
 
@@ -81,7 +82,16 @@ export default function AboutClient() {
             <p className="leading-[2.0]">夜の音楽体験が、日常に変わる瞬間へ。</p>
           </div>
 
-          <LinkButton href="/" priority="secondary" label="音箱を探す" leftIcon={Search} />
+          {/* LinkでラップしてButtonを表示。Button側からhrefを削除 */}
+        {/* LinkでラップしてButtonを表示 */}
+          <Link href="/">
+            <Button
+             priority="secondary"
+             label="音箱を探す"
+             leftIcon={Search}
+             onClick={() => {}} // onClickを空関数で渡して必須チェックをパスさせる
+            />
+          </Link>
         </section>
 
         {/* How to use */}

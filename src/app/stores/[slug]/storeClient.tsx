@@ -1,21 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+// HomeStore をインポートするように修正
 import type { HomeStore } from '@/types/store';
 import StoreDetailView from '@/components/store/StoreDetailView';
 import Header from '@/components/ui/Header';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
-export default function StoreClient({ store }: { store: any }) {
-  // 画像があるかチェック
-  const hasImages = (store.store_galleries?.length ?? 0) > 0;
+// 引数の型を HomeStore に指定
+export default function StoreClient({ store }: { store: HomeStore }) {
+  // HomeStore 型の定義に合わせて画像チェック
+  // HomeStore では gallery_url（文字列）が必須定義になっているため、
+  // もし store_galleries を直接参照したい場合は型定義の調整が必要ですが、
+  // 現状の HomeStore のプロパティに基づいて判定します。
+  const hasImages = !!store.gallery_url && store.gallery_url !== '/noshop.svg';
 
   // 画像がない場合は最初から「画像読み込み完了」の状態にする
   const [imageLoaded, setImageLoaded] = useState(!hasImages);
 
-  // マウント後のチラつき防止（任意）
+  // マウント後のチラつき防止
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   if (!mounted) return null;
 

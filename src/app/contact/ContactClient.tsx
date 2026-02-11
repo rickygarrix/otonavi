@@ -16,10 +16,17 @@ export const contactStyles = {
   textarea: 'min-h-40 px-4 py-3 bg-light-1 rounded-3xl outline outline-1 outline-offset-[-1px] outline-light-4 text-base resize-none focus:outline-blue-3 transition-all',
   inputDisabled: 'px-4 py-3 bg-dark-5/10 rounded-3xl outline outline-1 outline-offset-[-1px] text-dark-5/50 outline-dark-5/10 text-md',
   textareaDisabled: 'min-h-40 px-4 py-3 bg-dark-5/10 rounded-3xl outline outline-1 outline-offset-[-1px] outline-dark-5/10 text-dark-5/50 text-md',
-};
+} as const;
+
+/**
+ * ステッパーの型定義
+ */
+interface StepperProps {
+  step: 1 | 2 | 3;
+}
 
 // ステッパーを共通コンポーネントとして export
-export function Stepper({ step }: { step: 1 | 2 | 3 }) {
+export function Stepper({ step }: StepperProps) {
   return (
     <div className="relative flex h-20 items-center justify-between pr-4 pl-24">
       {[1, 2, 3].map((s) => (
@@ -42,25 +49,60 @@ export function Stepper({ step }: { step: 1 | 2 | 3 }) {
   );
 }
 
+/**
+ * フォーム入力フィールドの型定義
+ */
+interface FormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+  name: string;
+}
+
+function FormField({ label, name, ...props }: FormFieldProps) {
+  return (
+    <div className={contactStyles.wrapper}>
+      <label htmlFor={name} className={contactStyles.label}>{label}<span className="text-red-4">*</span></label>
+      <input id={name} name={name} required className={contactStyles.input} {...props} />
+    </div>
+  );
+}
+
+/**
+ * メインコンポーネント
+ */
 export default function ContactClient() {
   const router = useRouter();
   const [form, setForm] = useState({ name: '', email: '', message: '' });
 
+  // セッションストレージから復元
   useEffect(() => {
     const stored = sessionStorage.getItem('contactForm');
-    if (stored) try { setForm(JSON.parse(stored)); } catch { /* ignore */ }
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setForm({
+          name: parsed.name ?? '',
+          email: parsed.email ?? '',
+          message: parsed.message ?? '',
+        });
+      } catch {
+        console.error('Failed to parse stored form data');
+      }
+    }
   }, []);
 
+  // 入力ハンドラ
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
   }, []);
 
+  // 確認画面へ
   const handleConfirm = () => {
     sessionStorage.setItem('contactForm', JSON.stringify(form));
     router.push('/contact/confirm');
   };
 
+  // バリデーションチェック
   const isValid = Object.values(form).every(v => v.trim() !== '');
 
   return (
@@ -71,36 +113,58 @@ export default function ContactClient() {
       <main>
         <section className="flex flex-col gap-6 px-6 py-10">
           <h1 className="text-xl font-bold tracking-widest">お問い合わせ</h1>
-          <p className="text-justify text-sm leading-relaxed opacity-80">オトナビについてのご質問や店舗情報に関するご相談など、お気軽にお問い合わせください。3営業日以内にメールにてお返事いたします。</p>
+          <p className="text-justify text-sm leading-relaxed opacity-80">
+            オトナビについてのご質問や店舗情報に関するご相談など、お気軽にお問い合わせください。3営業日以内にメールにてお返事いたします。
+          </p>
         </section>
 
         <div className="bg-light-2 flex flex-col gap-8 px-6 pt-10 pb-20">
-          <FormField label="お名前" name="name" value={form.name} onChange={handleChange} placeholder="音箱 太郎" autoComplete="name" />
-          <FormField label="メールアドレス" name="email" value={form.email} onChange={handleChange} placeholder="otonavi@example.jp" autoComplete="email" />
+          <FormField
+            label="お名前"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            placeholder="音箱 太郎"
+            autoComplete="name"
+          />
+          <FormField
+            label="メールアドレス"
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="otonavi@example.jp"
+            autoComplete="email"
+          />
 
           <div className={contactStyles.wrapper}>
             <div className="flex flex-col gap-1">
-              <label htmlFor="message" className={contactStyles.label}>お問い合わせ内容<span className="text-red-4">*</span></label>
+              <label htmlFor="message" className={contactStyles.label}>
+                お問い合わせ内容<span className="text-red-4">*</span>
+              </label>
               <p className="text-gray-4 text-xs">わかる範囲で概要をご記入ください。</p>
             </div>
-            <textarea id="message" name="message" required className={contactStyles.textarea} value={form.message} onChange={handleChange} />
+            <textarea
+              id="message"
+              name="message"
+              required
+              className={contactStyles.textarea}
+              value={form.message}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="mt-4">
-            <Button onClick={handleConfirm} label="内容確認へ" rightIcon={ArrowRight} disabled={!isValid} />
+            <Button
+              onClick={handleConfirm}
+              label="内容確認へ"
+              rightIcon={ArrowRight}
+              disabled={!isValid}
+            />
           </div>
         </div>
       </main>
       <Footer />
-    </div>
-  );
-}
-
-function FormField({ label, name, ...props }: any) {
-  return (
-    <div className={contactStyles.wrapper}>
-      <label htmlFor={name} className={contactStyles.label}>{label}<span className="text-red-4">*</span></label>
-      <input id={name} name={name} required className={contactStyles.input} {...props} />
     </div>
   );
 }

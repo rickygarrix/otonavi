@@ -19,6 +19,14 @@ const TABLE_TO_SECTION: Record<string, string> = {
   atmospheres: '雰囲気',
 };
 
+// 汎用マスタのレスポンス形状を定義
+interface GenericResponseItem {
+  id: string;
+  key: string;
+  label: string;
+  sort_order: number | null;
+}
+
 export function useHomeMasters() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<{
@@ -49,18 +57,24 @@ export function useHomeMasters() {
 
         if (!mounted) return;
 
-        const generics = new Map<string, GenericMaster>();
+       const generics = new Map<string, GenericMaster>();
         Object.keys(TABLE_TO_SECTION).forEach((table, index) => {
-          genericResponses[index].data?.forEach((item: any) => {
+          const items = (genericResponses[index].data as GenericResponseItem[]) ?? [];
+          items.forEach((item) => {
             const mapKey = `${table}:${item.key}`;
-            generics.set(mapKey, { ...item, key: mapKey, table });
+            generics.set(mapKey, {
+              ...item,
+              key: mapKey,
+              table,
+              sort_order: item.sort_order ?? 0 // ここで null を回避
+            });
           });
         });
 
         setData({
-          prefectures: prefRes.data ?? [],
-          cities: cityRes.data ?? [],
-          drinks: drinkRes.data ?? [],
+          prefectures: (prefRes.data as Prefecture[]) ?? [],
+          cities: (cityRes.data as City[]) ?? [],
+          drinks: (drinkRes.data as DrinkDefinition[]) ?? [],
           generics,
         });
       } finally {

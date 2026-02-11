@@ -9,7 +9,7 @@ type Props = {
   updateFilter: (table: string, values: string[]) => void;
 };
 
-// 表示順とカラム設定を一箇所で管理（ここをいじれば順番もすぐ変わる）
+// 表示順とカラム設定
 const FILTER_CONFIG = [
   { key: '客層', table: 'audience_types', cols: 2 },
   { key: '雰囲気', table: 'atmospheres', cols: 3 },
@@ -23,12 +23,12 @@ const FILTER_CONFIG = [
   { key: 'トイレ', table: 'toilets', cols: 3 },
   { key: '周辺環境', table: 'environments', cols: 2 },
   { key: 'その他', table: 'amenities', cols: 2 },
-];
+] as const;
 
 export default function HomeFilterSections({ sectionRefs, filterMap, updateFilter }: Props) {
   return (
     <div className="pb-10">
-      {/* 1. エリアセクション（特殊構造なので単独定義） */}
+      {/* 1. エリアセクション */}
       <section
         ref={(el) => { sectionRefs.current['エリア'] = el; }}
         className="flex flex-col gap-4 p-4"
@@ -44,7 +44,7 @@ export default function HomeFilterSections({ sectionRefs, filterMap, updateFilte
         />
       </section>
 
-      {/* 2. その他の属性セクション（ループで一括生成） */}
+      {/* 2. その他の属性セクション */}
       {FILTER_CONFIG.map((conf) => (
         <section
           key={conf.key}
@@ -57,8 +57,9 @@ export default function HomeFilterSections({ sectionRefs, filterMap, updateFilte
             selection="multi"
             value={filterMap[conf.table] || []}
             columns={conf.cols}
-            variant={conf.variant || 'default'}
-            onChange={(v) => updateFilter(conf.table, v)}
+            // 修正ポイント: 'variant' in conf を使って型ガード
+            variant={'variant' in conf ? conf.variant : 'default'}
+            onChange={(v) => updateFilter(conf.table, v as string[])}
           />
         </section>
       ))}

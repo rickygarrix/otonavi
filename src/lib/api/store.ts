@@ -1,28 +1,41 @@
 import { supabase } from '@/lib/infra';
 import type {
   StoreRow, SearchStoreRow,
-  SearchStore, HomeStore, HomeStoreLite
+  SearchStore, HomeStore
 } from '@/types/store';
 
 /* ==========================================================================
-   1. 内部用ヘルパー (旧 normalize.ts より移動)
+   1. 内部用ヘルパー
    ========================================================================== */
 
 const asNumber = (v: unknown): number | null => (typeof v === 'number' ? v : null);
 
 /** 画像選択 (優先順位: sort_order) */
-function selectImage(galleries: any[] | null): string {
+function selectImage(galleries: { gallery_url: string | null; sort_order?: number | null }[] | null): string {
   if (!galleries?.length) return '/noshop.svg';
-  const top = [...galleries].sort((a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999))[0];
+
+  // gallery_url が存在するものだけを対象にソート
+  const validImages = galleries.filter(g => !!g.gallery_url);
+  if (!validImages.length) return '/noshop.svg';
+
+  const top = [...validImages].sort((a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999))[0];
   return top?.gallery_url?.trim() || '/noshop.svg';
 }
 
+/** M2M (多対多) の抽出用インターフェース */
+interface M2MItem {
+  key: string;
+  label: string;
+  sort_order?: number | null;
+}
+
 /** M2M (多対多) の抽出 */
-function getM2M(list: any, defKey: string, prefix?: string) {
+function getM2M(list: unknown, defKey: string, prefix?: string) {
   if (!Array.isArray(list)) return { keys: [], labels: [] };
+
   const sorted = list
-    .map((row) => row?.[defKey])
-    .filter((d): d is { key: string; label: string; sort_order?: number } => !!(d?.key && d?.label))
+    .map((row) => row?.[defKey] as M2MItem | undefined)
+    .filter((d): d is M2MItem => !!(d?.key && d?.label))
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 
   return {
@@ -32,12 +45,12 @@ function getM2M(list: any, defKey: string, prefix?: string) {
 }
 
 /* ==========================================================================
-   2. 正規化ロジック (旧 normalize.ts より移動)
+   2. 正規化ロジック
    ========================================================================== */
 
 export function normalizeSearchStore(raw: SearchStoreRow): SearchStore {
   const { prefectures: pref, cities: city, venue_types: vType } = raw;
-  const k = (list: any, def: string, p?: string) => getM2M(list, def, p).keys;
+  const k = (list: unknown, def: string, p?: string) => getM2M(list, def, p).keys;
 
   return {
     id: raw.id, slug: raw.slug, name: raw.name, kana: raw.kana,
@@ -68,8 +81,15 @@ export function normalizeSearchStore(raw: SearchStoreRow): SearchStore {
   };
 }
 
+interface MentionItem {
+  id: string | number;
+  text: string | null;
+  year: number | null;
+  is_active: boolean;
+}
+
 export function normalizeStoreDetail(raw: StoreRow): HomeStore {
-  const m = (list: any, def: string) => getM2M(list, def);
+  const m = (list: unknown, def: string) => getM2M(list, def);
   const drinks = m(raw.store_drinks, 'drinks');
   const payments = m(raw.store_payment_methods, 'payment_methods');
   const events = m(raw.store_event_trends, 'event_trends');
@@ -81,9 +101,10 @@ export function normalizeStoreDetail(raw: StoreRow): HomeStore {
   const customers = m(raw.store_audience_types, 'audience_types');
   const atmos = m(raw.store_atmospheres, 'atmospheres');
 
-  const mentions = (Array.isArray(raw.mentions) ? raw.mentions : [])
-    .filter((item: any) => item.is_active)
-    .map((item: any) => ({
+  const rawMentions = (Array.isArray(raw.mentions) ? raw.mentions : []) as MentionItem[];
+  const mentions = rawMentions
+    .filter((item) => item.is_active)
+    .map((item) => ({
       id: String(item.id ?? ''),
       text: String(item.text ?? ''),
       year: asNumber(item.year),
@@ -176,7 +197,6 @@ export async function fetchStores(params: StoreSearchParams): Promise<SearchStor
 }
 
 /** 店舗詳細取得 */
-/** 店舗詳細取得 (修正版) */
 export async function fetchStoreBySlug(slug: string): Promise<HomeStore | null> {
   const { data, error } = await supabase
     .from('stores')
@@ -207,5 +227,5 @@ export async function fetchStoreBySlug(slug: string): Promise<HomeStore | null> 
 
   if (error || !data) return null;
 
-  return normalizeStoreDetail(data as any);
+  return normalizeStoreDetail(data as unknown as StoreRow);
 }

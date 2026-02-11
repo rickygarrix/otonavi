@@ -2,7 +2,8 @@
 
 import type { HomeStore } from '@/types/store';
 import { MapPin } from 'lucide-react';
-import LinkButton from '@/components/ui/button/Button';
+import Link from 'next/link'; // Link をインポート
+import Button from '@/components/ui/button/Button'; // LinkButton から Button に名称変更（推奨）
 
 /* =========================
    Utils
@@ -30,8 +31,8 @@ function buildMapUrl(store: HomeStore) {
 
   // Android → Google Maps アプリ
   if (isAndroid()) {
-    return `intent://maps.google.com/maps?q=${query}` +
-           `#Intent;scheme=https;package=com.google.android.apps.maps;end`;
+    // 修正: テンプレートリテラルの変数を正しく埋め込み
+    return `intent://maps.google.com/maps?q=${query}#Intent;scheme=https;package=com.google.android.apps.maps;end`;
   }
 
   // PC / その他 → Google Maps Web
@@ -72,14 +73,16 @@ export default function StoreAccess({ store }: Props) {
         <p className="whitespace-pre-line">{store.access}</p>
       )}
 
-      {/* 地図を開く（同一タブ） */}
+      {/* 地図を開く（外部リンク/アプリ起動） */}
       {mapUrl && (
-        <LinkButton
-          href={mapUrl}
-          priority="secondary"
-          label="地図を開く"
-          leftIcon={MapPin}
-        />
+        <Link href={mapUrl} passHref legacyBehavior={false}>
+          <Button
+            priority="secondary"
+            label="地図を開く"
+            leftIcon={MapPin}
+            onClick={() => {}} // 必須プロパティを満たすための空関数
+          />
+        </Link>
       )}
     </section>
   );

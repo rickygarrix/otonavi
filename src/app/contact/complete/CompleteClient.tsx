@@ -8,15 +8,27 @@ import Footer from '@/components/ui/Footer';
 import Button from '@/components/ui/button/Button';
 import { contactStyles, Stepper } from '../ContactClient';
 
+// フォームデータの型定義（ConfirmClientと同じもの）
+interface ContactFormData {
+  name: string;
+  email: string;
+  message: string;
+}
+
 export default function CompleteClient() {
   const router = useRouter();
-  const [form, setForm] = useState<any>(null);
+  // any を排除
+  const [form, setForm] = useState<ContactFormData | null>(null);
 
   useEffect(() => {
     const stored = sessionStorage.getItem('contactFormSubmitted');
     if (stored) {
-      setForm(JSON.parse(stored));
-      sessionStorage.removeItem('contactFormSubmitted');
+      try {
+        setForm(JSON.parse(stored));
+        sessionStorage.removeItem('contactFormSubmitted');
+      } catch {
+        console.error('Failed to parse submitted form data');
+      }
     }
   }, []);
 

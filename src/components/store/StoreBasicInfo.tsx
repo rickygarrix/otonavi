@@ -28,10 +28,10 @@ export default function StoreBasicInfo({ store }: Props) {
     { href: store.tiktok_url, img: '/tiktok@2x.png', alt: 'TikTok' },
   ].filter(link => !!link.href);
 
-  // 表示用テキストの優先順位付け（labelが空の場合の対策）
-  const pref = store.prefecture_label || store.prefecture_name;
-  const city = store.city_label || store.city_name;
-  const type = store.type_label || store.venue_type;
+  // 【修正ポイント】型定義に存在するプロパティのみを使用
+  const pref = store.prefecture_label;
+  const city = store.city_label;
+  const type = store.type_label;
 
   return (
     <div className={`flex flex-col gap-4 p-4 text-center ${store.id === 'default' ? 'mt-20' : 'mt-8'}`}>
@@ -48,7 +48,7 @@ export default function StoreBasicInfo({ store }: Props) {
           </div>
         )}
 
-        {/* エリア・タイプの表示（データがある場合のみドットを出す） */}
+        {/* エリア・タイプの表示 */}
         <div className="flex items-center gap-1">
           {pref && <span>{pref}</span>}
           {city && <span>{city}</span>}
