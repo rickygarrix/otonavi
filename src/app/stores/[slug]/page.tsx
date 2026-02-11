@@ -1,7 +1,7 @@
 // src/app/stores/[slug]/page.tsx
 import type { Metadata } from 'next';
 import StoreClient from './storeClient';
-import { SITE_URL, SITE_DESC } from '@/lib/site';
+import { SITE_URL, SITE_DESC } from '@/lib/metadata';
 import { getSupabaseServer } from '@/lib/supabaseServer';
 
 type Props = {

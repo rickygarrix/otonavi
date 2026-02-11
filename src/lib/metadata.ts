@@ -1,6 +1,14 @@
-// src/lib/metadata.ts
 import type { Metadata, Viewport } from 'next';
-import { SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESC } from '@/lib/site';
+
+/* =========================
+   Constants
+========================= */
+export const SITE_URL = 'https://otnv.jp';
+export const SITE_NAME = 'オトナビ';
+export const SITE_TITLE = 'オトナビ｜音箱検索サイト';
+export const SITE_DESC = '夜の音楽体験をもっと身近にする音箱検索サイト。エリアやこだわり条件で絞って、お気に入りのクラブ・バー・ライブハウスを探せます。';
+export const SITE_THEME_COLOR = '#081624';
+export const SITE_BACKGROUND_COLOR = '#F7F9FB';
 
 const ogImage = new URL('/ogp.png', SITE_URL).toString();
 
@@ -40,7 +48,7 @@ export const baseMetadata: Metadata = {
 
   appleWebApp: {
     capable: true,
-    title: 'オトナビ',
+    title: SITE_NAME,
     statusBarStyle: 'black-translucent',
   },
 };
@@ -49,12 +57,11 @@ export const baseMetadata: Metadata = {
    Viewport
 ========================= */
 export const baseViewport: Viewport = {
-  themeColor: '#081624',
+  themeColor: SITE_THEME_COLOR, // 定数を使用
 };
 
 /* =========================
    Noindex helper
-   confirm / complete / thanks 等
 ========================= */
 export function noindex(meta: Metadata): Metadata {
   return {
@@ -72,7 +79,6 @@ export function noindex(meta: Metadata): Metadata {
 
 /* =========================
    Static Page Metadata
-   contact / privacy / terms 用
 ========================= */
 export function staticMeta(opts: { title: string; path: string; description?: string }): Metadata {
   const url = new URL(opts.path, SITE_URL).toString();
@@ -106,10 +112,7 @@ export function staticMeta(opts: { title: string; path: string; description?: st
 ========================= */
 export function storesMeta(opts: { filters: string[]; storeTypeId?: string }): Metadata {
   const title = !opts.filters.length && !opts.storeTypeId ? '検索結果' : '条件付き検索結果';
-
-  const description =
-    'オトナビの検索結果一覧。エリアやこだわり条件で音箱（クラブ・バー・ライブハウス等）を探せます。';
-
+  const description = 'オトナビの検索結果一覧。エリアやこだわり条件で音箱（クラブ・バー・ライブハウス等）を探せます。';
   const canonical = new URL('/stores', SITE_URL).toString();
 
   return {

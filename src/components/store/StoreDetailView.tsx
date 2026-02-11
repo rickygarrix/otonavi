@@ -1,10 +1,8 @@
 'use client';
 
 import type { HomeStore } from '@/types/store';
-
 import Footer from '@/components/ui/Footer';
 import BackToHomeButton from '@/components/ui/BackToHomeButton';
-
 import StoreGalleryCarousel from '@/components/store/StoreGalleryCarousel';
 import StoreBasicInfo from '@/components/store/StoreBasicInfo';
 import StoreAccess from '@/components/store/StoreAccess';
@@ -14,84 +12,53 @@ import StoreDetailMedia from './StoreDetailMedia';
 import { StoreDetailDivider } from './StoreDetailDivider';
 
 /* =========================
-   Utils
+   Utils (ロジックをより堅牢に)
 ========================= */
 
-const join = (v?: string[]) => (v && v.length > 0 ? v.join(', ') : null);
+const join = (v?: string[]) => (v?.length ? v.join(', ') : null);
 
-const formatPaymentMethods = (
-  labels?: string[],
-  otherText?: string | null,
-) => {
-  if (!labels || labels.length === 0) return null;
-
-  const hasOther = labels.includes('その他');
-  if (hasOther && otherText) {
-    const filtered = labels.filter((l) => l !== 'その他');
+const formatPaymentMethods = (labels?: string[], otherText?: string | null) => {
+  if (!labels?.length) return null;
+  // 「その他」が含まれていて、かつ具体的なテキストがある場合のみ差し替え
+  const filtered = labels.filter((l) => l !== 'その他');
+  if (labels.includes('その他') && otherText) {
     return [...filtered, otherText].join(', ');
   }
-
   return labels.join(', ');
 };
-
-/* =========================
-   Props
-========================= */
 
 type Props = {
   store: HomeStore;
   onMainImageLoaded?: () => void;
 };
 
-/* =========================
-   Component
-========================= */
+export default function StoreDetailView({ store, onMainImageLoaded }: Props) {
 
-export default function StoreDetailView({
-  store,
-  onMainImageLoaded,
-}: Props) {
+  // ★ 表示項目の定義とフィルタリングを一本化
   const detailItems: [string, string][] = [
-    { order: 10, label: '客層', value: join(store.customer_labels) },
-    { order: 20, label: '雰囲気', value: join(store.atmosphere_labels) },
-    { order: 30, label: '広さ', value: store.size_label },
-    { order: 40, label: 'ドリンク', value: join(store.drink_labels) },
-    { order: 50, label: '価格帯', value: store.price_range_label },
-    {
-      order: 60,
-      label: '支払い方法',
-      value: formatPaymentMethods(
-        store.payment_method_labels,
-        store.other_payment_method,
-      ),
-    },
-    { order: 70, label: 'イベントの傾向', value: join(store.event_trend_labels) },
-    { order: 80, label: '荷物預かり', value: join(store.baggage_labels) },
-    { order: 90, label: '喫煙', value: join(store.smoking_labels) },
-    { order: 100, label: 'トイレ', value: join(store.toilet_labels) },
-    { order: 110, label: '周辺環境', value: join(store.environment_labels) },
-    { order: 120, label: 'その他', value: join(store.other_labels) },
+    { label: '客層', value: join(store.customer_labels) },
+    { label: '雰囲気', value: join(store.atmosphere_labels) },
+    { label: '広さ', value: store.size_label },
+    { label: 'ドリンク', value: join(store.drink_labels) },
+    { label: '価格帯', value: store.price_range_label },
+    { label: '支払い方法', value: formatPaymentMethods(store.payment_method_labels, store.other_payment_method) },
+    { label: 'イベントの傾向', value: join(store.event_trend_labels) },
+    { label: '荷物預かり', value: join(store.baggage_labels) },
+    { label: '喫煙', value: join(store.smoking_labels) },
+    { label: 'トイレ', value: join(store.toilet_labels) },
+    { label: '周辺環境', value: join(store.environment_labels) },
+    { label: 'その他', value: join(store.other_labels) },
   ]
-    .filter(
-      (
-        item,
-      ): item is { order: number; label: string; value: string } =>
-        typeof item.value === 'string' && item.value.trim().length > 0,
-    )
-    .sort((a, b) => a.order - b.order)
+    .filter((item): item is { label: string; value: string } => !!item.value?.trim())
     .map((item) => [item.label, item.value]);
 
   return (
     <div className="bg-white">
       <main>
-        <StoreGalleryCarousel
-          storeId={store.id}
-          storeName={store.name}
-          onMainImageLoaded={onMainImageLoaded}
-        />
-
+        <StoreGalleryCarousel storeId={store.id} storeName={store.name} onMainImageLoaded={onMainImageLoaded} />
         <StoreBasicInfo store={store} />
 
+        {/* 各セクション：データがある場合のみDividerとセットで表示 */}
         {store.access && (
           <>
             <StoreDetailDivider />
@@ -122,11 +89,9 @@ export default function StoreDetailView({
       </main>
 
       <StoreDetailDivider />
-
       <div className="p-10">
         <BackToHomeButton />
       </div>
-
       <Footer />
     </div>
   );

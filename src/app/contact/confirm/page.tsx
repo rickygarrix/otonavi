@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import { noindex } from '@/lib/metadata';
-import { SITE_URL } from '@/lib/site';
+import { noindex, SITE_URL } from '@/lib/metadata';
 import ConfirmClient from './ConfirmClient';
 
 export const metadata: Metadata = noindex({

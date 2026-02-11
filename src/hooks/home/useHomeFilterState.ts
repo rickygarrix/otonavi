@@ -12,176 +12,54 @@ export function useHomeFilterState(
   externalLabelMap?: Map<string, string>,
   options?: Options,
 ) {
-  /* =========================
-     options 正規化（★重要）
-  ========================= */
-  const initialKeys = useMemo(
-    () => options?.initialKeys ?? [],
-    [options?.initialKeys],
-  );
+  // ★ 12個の useState を1つの Record に統合
+  const [filterMap, setFilterMap] = useState<Record<string, string[]>>({});
 
-  const keyToTableMap = options?.keyToTableMap;
+  // 特定のテーブル（カテゴリ）を更新する汎用関数
+  const updateFilter = useCallback((table: string, values: string[]) => {
+    setFilterMap((prev) => ({ ...prev, [table]: values }));
+  }, []);
 
-  // ===== エリア =====
-  const [prefectureKeys, setPrefectureKeys] = useState<string[]>([]);
-  const [cityKeys, setCityKeys] = useState<string[]>([]);
+  // URL (initialKeys) からの状態復元ロジック
+  useEffect(() => {
+    if (!options?.keyToTableMap || options.initialKeys?.length === 0) return;
 
-  // ===== 属性 =====
-  const [customerKeys, setCustomerKeys] = useState<string[]>([]);
-  const [atmosphereKeys, setAtmosphereKeys] = useState<string[]>([]);
-  const [environmentKeys, setEnvironmentKeys] = useState<string[]>([]);
-  const [sizeKeys, setSizeKeys] = useState<string[]>([]);
-  const [drinkKeys, setDrinkKeys] = useState<string[]>([]);
-  const [priceRangeKeys, setPriceRangeKeys] = useState<string[]>([]);
-  const [paymentMethodKeys, setPaymentMethodKeys] = useState<string[]>([]);
-  const [eventTrendKeys, setEventTrendKeys] = useState<string[]>([]);
-  const [baggageKeys, setBaggageKeys] = useState<string[]>([]);
-  const [smokingKeys, setSmokingKeys] = useState<string[]>([]);
-  const [toiletKeys, setToiletKeys] = useState<string[]>([]);
-  const [otherKeys, setOtherKeys] = useState<string[]>([]);
+    const nextMap: Record<string, string[]> = { prefectures: [], cities: [] };
 
-  /* =========================
-     URL → state 復元（key完全準拠）
-  ========================= */
-useEffect(() => {
-  if (!keyToTableMap) return;
-  if (initialKeys.length === 0) return;
+    options.initialKeys.forEach((rawKey) => {
+      let table = options.keyToTableMap?.get(rawKey);
 
-  const byTable: Record<string, string[]> = {
-    prefectures: [],
-    cities: [],
-  };
-
-  initialKeys.forEach((rawKey) => {
-    const table = keyToTableMap.get(rawKey);
-
-    // ===== エリア =====
-    if (!table) {
-      if (options?.cityMap?.has(rawKey)) {
-        byTable.cities.push(rawKey);
-      } else {
-        byTable.prefectures.push(rawKey);
+      // エリア判定
+      if (!table) {
+        table = options.cityMap?.has(rawKey) ? 'cities' : 'prefectures';
       }
-      return;
-    }
 
-    // ===== 属性 =====
-    const fullKey = `${table}:${rawKey}`;
-    if (!byTable[table]) byTable[table] = [];
-    byTable[table].push(fullKey);
-  });
+      const fullKey = (table === 'prefectures' || table === 'cities')
+        ? rawKey
+        : `${table}:${rawKey}`;
 
-  setPrefectureKeys(byTable.prefectures);
-  setCityKeys(byTable.cities);
+      if (!nextMap[table]) nextMap[table] = [];
+      nextMap[table].push(fullKey);
+    });
 
-  setCustomerKeys(byTable.audience_types ?? []);
-  setAtmosphereKeys(byTable.atmospheres ?? []);
-  setEnvironmentKeys(byTable.environments ?? []);
-  setSizeKeys(byTable.sizes ?? []);
-  setDrinkKeys(byTable.drinks ?? []);
-  setPriceRangeKeys(byTable.price_ranges ?? []);
-  setPaymentMethodKeys(byTable.payment_methods ?? []);
-  setEventTrendKeys(byTable.event_trends ?? []);
-  setBaggageKeys(byTable.luggages ?? []);
-  setSmokingKeys(byTable.smoking_policies ?? []);
-  setToiletKeys(byTable.toilets ?? []);
-  setOtherKeys(byTable.amenities ?? []);
-}, [initialKeys, keyToTableMap, options?.cityMap]);
+    setFilterMap(nextMap);
+  }, [options?.initialKeys, options?.keyToTableMap, options?.cityMap]);
 
-  /* =========================
-     filters 用
-  ========================= */
-  const selectedKeys = useMemo(
-    () => [
-      ...prefectureKeys,
-      ...cityKeys,
-      ...customerKeys,
-      ...atmosphereKeys,
-      ...environmentKeys,
-      ...sizeKeys,
-      ...drinkKeys,
-      ...priceRangeKeys,
-      ...paymentMethodKeys,
-      ...eventTrendKeys,
-      ...baggageKeys,
-      ...smokingKeys,
-      ...toiletKeys,
-      ...otherKeys,
-    ],
-    [
-      prefectureKeys,
-      cityKeys,
-      customerKeys,
-      atmosphereKeys,
-      environmentKeys,
-      sizeKeys,
-      drinkKeys,
-      priceRangeKeys,
-      paymentMethodKeys,
-      eventTrendKeys,
-      baggageKeys,
-      smokingKeys,
-      toiletKeys,
-      otherKeys,
-    ],
-  );
+  // ★ 12個並べていた selectedKeys を一発で作成
+  const selectedKeys = useMemo(() => Object.values(filterMap).flat(), [filterMap]);
 
   const selectedLabels = useMemo(
     () => selectedKeys.map((k) => externalLabelMap?.get(k) ?? k),
     [selectedKeys, externalLabelMap],
   );
 
-  const handleClear = useCallback(() => {
-    setPrefectureKeys([]);
-    setCityKeys([]);
-    setCustomerKeys([]);
-    setAtmosphereKeys([]);
-    setEnvironmentKeys([]);
-    setSizeKeys([]);
-    setDrinkKeys([]);
-    setPriceRangeKeys([]);
-    setPaymentMethodKeys([]);
-    setEventTrendKeys([]);
-    setBaggageKeys([]);
-    setSmokingKeys([]);
-    setToiletKeys([]);
-    setOtherKeys([]);
-  }, []);
+  const handleClear = useCallback(() => setFilterMap({}), []);
 
   return {
+    filterMap,     // 各コンポーネントにはこれの該当する index を渡すだけ
+    updateFilter,  // Setter もこれ一つ
     selectedKeys,
     selectedLabels,
-
-    prefectureKeys,
-    cityKeys,
-    customerKeys,
-    atmosphereKeys,
-    environmentKeys,
-    sizeKeys,
-    drinkKeys,
-    priceRangeKeys,
-    paymentMethodKeys,
-    eventTrendKeys,
-    baggageKeys,
-    smokingKeys,
-    toiletKeys,
-    otherKeys,
-
-    setPrefectureKeys,
-    setCityKeys,
-    setCustomerKeys,
-    setAtmosphereKeys,
-    setEnvironmentKeys,
-    setSizeKeys,
-    setDrinkKeys,
-    setPriceRangeKeys,
-    setPaymentMethodKeys,
-    setEventTrendKeys,
-    setBaggageKeys,
-    setSmokingKeys,
-    setToiletKeys,
-    setOtherKeys,
-
     handleClear,
   };
 }

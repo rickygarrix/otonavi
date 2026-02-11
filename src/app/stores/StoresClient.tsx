@@ -9,104 +9,52 @@ import StoreCard from '@/components/store/StoreCard';
 import BackToHomeButton from '@/components/ui/BackToHomeButton';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
-import { useStoresForSearch, useStoreFilters } from '@/hooks/store';
-import { useHomeMasters } from '@/hooks/home';
-import { useSearchStore } from '@/stores/searchStore';
+// 統合したフックのみを使用
+import { useStores } from '@/hooks/store/useStores';
+import { useStoreFilters } from '@/hooks/store/useStoreFilters';
+import { useHomeMasters } from '@/hooks/home/useHomeMasters';
 
 export default function StoresClient() {
   const searchParams = useSearchParams();
-
-  /** URL（raw key） */
   const selectedFilters = searchParams.getAll('filters');
-  const params = searchParams.toString();
 
-  /** masters */
-  const masters = useHomeMasters();
-  const labelMap = masters.externalLabelMap;
-  const mastersLoading = masters.loading;
+  const { externalLabelMap, genericMasters, drinkMasters, loading: mastersLoading } = useHomeMasters();
 
-  /** store source */
-  const { stores: prefetchedStores } = useSearchStore();
-  const { stores: fetchedStores, loading: storesLoading } =
-    useStoresForSearch({
-      enabled: prefetchedStores.length === 0,
-    });
+  /** useStores で全件取得 */
+  const { stores: fetchedStores, loading: storesLoading } = useStores();
 
-  const baseStores = useMemo(
-    () =>
-      prefetchedStores.length > 0
-        ? prefetchedStores
-        : fetchedStores,
-    [prefetchedStores, fetchedStores],
-  );
+  const filterKeys = useMemo(() => {
+    const lookup = new Map<string, string>();
+    genericMasters.forEach(m => lookup.set(m.key.split(':')[1], m.key));
+    drinkMasters.forEach(d => lookup.set(d.key, `drinks:${d.key}`));
 
-  /** rawKey → fullKey 変換 Map */
-  const keyToFullKeyMap = useMemo(() => {
-    const map = new Map<string, string>();
+    return selectedFilters.map(rawKey => lookup.get(rawKey) ?? rawKey);
+  }, [selectedFilters, genericMasters, drinkMasters]);
 
-    // generic masters
-    masters.genericMasters.forEach((m) => {
-      const rawKey = m.key.split(':')[1];
-      map.set(rawKey, m.key);
-    });
+  const { filteredStores } = useStoreFilters(fetchedStores, { filters: filterKeys });
 
-    // 🔥 drinks masters
-    masters.drinkMasters.forEach((d) => {
-      map.set(d.key, `drinks:${d.key}`);
-    });
-
-    return map;
-  }, [masters.genericMasters, masters.drinkMasters]);
-
-  /** 🔥 検索用フィルタ（raw + full 混在） */
-  const filterKeys = useMemo(
-    () =>
-      selectedFilters.map((rawKey) => {
-        const fullKey = keyToFullKeyMap.get(rawKey);
-        return fullKey ?? rawKey; // エリアは rawKey
-      }),
-    [selectedFilters, keyToFullKeyMap],
-  );
-
-  /** 検索実行 */
-  const { filteredStores } = useStoreFilters(baseStores, {
-    filters: filterKeys,
-  });
-
-  /** 表示用ラベル */
   const displayLabels = useMemo(() => {
-    if (mastersLoading) return [];
-    return filterKeys.map(
-      (fullKey) => labelMap.get(fullKey) ?? fullKey,
-    );
-  }, [mastersLoading, filterKeys, labelMap]);
+    if (mastersLoading) return "";
+    return filterKeys.map(key => externalLabelMap.get(key) ?? key).join(', ');
+  }, [mastersLoading, filterKeys, externalLabelMap]);
 
-  const isReady =
-    prefetchedStores.length > 0 ||
-    (!mastersLoading && !storesLoading);
-
-  if (!isReady) return <LoadingOverlay />;
+  if (mastersLoading || storesLoading) {
+    return <LoadingOverlay />;
+  }
 
   return (
     <div className="bg-white text-dark-5">
-      <Header
-        variant="result"
-        count={filteredStores.length}
-        labels={displayLabels.join(', ')}
-      />
-
+      <Header variant="result" count={filteredStores.length} labels={displayLabels} />
       <ul className="grid grid-cols-2">
         {filteredStores.map((store) => (
           <li key={store.id}>
-            <StoreCard store={store} query={params} />
+            <StoreCard store={store} query={searchParams.toString()} />
           </li>
         ))}
       </ul>
-
       <div className="p-10">
         <BackToHomeButton />
       </div>
-
       <Footer />
     </div>
   );

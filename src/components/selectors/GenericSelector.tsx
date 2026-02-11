@@ -8,172 +8,98 @@ import Chip from '@/components/ui/Chip';
 /* =========================
    Types
 ========================= */
-
-type BaseProps = {
-  title: string;
-  table: string;
-  columns?: 2 | 3;
-  variant?: 'default' | 'drink';
-};
-
-type SingleProps = BaseProps & {
-  selection: 'single';
-  value: string | null;
-  onChange?: (value: string | null) => void;
-};
-
-type MultiProps = BaseProps & {
-  selection: 'multi';
-  value: string[];
-  onChange?: (value: string[]) => void;
-};
-
-type Props = SingleProps | MultiProps;
-
 type MasterRow = {
   id: string;
-  key: string; // ← DB 上の素 key
+  key: string;
   label: string;
   sort_order: number | null;
   hint?: string | null;
 };
 
-/* =========================
-   Component
-========================= */
+type Props = {
+  title: string;
+  table: string;
+  selection: 'single' | 'multi';
+  value: any; // string | null または string[]
+  onChange?: (val: any) => void;
+  columns?: 2 | 3;
+  variant?: 'default' | 'drink';
+};
 
+/* =========================
+   Main Component
+========================= */
 export default function GenericSelector({
-  title,
-  table,
-  selection,
-  value,
-  onChange,
-  columns = 2,
-  variant = 'default',
+  title, table, selection, value, onChange, columns = 2, variant = 'default',
 }: Props) {
   const [items, setItems] = useState<MasterRow[]>([]);
 
-  /* =========================
-     Tooltip
-  ========================= */
-  const enableHint =
-    table === 'sizes' ||
-    table === 'price_ranges' ||
-    table === 'luggages' ||
-    table === 'smoking_policies';
+  // ヒントを有効にするテーブル定義
+  const enableHint = ['sizes', 'price_ranges', 'luggages', 'smoking_policies'].includes(table);
 
-  /* =========================
-     Data fetch
-  ========================= */
   useEffect(() => {
-    const load = async () => {
-      const { data, error } = await supabase
+    (async () => {
+      const { data } = await supabase
         .from(table)
-        .select(
-          enableHint
-            ? 'id, key, label, sort_order, hint'
-            : 'id, key, label, sort_order',
-        )
+        .select(`id, key, label, sort_order${enableHint ? ', hint' : ''}`)
         .eq('is_active', true)
-        .order('sort_order', { ascending: true })
-        .returns<MasterRow[]>();
-
-      if (error) {
-        console.error(`GenericSelector load error (${table})`, error);
-        return;
-      }
-
+        .order('sort_order', { ascending: true });
       setItems(data ?? []);
-    };
-
-    load();
+    })();
   }, [table, enableHint]);
 
-  /* =========================
-     Selection helpers
-     - key は必ず table:key
-  ========================= */
-  const isSelected = (fullKey: string) =>
-    selection === 'single'
-      ? value === fullKey
-      : value.includes(fullKey);
-
-  const toggle = (fullKey: string) => {
+  // 選択ロジックの共通化
+  const handleToggle = (key: string) => {
     if (!onChange) return;
+    const fullKey = `${table}:${key}`;
 
     if (selection === 'single') {
       onChange(value === fullKey ? null : fullKey);
     } else {
-      onChange(
-        value.includes(fullKey)
-          ? value.filter((v) => v !== fullKey)
-          : [...value, fullKey],
-      );
+      const next = value.includes(fullKey)
+        ? value.filter((v: string) => v !== fullKey)
+        : [...value, fullKey];
+      onChange(next);
     }
   };
 
-  /* =========================
-     Drink variant split
-  ========================= */
-  const { normalItems, specialItems } = useMemo(() => {
-    if (variant !== 'drink') {
-      return { normalItems: items, specialItems: [] as MasterRow[] };
-    }
+  // ドリンク用の仕分け
+  const groups = useMemo(() => {
+    if (variant !== 'drink') return [{ list: items, cols: columns }];
+    return [
+      { list: items.filter(i => (i.sort_order ?? 0) < 90), cols: 3 },
+      { list: items.filter(i => (i.sort_order ?? 0) >= 90), cols: 2 },
+    ];
+  }, [items, variant, columns]);
 
-    return {
-      normalItems: items.filter((i) => (i.sort_order ?? 0) < 90),
-      specialItems: items.filter((i) => (i.sort_order ?? 0) >= 90),
-    };
-  }, [items, variant]);
-
-  /* =========================
-     UI helpers
-  ========================= */
-  const renderList = (list: MasterRow[], cols: 2 | 3) => (
-    <ul className={`grid ${cols === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
-      {list.map((item) => {
-        // ★ 正規 key（URL / state / filter と完全一致）
-        const fullKey = `${table}:${item.key}`;
-
-        const chip = (
-          <Chip
-            label={item.label}
-            selected={isSelected(fullKey)}
-            hinted={enableHint && !!item.hint}
-            onChange={() => toggle(fullKey)}
-          />
-        );
-
-        return (
-          <li key={fullKey}>
-            {enableHint && item.hint ? (
-              <Tooltip content={item.hint}>{chip}</Tooltip>
-            ) : (
-              chip
-            )}
-          </li>
-        );
-      })}
-    </ul>
-  );
-
-  /* =========================
-     Render
-  ========================= */
   return (
-    <>
-      <h3 className="text-md font-bold tracking-widest text-dark-5">
-        {title}
-      </h3>
+    <div className="flex flex-col gap-4">
+      <h3 className="text-md font-bold tracking-widest text-dark-5">{title}</h3>
+      <div className="flex flex-col gap-2">
+        {groups.map((group, idx) => (
+          <ul key={idx} className={`grid ${group.cols === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+            {group.list.map((item) => {
+              const fullKey = `${table}:${item.key}`;
+              const isSelected = selection === 'single' ? value === fullKey : value.includes(fullKey);
 
-      {variant === 'drink' ? (
-        <div>
-          {normalItems.length > 0 && renderList(normalItems, 3)}
-          {specialItems.length > 0 && renderList(specialItems, 2)}
-        </div>
-      ) : (
-        renderList(items, columns)
-      )}
-    </>
+              const chip = (
+                <Chip
+                  label={item.label}
+                  selected={isSelected}
+                  hinted={enableHint && !!item.hint}
+                  onChange={() => handleToggle(item.key)}
+                />
+              );
+
+              return (
+                <li key={fullKey}>
+                  {enableHint && item.hint ? <Tooltip content={item.hint}>{chip}</Tooltip> : chip}
+                </li>
+              );
+            })}
+          </ul>
+        ))}
+      </div>
+    </div>
   );
 }

@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import CompleteClient from './CompleteClient';
-import { noindex } from '@/lib/metadata';
-import { SITE_URL } from '@/lib/site';
+import { noindex, SITE_URL } from '@/lib/metadata';
 
 export const metadata: Metadata = noindex({
     title: 'お問い合わせ完了',
