@@ -59,9 +59,8 @@ export default function StoreAccess({ store }: Props) {
         アクセス
       </h2>
 
-      {/* 店名＋住所 */}
+      {/* 住所 */}
       <div className="flex flex-col gap-1">
-        <p className="text-dark-5 font-bold">{store.name}</p>
         {store.postcode && <p>〒{store.postcode}</p>}
         {store.address && (
           <p className="whitespace-pre-line">{store.address}</p>
