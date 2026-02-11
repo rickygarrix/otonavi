@@ -2,7 +2,7 @@
 
 import { Search } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button/Button';
 
 export default function BackToHomeButton() {
   const router = useRouter();

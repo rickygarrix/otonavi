@@ -1,18 +1,22 @@
 import type { Metadata, Viewport } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Zen_Maru_Gothic, Zen_Kaku_Gothic_New } from 'next/font/google'; // fonts.ts から移動
 import Script from 'next/script';
 import './globals.css';
 import ServiceWorkerRegister from './_pwa/ServiceWorkerRegister';
 import { baseMetadata, baseViewport } from '@/lib/metadata';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const zenMaru = Zen_Maru_Gothic({
   subsets: ['latin'],
+  weight: ['300', '400', '700'],
+  variable: '--font-zen-maru',
+  display: 'swap',
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const zenKaku = Zen_Kaku_Gothic_New({
   subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-zen-kaku',
+  display: 'swap',
 });
 
 const GA_ID = 'G-WEZPMCLCSW';
@@ -28,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="ja" className="bg-dark-5 flex items-start justify-center">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} bg-light-1 text-dark-5 mx-auto w-full max-w-105 antialiased`}
+        className={`${zenMaru.variable} ${zenKaku.variable} bg-light-1 text-dark-5 mx-auto w-full max-w-105 antialiased`}
       >
         <ServiceWorkerRegister />
 

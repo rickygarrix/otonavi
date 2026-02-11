@@ -6,7 +6,7 @@ import { House } from 'lucide-react';
 
 import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button/Button';
 
 type ContactForm = {
   name: string;

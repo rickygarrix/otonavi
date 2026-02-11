@@ -1,4 +1,4 @@
-import type { StoreRow, SearchStoreRow } from '@/types/store-db';
+import type { StoreRow, SearchStoreRow } from '@/types/store';
 import type { HomeStore, HomeStoreLite, SearchStore } from '@/types/store';
 
 /* =========================

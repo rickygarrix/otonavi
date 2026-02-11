@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import type { StoreRow, SearchStoreRow } from '@/types/store-db';
+import type { StoreRow, SearchStoreRow } from '@/types/store';
 import type { SearchStore, HomeStore } from '@/types/store';
 import { normalizeSearchStore, normalizeStoreDetail } from '@/lib/normalize';
 

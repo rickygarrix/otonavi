@@ -5,7 +5,7 @@ import { staticMeta } from '@/lib/metadata';
 import { zenMaru, zenKaku } from '@/lib/fonts';
 import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
-import { LinkButton } from '@/components/ui/button';
+import LinkButton from '@/components/ui/button/Button';
 
 export const metadata: Metadata = staticMeta({
   title: 'オトナビとは？',

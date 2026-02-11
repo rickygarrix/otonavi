@@ -2,7 +2,7 @@
 
 import type { HomeStore } from '@/types/store';
 import { MapPin } from 'lucide-react';
-import { LinkButton } from '@/components/ui/button';
+import LinkButton from '@/components/ui/button/Button';
 
 /* =========================
    Utils

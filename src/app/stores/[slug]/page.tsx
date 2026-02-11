@@ -2,7 +2,7 @@
 import type { Metadata } from 'next';
 import StoreClient from './storeClient';
 import { SITE_URL, SITE_DESC } from '@/lib/metadata';
-import { getSupabaseServer } from '@/lib/supabaseServer';
+import { getSupabaseServer } from '@/lib/supabase';
 
 type Props = {
   params: Promise<{ slug: string }>;

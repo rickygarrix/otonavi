@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { Prefecture, City } from '@/types/location';
+import type { Prefecture, City } from '@/types/master';
 import { ChevronsUpDown, Check } from 'lucide-react';
 
 /* =========================

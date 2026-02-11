@@ -6,7 +6,7 @@ import { ArrowRight } from 'lucide-react';
 
 import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button/Button';
 
 export default function ContactClient() {
   const router = useRouter();
