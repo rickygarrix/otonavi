@@ -9,7 +9,6 @@ import StoreCard from '@/components/store/StoreCard';
 import BackToHomeButton from '@/components/ui/BackToHomeButton';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
-// 統合したフックのみを使用
 import { useStores } from '@/hooks/store/useStores';
 import { useStoreFilters } from '@/hooks/store/useStoreFilters';
 import { useHomeMasters } from '@/hooks/home/useHomeMasters';
@@ -18,24 +17,44 @@ export default function StoresClient() {
   const searchParams = useSearchParams();
   const selectedFilters = searchParams.getAll('filters');
 
-  const { externalLabelMap, genericMasters, drinkMasters, loading: mastersLoading } = useHomeMasters();
+  const {
+    externalLabelMap,
+    genericMasters,
+    drinkMasters,
+    loading: mastersLoading
+  } = useHomeMasters();
 
-  /** useStores で全件取得 */
   const { stores: fetchedStores, loading: storesLoading } = useStores();
 
   const filterKeys = useMemo(() => {
     const lookup = new Map<string, string>();
-    genericMasters.forEach(m => lookup.set(m.key.split(':')[1], m.key));
-    drinkMasters.forEach(d => lookup.set(d.key, `drinks:${d.key}`));
 
-    return selectedFilters.map(rawKey => lookup.get(rawKey) ?? rawKey);
+    // 店舗タイプ(venue_types)を優先して lookup を構築
+    genericMasters.forEach((m) => {
+      const pureKey = m.key.split(':')[1] || m.key;
+      if (!lookup.has(pureKey) || m.table === 'venue_types') {
+        lookup.set(pureKey, m.key);
+      }
+    });
+
+    drinkMasters.forEach((d) => {
+      if (!lookup.has(d.key)) lookup.set(d.key, `drinks:${d.key}`);
+    });
+
+    return selectedFilters.map((rawKey) => {
+      if (rawKey.includes(':')) return rawKey;
+      return lookup.get(rawKey) ?? rawKey;
+    });
   }, [selectedFilters, genericMasters, drinkMasters]);
 
   const { filteredStores } = useStoreFilters(fetchedStores, { filters: filterKeys });
 
   const displayLabels = useMemo(() => {
     if (mastersLoading) return "";
-    return filterKeys.map(key => externalLabelMap.get(key) ?? key).join(', ');
+    return filterKeys
+      .map((key) => externalLabelMap.get(key) ?? key)
+      .filter(Boolean)
+      .join(', ');
   }, [mastersLoading, filterKeys, externalLabelMap]);
 
   if (mastersLoading || storesLoading) {
@@ -44,14 +63,26 @@ export default function StoresClient() {
 
   return (
     <div className="bg-white text-dark-5">
-      <Header variant="result" count={filteredStores.length} labels={displayLabels} />
-      <ul className="grid grid-cols-2">
-        {filteredStores.map((store) => (
-          <li key={store.id}>
-            <StoreCard store={store} query={searchParams.toString()} />
-          </li>
-        ))}
-      </ul>
+      <Header
+        variant="result"
+        count={filteredStores.length}
+        labels={displayLabels}
+      />
+
+      {filteredStores.length > 0 ? (
+        <ul className="grid grid-cols-2">
+          {filteredStores.map((store) => (
+            <li key={store.id}>
+              <StoreCard store={store} query={searchParams.toString()} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-20 text-dark-3">
+          <p>該当する店舗が見つかりませんでした。</p>
+        </div>
+      )}
+
       <div className="p-10">
         <BackToHomeButton />
       </div>

@@ -19,7 +19,6 @@ const TABLE_TO_SECTION: Record<string, string> = {
   atmospheres: '雰囲気',
 };
 
-// 汎用マスタのレスポンス形状を定義
 interface GenericResponseItem {
   id: string;
   key: string;
@@ -57,7 +56,7 @@ export function useHomeMasters() {
 
         if (!mounted) return;
 
-       const generics = new Map<string, GenericMaster>();
+        const generics = new Map<string, GenericMaster>();
         Object.keys(TABLE_TO_SECTION).forEach((table, index) => {
           const items = (genericResponses[index].data as GenericResponseItem[]) ?? [];
           items.forEach((item) => {
@@ -66,7 +65,7 @@ export function useHomeMasters() {
               ...item,
               key: mapKey,
               table,
-              sort_order: item.sort_order ?? 0 // ここで null を回避
+              sort_order: item.sort_order ?? 0
             });
           });
         });
@@ -84,17 +83,14 @@ export function useHomeMasters() {
     return () => { mounted = false; };
   }, []);
 
-  /** 計算済みマッピング */
   const masters = useMemo(() => {
     const externalLabelMap = new Map<string, string>();
     const labelToSectionMap = new Map<string, string>();
     const keyToTableMap = new Map<string, string>();
     const cityMap = new Map<string, City>();
 
-    // 店舗タイプ抽出
     const storeTypes = Array.from(data.generics.values()).filter(m => m.table === 'venue_types');
 
-    // マスタを回して各Mapを構築
     data.prefectures.forEach(p => {
       externalLabelMap.set(p.key, p.name);
       labelToSectionMap.set(p.name, 'エリア');
@@ -113,7 +109,12 @@ export function useHomeMasters() {
     data.generics.forEach(v => {
       externalLabelMap.set(v.key, v.label);
       labelToSectionMap.set(v.label, TABLE_TO_SECTION[v.table]);
-      keyToTableMap.set(v.key.split(':')[1], v.table);
+
+      const pureKey = v.key.split(':')[1];
+      // 既に登録があっても venue_types の場合は優先して上書きする
+      if (!keyToTableMap.has(pureKey) || v.table === 'venue_types') {
+        keyToTableMap.set(pureKey, v.table);
+      }
     });
 
     return { externalLabelMap, labelToSectionMap, keyToTableMap, cityMap, storeTypes };

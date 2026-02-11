@@ -6,13 +6,10 @@ import type { GenericMaster } from '@/types/master';
 
 type Props = {
   storeTypes: GenericMaster[];
-  activeTypeKey: string | null; // venue_types:club
+  activeTypeKey: string | null;
   onChange: (key: string | null) => void;
 };
 
-/**
- * venue_types の key 部分だけで判定する
- */
 const ICON_MAP: Record<string, LucideIcon> = {
   club: Headphones,
   bar: Disc3,
@@ -21,7 +18,6 @@ const ICON_MAP: Record<string, LucideIcon> = {
 };
 
 function getVenueTypeKey(fullKey: string): string {
-  // venue_types:club → club
   return fullKey.split(':')[1] ?? fullKey;
 }
 
@@ -35,7 +31,6 @@ export default function StoreTypeFilter({
       <div className="flex h-14 items-center rounded-full border border-gray-2/40 bg-light-1/90 backdrop-blur-sm">
         {storeTypes.map((t) => {
           const isActive = activeTypeKey === t.key;
-
           const venueKey = getVenueTypeKey(t.key);
           const Icon = ICON_MAP[venueKey] ?? Music;
 
@@ -43,6 +38,7 @@ export default function StoreTypeFilter({
             <button
               key={t.key}
               type="button"
+              // クリック時：isActiveなら解除(null)、そうでなければそのキーで上書き
               onClick={() => onChange(isActive ? null : t.key)}
               className={`flex h-full flex-1 flex-col items-center justify-center gap-1 rounded-full pt-1 transition
                 active:scale-110 active:bg-blue-3/5

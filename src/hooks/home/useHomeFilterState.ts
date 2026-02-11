@@ -15,26 +15,25 @@ export function useHomeFilterState(externalLabelMap: Map<string, string>, option
     setFilterMap((prev) => ({ ...prev, [table]: values }));
   }, []);
 
-  // URLキーから状態を復元
   useEffect(() => {
     if (!options?.keyToTableMap || !options.initialKeys || options.initialKeys.length === 0) {
-      // 初期化
       if (Object.keys(filterMap).length > 0) setFilterMap({});
       return;
     }
 
-    const nextMap: Record<string, string[]> = { prefectures: [], cities: [] };
+    const nextMap: Record<string, string[]> = {};
 
     options.initialKeys.forEach((rawKey) => {
+      // 1. まずマスタデータにあるか確認（venue_types 等を優先して table を決定）
       let table = options.keyToTableMap?.get(rawKey);
 
+      // 2. マスタにない場合のみエリア判定
       if (!table) {
         table = options.cityMap?.has(rawKey) ? 'cities' : 'prefectures';
       }
 
-      const fullKey = (table === 'prefectures' || table === 'cities')
-        ? rawKey
-        : `${table}:${rawKey}`;
+      const isArea = table === 'prefectures' || table === 'cities';
+      const fullKey = isArea ? rawKey : `${table}:${rawKey}`;
 
       if (!nextMap[table]) nextMap[table] = [];
       if (!nextMap[table].includes(fullKey)) nextMap[table].push(fullKey);
@@ -45,15 +44,11 @@ export function useHomeFilterState(externalLabelMap: Map<string, string>, option
   }, [options?.initialKeys, options?.keyToTableMap, options?.cityMap]);
 
   const selectedKeys = useMemo(() => Object.values(filterMap).flat(), [filterMap]);
-const selectedLabels = useMemo(
-  () => {
 
+  const selectedLabels = useMemo(() => {
     if (!externalLabelMap || externalLabelMap.size === 0) return [];
-
     return selectedKeys.map((k) => externalLabelMap.get(k) ?? "");
-  },
-  [selectedKeys, externalLabelMap]
-);
+  }, [selectedKeys, externalLabelMap]);
 
   const handleClear = useCallback(() => setFilterMap({}), []);
 

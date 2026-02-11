@@ -21,47 +21,63 @@ export default function HomePage() {
   const searchParams = useSearchParams();
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
-  // 1. データ取得
   const masters = useHomeMasters();
   const { stores: allStores, loading } = useStores({ limit: 12 });
   const urlFilters = useMemo(() => searchParams.getAll('filters'), [searchParams]);
 
-  // 2. 状態管理
+  // 店舗タイプ専用のステート
   const [storeTypeKey, setStoreTypeKey] = useState<string | null>(null);
+
   const filter = useHomeFilterState(masters.externalLabelMap, {
     initialKeys: urlFilters,
     keyToTableMap: masters.keyToTableMap,
     cityMap: masters.cityMap,
   });
 
-  const { selectedKeys, selectedLabels, handleClear, ...setters } = filter;
+  const { selectedKeys, selectedLabels, filterMap, handleClear, ...setters } = filter;
 
-  // 3. 複雑なUIロジック（店舗タイプ同期など）
+  // URLから戻った時の復元ロジック（単一選択を保証）
   useEffect(() => {
-    if (!masters.storeTypes.length) return;
-    const found = urlFilters.find((f) => masters.storeTypes.some((t) => t.key === f));
-    setStoreTypeKey(found ?? null);
-  }, [urlFilters, masters.storeTypes]);
+    if (masters.loading || !masters.storeTypes.length) return;
 
-  // 4. 件数計算
+    const foundType = masters.storeTypes.find((t) => {
+      const pureKey = t.key.split(':')[1];
+      return urlFilters.includes(pureKey);
+    });
+
+    setStoreTypeKey(foundType ? foundType.key : null);
+  }, [urlFilters, masters.storeTypes, masters.loading]);
+
+  // 件数計算：storeTypeKey は常に1つだけ配列に含める
   const { stores: fetchStores } = useStores();
   const { filteredStores } = useStoreFilters(fetchStores, {
     filters: storeTypeKey ? [storeTypeKey, ...selectedKeys] : selectedKeys,
   });
 
-  // 5. ハンドラー
   const handleClearAll = () => {
     handleClear();
     setStoreTypeKey(null);
     router.replace('/', { scroll: false });
   };
 
+  // 検索実行時の遷移処理
   const handleGoToStores = () => {
     const params = new URLSearchParams();
     const deflate = (k: string) => k.includes(':') ? k.split(':')[1] : k;
 
-    if (storeTypeKey) params.append('filters', deflate(storeTypeKey));
-    selectedKeys.forEach((k) => params.append('filters', deflate(k)));
+    // 1. 店舗タイプを最初に入れる（1つのみ）
+    if (storeTypeKey) {
+      params.append('filters', deflate(storeTypeKey));
+    }
+
+    // 2. その他の属性（店舗タイプと重複するキーは除外して追加）
+    selectedKeys.forEach((k) => {
+      const isStoreType = masters.storeTypes.some(t => t.key === k);
+      if (!isStoreType) {
+        params.append('filters', deflate(k));
+      }
+    });
+
     router.push(`/stores?${params.toString()}`);
   };
 
@@ -70,22 +86,20 @@ export default function HomePage() {
     if (section) sectionRefs.current[section]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-const displayLabels = useMemo(() => {
-  // マスタデータがまだ空、あるいは読み込み中の場合は、
-  // 中途半端な key を出さないよう空配列を返す
-  if (masters.loading || !masters.externalLabelMap.size) return [];
-
-  const labels = [];
-
-  // 店舗タイプ
-  if (storeTypeKey) {
-    const typeLabel = masters.storeTypes.find((t) => t.key === storeTypeKey)?.label;
-    if (typeLabel) labels.push(typeLabel);
-  }
-  labels.push(...selectedLabels);
-
-  return labels;
-}, [masters.loading, masters.externalLabelMap, storeTypeKey, masters.storeTypes, selectedLabels]);
+  const displayLabels = useMemo(() => {
+    if (masters.loading || !masters.externalLabelMap.size) return [];
+    const labels = [];
+    if (storeTypeKey) {
+      const typeLabel = masters.externalLabelMap.get(storeTypeKey);
+      if (typeLabel) labels.push(typeLabel);
+    }
+    // 店舗タイプ以外のラベルのみを合成
+    selectedLabels.forEach(label => {
+      const isStoreTypeLabel = masters.storeTypes.some(t => t.label === label);
+      if (!isStoreTypeLabel && !labels.includes(label)) labels.push(label);
+    });
+    return labels;
+  }, [masters.loading, masters.externalLabelMap, storeTypeKey, selectedLabels, masters.storeTypes]);
 
   return (
     <>
@@ -96,8 +110,18 @@ const displayLabels = useMemo(() => {
         <CommentSlider />
       </div>
 
-      <StoreTypeFilter storeTypes={masters.storeTypes} activeTypeKey={storeTypeKey} onChange={setStoreTypeKey} />
-      <HomeFilterSections sectionRefs={sectionRefs} {...setters} />
+      {/* onChange 時は引数で渡ってきた key で上書きすることで単一選択を維持 */}
+      <StoreTypeFilter
+        storeTypes={masters.storeTypes}
+        activeTypeKey={storeTypeKey}
+        onChange={(key) => setStoreTypeKey(key)}
+      />
+
+      <HomeFilterSections
+        sectionRefs={sectionRefs}
+        filterMap={filterMap}
+        {...setters}
+      />
 
       <SearchBar
         selectedFilters={displayLabels}
