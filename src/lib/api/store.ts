@@ -127,7 +127,7 @@ export function normalizeStoreDetail(raw: StoreRow): HomeStore {
     description: raw.description, instagram_url: raw.instagram_url,
     x_url: raw.x_url, facebook_url: raw.facebook_url,
     tiktok_url: raw.tiktok_url, official_site_url: raw.official_site_url,
-    access: raw.access, place_id: raw.place_id, address: raw.address,
+    access: raw.access, address: raw.address,
     postcode: raw.postcode, business_hours: raw.business_hours,
     hasMentions: mentions.length > 0, mentions,
     payment_method_keys: payments.keys, payment_method_labels: payments.labels,
@@ -144,10 +144,6 @@ export function normalizeStoreDetail(raw: StoreRow): HomeStore {
     updated_at: raw.updated_at,
   };
 }
-
-/* ==========================================================================
-   3. API関数
-   ========================================================================== */
 
 export type StoreSearchParams = {
   storeTypeId: string | null;

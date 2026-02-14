@@ -56,7 +56,6 @@ export type HomeStore = {
 
   // アクセス
   access: string | null;
-  place_id: string | null;
   address: string | null;
   postcode: string | null;
   business_hours: string | null;
@@ -178,7 +177,6 @@ export type StoreRow = {
   updated_at: string;
   description: string | null;
   access: string | null;
-  place_id: string | null;
   address: string | null;
   postcode: string | null;
   business_hours: string | null;
