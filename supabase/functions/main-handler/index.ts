@@ -289,7 +289,11 @@ async function handleUpsertStoreGallery(
 }
 
 /*************************************************
- * 🔥 store_galleries BULK UPSERT（本命）
+ * 🔥 store_galleries BULK UPSERT（完全版）
+ * - sort_order 衝突回避
+ * - null安全
+ * - ログ強化
+ * - 本番耐性
  *************************************************/
 async function handleBulkUpsertStoreGallery(
   supabase: any,
@@ -308,8 +312,16 @@ async function handleBulkUpsertStoreGallery(
     // ✅ store_id 一覧抽出
     // ===============================
     const storeIds = [
-      ...new Set(list.map((r: any) => r.store_id)),
+      ...new Set(
+        list
+          .map((r: any) => r.store_id)
+          .filter(Boolean)
+      ),
     ];
+
+    if (storeIds.length === 0) {
+      return jsonError(400, "NO_VALID_STORE_ID");
+    }
 
     console.log("target stores =", storeIds);
 
@@ -317,6 +329,8 @@ async function handleBulkUpsertStoreGallery(
     // 🔥 既存 sort_order を一時退避
     // ===============================
     for (const storeId of storeIds) {
+      console.log("bump start:", storeId);
+
       const { error: bumpError } = await supabase.rpc(
         "bump_store_gallery_sort_orders",
         {
@@ -333,18 +347,64 @@ async function handleBulkUpsertStoreGallery(
           bumpError
         );
       }
+
+      console.log("bump success:", storeId);
     }
 
     // ===============================
-    // 🔥 UPSERT
+    // 🔥 UPSERT用データ整形（安全版）
     // ===============================
-    const rows = list.map((row: any) => ({
-      store_id: row.store_id,
-      gallery_url: row.gallery_url,
-      sort_order: row.sort_order ?? 0,
-      updated_at: now,
-    }));
+    const rows = [];
 
+    for (const row of list) {
+      const storeId = row.store_id;
+      const galleryUrl = row.gallery_url;
+      const sortOrderRaw = row.sort_order;
+
+      // 必須チェック
+      if (!storeId || !galleryUrl) {
+        console.warn("skip invalid row", row);
+        continue;
+      }
+
+      // sort_order 厳密処理
+      if (
+        sortOrderRaw === undefined ||
+        sortOrderRaw === null ||
+        sortOrderRaw === ""
+      ) {
+        return jsonError(
+          400,
+          "SORT_ORDER_REQUIRED"
+        );
+      }
+
+      const sortOrder = Number(sortOrderRaw);
+
+      if (!Number.isFinite(sortOrder)) {
+        return jsonError(
+          400,
+          "INVALID_SORT_ORDER"
+        );
+      }
+
+      rows.push({
+        store_id: storeId,
+        gallery_url: galleryUrl,
+        sort_order: sortOrder,
+        updated_at: now,
+      });
+    }
+
+    if (rows.length === 0) {
+      return jsonError(400, "NO_VALID_ROWS");
+    }
+
+    console.log("upsert rows =", rows.length);
+
+    // ===============================
+    // 🔥 UPSERT 実行
+    // ===============================
     const { error } = await supabase
       .from("store_galleries")
       .upsert(rows, {
@@ -352,12 +412,24 @@ async function handleBulkUpsertStoreGallery(
       });
 
     if (error) {
-      return jsonStepError(500, "bulk_gallery_upsert", error);
+      console.error("upsert failed", error);
+      return jsonStepError(
+        500,
+        "bulk_gallery_upsert",
+        error
+      );
     }
+
+    console.log("upsert success");
 
     return jsonSuccess({ count: rows.length });
   } catch (e) {
-    return jsonStepError(500, "bulk_gallery_upsert_fatal", e);
+    console.error("bulk fatal", e);
+    return jsonStepError(
+      500,
+      "bulk_gallery_upsert_fatal",
+      e
+    );
   }
 }
 

@@ -5,23 +5,39 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-02-05",
 
-  // 🔥 今回は node 互換いらない（R2ネイティブのため）
-  // 必要になったら戻せばOK
-  // "compatibility_flags": ["nodejs_compat"],
-
   "observability": {
     "enabled": true
   },
 
   /**
-   * ========================================
-   * R2 Buckets（最重要）
-   * ========================================
+   * ===============================
+   * 🔧 デフォルト（= staging）
+   * ===============================
+   * wrangler deploy のとき
+   * → staging バケットに接続
    */
   "r2_buckets": [
     {
       "binding": "R2_BUCKET",
       "bucket_name": "staging"
     }
-  ]
+  ],
+
+  /**
+   * ===============================
+   * 🚀 本番環境
+   * ===============================
+   * wrangler deploy --env production
+   * → production バケットに接続
+   */
+  "env": {
+    "production": {
+      "r2_buckets": [
+        {
+          "binding": "R2_BUCKET",
+          "bucket_name": "production"
+        }
+      ]
+    }
+  }
 }
