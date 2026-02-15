@@ -2,10 +2,15 @@ export interface Env {
   R2_BUCKET: R2Bucket;
 }
 
+type RequestBody = {
+  action?: string;
+  storeId?: string;
+};
+
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     try {
-      const body = await req.json();
+      const body = (await req.json()) as RequestBody;
       const { action, storeId } = body;
 
       if (action !== "ensure_store_folder") {
