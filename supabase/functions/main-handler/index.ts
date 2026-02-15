@@ -126,7 +126,6 @@ async function handleInsertStore(
     atmosphere_ids,
     drink_ids,
     environment_ids,
-    event_trend_ids,
     luggage_ids,
     payment_method_ids,
     smoking_policy_ids,
@@ -163,7 +162,6 @@ async function handleInsertStore(
       store_atmospheres: ["atmosphere_id", atmosphere_ids],
       store_drinks: ["drink_id", drink_ids],
       store_environments: ["environment_id", environment_ids],
-      store_event_trends: ["event_trend_id", event_trend_ids],
       store_luggages: ["luggage_id", luggage_ids],
       store_payment_methods: [
         "payment_method_id",
@@ -209,7 +207,6 @@ async function handleUpsertStore(
     atmosphere_ids,
     drink_ids,
     environment_ids,
-    event_trend_ids,
     luggage_ids,
     payment_method_ids,
     smoking_policy_ids,
@@ -234,7 +231,6 @@ async function handleUpsertStore(
       store_atmospheres: ["atmosphere_id", atmosphere_ids],
       store_drinks: ["drink_id", drink_ids],
       store_environments: ["environment_id", environment_ids],
-      store_event_trends: ["event_trend_id", event_trend_ids],
       store_luggages: ["luggage_id", luggage_ids],
       store_payment_methods: [
         "payment_method_id",

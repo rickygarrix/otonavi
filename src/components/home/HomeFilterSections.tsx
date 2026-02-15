@@ -17,7 +17,6 @@ const FILTER_CONFIG = [
   { key: 'ドリンク', table: 'drinks', cols: 3, variant: 'drink' as const },
   { key: '価格帯', table: 'price_ranges', cols: 3 },
   { key: '支払い方法', table: 'payment_methods', cols: 2 },
-  { key: 'イベントの傾向', table: 'event_trends', cols: 3 },
   { key: '荷物預かり', table: 'luggages', cols: 2 },
   { key: '喫煙', table: 'smoking_policies', cols: 3 },
   { key: 'トイレ', table: 'toilets', cols: 3 },

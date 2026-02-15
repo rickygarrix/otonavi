@@ -42,7 +42,6 @@ export default function StoreDetailView({ store, onMainImageLoaded }: Props) {
     { label: 'ドリンク', value: join(store.drink_labels) },
     { label: '価格帯', value: store.price_range_label },
     { label: '支払い方法', value: formatPaymentMethods(store.payment_method_labels, store.other_payment_method) },
-    { label: 'イベントの傾向', value: join(store.event_trend_labels) },
     { label: '荷物預かり', value: join(store.baggage_labels) },
     { label: '喫煙', value: join(store.smoking_labels) },
     { label: 'トイレ', value: join(store.toilet_labels) },
@@ -58,7 +57,6 @@ export default function StoreDetailView({ store, onMainImageLoaded }: Props) {
         <StoreGalleryCarousel storeId={store.id} storeName={store.name} onMainImageLoaded={onMainImageLoaded} />
         <StoreBasicInfo store={store} />
 
-        {/* 各セクション：データがある場合のみDividerとセットで表示 */}
         {store.access && (
           <>
             <StoreDetailDivider />

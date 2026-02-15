@@ -72,7 +72,6 @@ export function normalizeSearchStore(raw: SearchStoreRow): SearchStore {
     environment_keys: k(raw.store_environments, 'environments'),
     drink_keys: k(raw.store_drinks, 'drinks', 'drinks'),
     payment_method_keys: k(raw.store_payment_methods, 'payment_methods'),
-    event_trend_keys: k(raw.store_event_trends, 'event_trends'),
     baggage_keys: k(raw.store_luggages, 'luggages'),
     smoking_keys: k(raw.store_smoking_policies, 'smoking_policies'),
     toilet_keys: k(raw.store_toilets, 'toilets'),
@@ -92,7 +91,6 @@ export function normalizeStoreDetail(raw: StoreRow): HomeStore {
   const m = (list: unknown, def: string) => getM2M(list, def);
   const drinks = m(raw.store_drinks, 'drinks');
   const payments = m(raw.store_payment_methods, 'payment_methods');
-  const events = m(raw.store_event_trends, 'event_trends');
   const bags = m(raw.store_luggages, 'luggages');
   const toilets = m(raw.store_toilets, 'toilets');
   const smoking = m(raw.store_smoking_policies, 'smoking_policies');
@@ -132,7 +130,6 @@ export function normalizeStoreDetail(raw: StoreRow): HomeStore {
     hasMentions: mentions.length > 0, mentions,
     payment_method_keys: payments.keys, payment_method_labels: payments.labels,
     other_payment_method: raw.other_payment_method,
-    event_trend_keys: events.keys, event_trend_labels: events.labels,
     baggage_keys: bags.keys, baggage_labels: bags.labels,
     toilet_keys: toilets.keys, toilet_labels: toilets.labels,
     smoking_keys: smoking.keys, smoking_labels: smoking.labels,
@@ -174,7 +171,6 @@ export async function fetchStores(params: StoreSearchParams): Promise<SearchStor
       store_smoking_policies ( smoking_policies ( key, label, sort_order ) ),
       store_environments ( environments ( key, label, sort_order ) ),
       store_amenities ( amenities ( key, label, sort_order ) ),
-      store_event_trends ( event_trends ( key, label, sort_order ) ),
       store_payment_methods ( payment_methods ( key, label, sort_order ) ),
       store_galleries ( gallery_url, sort_order )
     `)
@@ -208,7 +204,6 @@ export async function fetchStoreBySlug(slug: string): Promise<HomeStore | null> 
       store_drinks ( drinks ( key, label, sort_order ) ),
       store_audience_types ( audience_types ( key, label, sort_order ) ),
       store_atmospheres ( atmospheres ( key, label, sort_order ) ),
-      store_event_trends ( event_trends ( key, label, sort_order ) ),
       store_toilets ( toilets ( key, label, sort_order ) ),
       store_smoking_policies ( smoking_policies ( key, label, sort_order ) ),
       store_environments ( environments ( key, label, sort_order ) ),

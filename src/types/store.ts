@@ -65,8 +65,6 @@ export type HomeStore = {
   mentions: StoreMention[];
 
   // フィルタ（すべて key / label の配列）
-  event_trend_keys: string[];
-  event_trend_labels: string[];
   baggage_keys: string[];
   baggage_labels: string[];
   toilet_keys: string[];
@@ -130,7 +128,6 @@ export type SearchStore = {
   environment_keys: string[];
   drink_keys: string[];
   payment_method_keys: string[];
-  event_trend_keys: string[];
   baggage_keys: string[];
   smoking_keys: string[];
   toilet_keys: string[];
@@ -191,7 +188,6 @@ export type StoreRow = {
   venue_types: IdLabelRow | null;
   price_ranges: DefinitionKV | null;
   sizes: DefinitionKV | null;
-  store_event_trends: M2MRow<'event_trends'>[];
   store_luggages: M2MRow<'luggages'>[];
   store_toilets: M2MRow<'toilets'>[];
   store_smoking_policies: M2MRow<'smoking_policies'>[];

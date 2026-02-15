@@ -38,7 +38,6 @@ export function useStoreFilters(
         ...store.environment_keys,
         ...store.drink_keys,
         ...store.payment_method_keys,
-        ...store.event_trend_keys,
         ...store.baggage_keys,
         ...store.smoking_keys,
         ...store.toilet_keys,

@@ -6,7 +6,6 @@ import type { Prefecture, City, DrinkDefinition, GenericMaster } from '@/types/m
 
 const TABLE_TO_SECTION: Record<string, string> = {
   venue_types: '店舗タイプ',
-  event_trends: 'イベントの傾向',
   luggages: '荷物預かり',
   toilets: 'トイレ',
   sizes: '広さ',
